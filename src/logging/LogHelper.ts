@@ -38,7 +38,7 @@ export class LogHelper implements ILogHelper {
     }
   }
 
-  public child(options: Object): ILogHelper {
+  public child(options: object): ILogHelper {
     const childLogger = this.logger.child(options);
     const helper = new LogHelper(childLogger.fields.name);
     helper.logger = childLogger;
