@@ -1,9 +1,8 @@
 name: Node.js Package
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [created]
 
 jobs:
   build:
@@ -21,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: write
-      contents: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,16 +28,6 @@ jobs:
           node-version: 20
           registry-url: https://npm.pkg.github.com/
       - run: yarn install --frozen-lockfile
-      
-      - name: Get package version
-        id: package-version
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-      
-      - name: Create and push tag
-        run: |
-          git tag v${{ steps.package-version.outputs.version }}
-          git push origin v${{ steps.package-version.outputs.version }}
-          
       - run: yarn publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}} 
