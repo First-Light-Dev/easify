@@ -42,6 +42,21 @@ class LogHelper {
             ...options
         });
     }
+    static initialize(serviceName, options) {
+        if (LogHelper.isInitialized) {
+            console.warn('LogHelper is already initialized. Ignoring re-initialization attempt.');
+            return LogHelper.instance;
+        }
+        LogHelper.instance = new LogHelper(serviceName, options);
+        LogHelper.isInitialized = true;
+        return LogHelper.instance;
+    }
+    static getInstance() {
+        if (!LogHelper.isInitialized) {
+            throw new Error('LogHelper not initialized. Call initialize() first with a service name.');
+        }
+        return LogHelper.instance;
+    }
     debug(message, ...args) {
         this.logger.debug(message, ...args);
     }
@@ -59,11 +74,6 @@ class LogHelper {
             this.logger.error(message, ...args);
         }
     }
-    child(options) {
-        const childLogger = this.logger.child(options);
-        const helper = new LogHelper(childLogger.fields.name);
-        helper.logger = childLogger;
-        return helper;
-    }
 }
 exports.LogHelper = LogHelper;
+LogHelper.isInitialized = false;

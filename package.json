@@ -12,7 +12,11 @@
     "prepare": "husky install && npm run build",
     "prepublishOnly": "npm test && npm run lint"
   },
-  "keywords": ["typescript", "utilities", "logging"],
+  "keywords": [
+    "typescript",
+    "utilities",
+    "logging"
+  ],
   "author": "First Light Dev",
   "license": "MIT",
   "devDependencies": {
@@ -29,6 +33,7 @@
     "typescript": "^5.0.3"
   },
   "dependencies": {
+    "axios": "^1.7.9",
     "bunyan": "^1.8.15"
   },
   "publishConfig": {
@@ -38,4 +43,4 @@
     "type": "git",
     "url": "git+https://github.com/First-Light-Dev/common-utils.git"
   }
-} 
+}

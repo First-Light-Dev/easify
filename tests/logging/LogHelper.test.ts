@@ -4,11 +4,29 @@ describe('LogHelper', () => {
   let logger: LogHelper;
 
   beforeEach(() => {
-    logger = new LogHelper('TestService');
+
+    logger = LogHelper.initialize({ serviceName: 'TestService' });
+
+    LogHelper['isInit'] = false;
+    (LogHelper['instance'] as any) = null;
   });
 
-  it('should create a logger instance', () => {
-    expect(logger).toBeInstanceOf(LogHelper);
+  describe('initialize', () => {
+    it('should create a logger instance', () => {
+      expect(logger).toBeInstanceOf(LogHelper);
+    });
+
+    it('should return the same instance on subsequent calls', () => {
+      const instance1 = LogHelper.initialize({ serviceName: 'TestService' });
+      const instance2 = LogHelper.initialize({ serviceName: 'TestService' });
+      expect(instance1).toBe(instance2);
+    });
+  });
+
+  describe('getInstance', () => {
+    it('should throw an error if not initialized', () => {
+      expect(() => LogHelper.getInstance()).toThrow('LogHelper not initialized. Call initialize() first with a service name.');
+    });
   });
 
   it('should log messages at different levels', () => {
@@ -24,11 +42,6 @@ describe('LogHelper', () => {
     expect(() => {
       logger.info('Message with metadata', { key: 'value' });
     }).not.toThrow();
-  });
-
-  it('should create child loggers', () => {
-    const childLogger = logger.child({ component: 'ChildComponent' });
-    expect(childLogger).toBeInstanceOf(LogHelper);
   });
 
   it('should handle errors with stack traces', () => {

@@ -4,14 +4,24 @@ export interface ILogHelper {
     info(message: string, ...args: any[]): void;
     warn(message: string, ...args: any[]): void;
     error(message: string, error?: Error, ...args: any[]): void;
-    child(options: object): ILogHelper;
+}
+export interface LogHelperOptions {
+    serviceName: string;
+    discord?: {
+        webhookUrl: string;
+        userId: string;
+    };
+    options?: bunyan.LoggerOptions;
 }
 export declare class LogHelper implements ILogHelper {
     private logger;
-    constructor(serviceName: string, options?: bunyan.LoggerOptions);
+    private static instance;
+    private static isInitialized;
+    private constructor();
+    static initialize(serviceName: string, options?: bunyan.LoggerOptions): LogHelper;
+    static getInstance(): LogHelper;
     debug(message: string, ...args: any[]): void;
     info(message: string, ...args: any[]): void;
     warn(message: string, ...args: any[]): void;
     error(message: string, error?: Error, ...args: any[]): void;
-    child(options: Object): ILogHelper;
 }
