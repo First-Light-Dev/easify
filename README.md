@@ -1,61 +1,202 @@
-# easify
+# Easify
 
-A TypeScript-based utility library providing commonly used APIs and integrations with a focus on maintainability and ease of use.
+A lightweight, type-safe toolkit for Shopify application development, featuring GraphQL client and advanced logging capabilities.
 
 ## Features
 
-- 🪵 **Logging Utility** - Simple yet powerful logging with Bunyan
-- 📝 **TypeScript Support** - Full type definitions included
-- 🛠️ **Code Quality Tools** - Built-in ESLint and Prettier configuration
-- 🧪 **Testing Framework** - Jest integration with coverage reporting
+- 🪶 Lightweight GraphQL client - only uses axios as runtime dependency
+- 📝 Type-safe - full TypeScript support with GraphQL code generation
+- 🛠️ Flexible - generate types only for the queries you need
+- 🔒 Secure - built-in support for Shopify's authentication
+- 📋 Advanced Logging - Bunyan-based logging with optional Discord notifications
+- 🚨 Error Tracking - Automatic error reporting to Discord (optional)
 
 ## Installation
 
-```bash
-npm install easify
-```
+Install the main package:
 
-## Quick Start
+    npm install easify
 
-### Logging Example
-```typescript
+Install peer dependencies for type generation:
+
+    npm install -D @graphql-codegen/cli @graphql-codegen/typescript @graphql-codegen/typescript-operations graphql
+
+## Modules
+
+### 1. GraphQL Client
+
+#### Setup Type Generation
+
+Create a codegen.yml in your project root:
+
+[Example: codegen.yml]
+schema: 'https://shopify.dev/admin-graphql-direct-proxy'
+documents: 'src/**/*.graphql'
+generates:
+  src/generated/types.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+    config:
+      scalars:
+        DateTime: string
+        Date: string
+        Decimal: string
+        JSON: Record<string, any>
+        URL: string
+        ID: string
+        Handle: string
+        DateTimeWithoutTimezone: string
+        TimeWithoutTimezone: string
+
+Add to package.json:
+
+[Example: package.json]
+{
+  "scripts": {
+    "generate": "graphql-codegen"
+  }
+}
+
+#### Create GraphQL Queries
+
+[Example: src/queries/products.graphql]
+query GetProducts($first: Int!) {
+  products(first: $first) {
+    edges {
+      node {
+        id
+        title
+        handle
+        priceRangeV2 {
+          minVariantPrice {
+            amount
+            currencyCode
+          }
+        }
+      }
+    }
+  }
+}
+
+#### Using the Client
+
+[Example: src/example.ts]
+import { ShopifyGraphQLClient } from 'easify';
+import { GetProductsQuery, GetProductsQueryVariables } from './generated/types';
+
+const client = new ShopifyGraphQLClient(
+  'your-store.myshopify.com',
+  'your-access-token'
+);
+
+async function fetchProducts() {
+  const { data } = await client.query<GetProductsQuery, GetProductsQueryVariables>(
+    GET_PRODUCTS,
+    { first: 10 }
+  );
+  
+  // data is fully typed!
+  console.log(data.products.edges[0].node.title);
+}
+
+### 2. Logging
+
+The LogHelper provides a singleton logging interface with optional Discord integration for error reporting.
+
+#### Initialize Logger:
+
+[Example: src/index.ts]
 import { LogHelper } from 'easify';
 
-const logger = new LogHelper('MyService');
-logger.info('Application started');
-logger.error('Something went wrong', new Error('Oops!'), { userId: '123' });
-```
+LogHelper.initialize({
+  serviceName: 'my-service',
+  discord: {  // Optional Discord configuration
+    webhookUrl: 'your-discord-webhook-url',
+    userId: 'your-discord-user-id'
+  },
+  options: {  // Optional Bunyan options
+    level: 'debug'
+  }
+});
 
-## Requirements
+#### Usage:
 
-- Node.js >= 20.x
-- TypeScript >= 5.x
+[Example: src/example.ts]
+const logger = LogHelper.getInstance();
 
-## Documentation
-
-### LogHelper
-
-The `LogHelper` class provides a standardized logging interface with multiple log levels and structured logging support.
-
-```typescript
-const logger = new LogHelper('ServiceName');
-
-// Basic logging
+// Regular logging
 logger.debug('Debug message');
 logger.info('Info message');
 logger.warn('Warning message');
-logger.error('Error message');
 
-// Logging with metadata
-logger.info('Operation completed', { operationId: '123' });
+// Error logging (automatically notifies Discord if configured)
+try {
+  // Your code
+} catch (error) {
+  logger.error('Operation failed', error);
+}
 
-// Logging with error objects
-logger.error('Operation failed', new Error('Database connection failed'), { operationId: '123' });
+#### Logging Interface
 
-// Creating child loggers with context
-const childLogger = logger.child({ requestId: 'abc-123' });
-childLogger.info('Processing request');
-```
+The LogHelper provides the following methods:
+- debug(message: string, ...args: any[]): void
+- info(message: string, ...args: any[]): void
+- warn(message: string, ...args: any[]): void
+- error(message: string, error?: Error, ...args: any[]): void
+
+#### Configuration Options
+
+LogHelperOptions interface:
+- serviceName: string - Name of your service
+- discord?: {
+    webhookUrl: string - Discord webhook URL
+    userId: string - Discord user ID for notifications
+  }
+- options?: bunyan.LoggerOptions - Additional Bunyan logger options
+
+## Common Scalar Types
+
+The library includes proper TypeScript mappings for Shopify's custom scalar types:
+
+- DateTime: string
+- Date: string
+- Decimal: string
+- JSON: Record<string, any>
+- URL: string
+- ID: string
+- Handle: string
+- DateTimeWithoutTimezone: string
+- TimeWithoutTimezone: string
+
+## Best Practices
+
+1. Store your GraphQL queries in .graphql files
+2. Run type generation as part of your build process
+3. Initialize LogHelper early in your application
+4. Use environment variables for sensitive information (Discord webhooks, access tokens)
+5. Configure appropriate log levels for different environments
+
+## Error Handling
+
+The library provides comprehensive error handling through:
+- GraphQL error responses
+- Network error handling
+- Logging with stack traces
+- Automatic Discord notifications for errors (when configured)
+
+Example error handling:
+
+[Example: src/error-handling.ts]
+try {
+  const { data } = await client.query(GET_PRODUCTS, { first: 10 });
+} catch (error) {
+  if (error.response) {
+    logger.error('GraphQL Error', error);
+  } else {
+    logger.error('Network Error', error);
+  }
+}
 
 ## Development
 
@@ -76,12 +217,6 @@ childLogger.info('Processing request');
 ## Contributing
 
 Contributions are welcome! Please read our contributing guidelines before submitting pull requests.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## License
 

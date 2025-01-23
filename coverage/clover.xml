@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1737119580448" clover="3.2.0">
-  <project timestamp="1737119580448" name="All files">
+<coverage generated="1737661813502" clover="3.2.0">
+  <project timestamp="1737661813502" name="All files">
     <metrics statements="44" coveredstatements="41" conditionals="17" coveredconditionals="11" methods="12" coveredmethods="12" elements="73" coveredelements="64" complexity="0" loc="44" ncloc="44" packages="1" files="3" classes="3"/>
     <file name="Dislog.ts" path="/Users/sasukego/Documents/Firstlight/easify/src/logging/Dislog.ts">
       <metrics statements="19" coveredstatements="18" conditionals="2" coveredconditionals="1" methods="5" coveredmethods="5"/>

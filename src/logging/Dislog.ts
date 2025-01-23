@@ -2,7 +2,7 @@ import axios from "axios";
 
 class Dislog {
     private static instance : Dislog;
-    private static isInit : boolean = false;
+    private static isInit = false;
     webhook : string;
     userID : string;
 
