@@ -38,13 +38,13 @@
   "author": "First Light Dev",
   "license": "MIT",
   "devDependencies": {
-    "@types/bunyan": "^1.8.8",
-    "prettier": "^2.8.7",
     "@shopify/api-codegen-preset": "^1.1.7",
+    "@types/authenticator": "^1.1.4",
+    "@types/bunyan": "^1.8.8",
     "@types/node": "^22.14.1",
+    "prettier": "^2.8.7",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3",
-    "@types/authenticator": "^1.1.4"
+    "typescript": "^5.8.3"
   },
   "peerDependencies": {
     "puppeteer": "^24.7.1"
@@ -55,17 +55,17 @@
     }
   },
   "dependencies": {
-    "bunyan": "^1.8.15",
     "@shopify/admin-api-client": "^1.0.8",
     "authenticator": "^1.1.5",
     "axios": "^1.8.4",
+    "bunyan": "^1.8.15",
     "puppeteer": "^24.7.1"
   },
   "publishConfig": {
-    "@First-Light-Dev:registry": "https://npm.pkg.github.com"
+    "@first-light-dev:registry": "https://npm.pkg.github.com"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/First-Light-Dev/easify.git"
+    "url": "git+https://github.com/first-light-dev/easify.git"
   }
 }
