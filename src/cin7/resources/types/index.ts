@@ -4,5 +4,9 @@ export interface APIUpsertResponse {
     id: number;
     code: string | null;
     errors: string[];
-  } 
-  
+}
+
+
+export * from "./CreditNotes";
+export * from "./Payments";
+export * from "./SalesOrders";

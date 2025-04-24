@@ -1,6 +1,7 @@
 import { AxiosInstance } from "axios";
-import { APIUpsertResponse } from "../types";
+import { APIUpsertResponse } from "./types";
 import Cin7 from "..";
+import { Payment } from "./types/Payments";
 export default class Payments {
     private axios: AxiosInstance;
 
@@ -40,15 +41,4 @@ export default class Payments {
         const response = await this.axios.post(`/Payments`, payments);
         return response.data as Array<APIUpsertResponse>;
     }
-}
-
-
-export interface Payment {
-    id: string;
-    transactionRef: string;
-    amount: number;
-    method: string;
-    comments: string;
-    orderId: string;
-    paymentDate: string;
 }

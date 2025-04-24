@@ -26,3 +26,4 @@ export default class Cin7 {
     getPuppeteerPage(): Promise<Page>;
     closeBrowser(): Promise<void>;
 }
+export * from "./resources/types";

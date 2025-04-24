@@ -1,6 +1,6 @@
 {
   "name": "@first-light-dev/easify",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A TypeScript-based utility library providing commonly used APIs and integrations",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -18,9 +18,22 @@
     "shopify"
   ],
   "exports": {
-    "./shopify": "./dist/shopify/index.js",
-    "./cin7": "./dist/cin7/index.js",
-    "./logging": "./dist/logging/index.js"
+    "./shopify": {
+      "types": "./dist/shopify/index.d.ts",
+      "default": "./dist/shopify/index.js"
+    },
+    "./cin7": {
+      "types": "./dist/cin7/index.d.ts",
+      "default": "./dist/cin7/index.js"
+    },
+    "./logging": {
+      "types": "./dist/logging/index.d.ts",
+      "default": "./dist/logging/index.js"
+    },
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "author": "First Light Dev",
   "license": "MIT",

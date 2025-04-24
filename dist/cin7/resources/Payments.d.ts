@@ -1,6 +1,7 @@
 import { AxiosInstance } from "axios";
-import { APIUpsertResponse } from "../types";
+import { APIUpsertResponse } from "./types";
 import Cin7 from "..";
+import { Payment } from "./types/Payments";
 export default class Payments {
     private cin7;
     private axios;
@@ -9,13 +10,4 @@ export default class Payments {
     getByOrderId(orderId: number): Promise<Payment[]>;
     create(payments: Partial<Payment>[]): Promise<void>;
     createBatch(payments: Partial<Payment>[]): Promise<APIUpsertResponse[]>;
-}
-export interface Payment {
-    id: string;
-    transactionRef: string;
-    amount: number;
-    method: string;
-    comments: string;
-    orderId: string;
-    paymentDate: string;
 }

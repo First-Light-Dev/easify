@@ -1,6 +1,7 @@
 import { AxiosInstance } from "axios";
-import { APIUpsertResponse } from "../types";
+import { APIUpsertResponse } from "./types";
 import Cin7 from "..";
+import { SalesOrder } from "./types/SalesOrders";
 export default class SalesOrders {
     constructor(private axios: AxiosInstance, private cin7: Cin7) {}
 
@@ -113,77 +114,5 @@ export default class SalesOrders {
     getInternalCommentStr<T extends Record<string, string>>(data: T, separator: string = '#--#'): string {
         return `#FL#${Object.entries(data).map(([key, value]) => `${key}: ${value}`).join(separator)}#FL#`;
     }
-}
-
-export interface SalesOrder {
-    id: number;
-    reference: string;
-    
-    createdDate: string;
-    modifiedDate: string;
-
-    lineItems: Array<SalesOrderItem>;
-    productTotal: number;
-
-
-    // Important Fields
-    costCenter: string;
-    alternativeTaxRate: string;
-    stage: string;
-    memberId: number;
-    memberEmail: string;
-    paymentTerms: string;
-    branchId: number;
-    
-    // Address
-    deliveryFirstName: string;
-    deliveryLastName: string;
-    deliveryCompany: string;
-    deliveryAddress1: string;
-    deliveryAddress2: string;
-    deliveryCity: string;
-    deliveryState: string;
-    deliveryPostalCode: string;
-    deliveryCountry: string;
-    email: string;
-    phone: string;
-    customerOrderNo: string;
-
-    // Fulfillment Relatef
-    trackingCode: string;
-    dispatchedDate: string; 
-    logisticsCarrier: string;
-    estimatedDeliveryDate: string;
-
-    // Money Related
-    invoiceDate: string;
-    discountTotal: number;
-    discountDescription: string;
-    freightTotal: number;
-    freightDescription: string;
-    total: number;
-    taxStatus: "Incl" | "Excl" | "Exempt";
-    taxRate: number;
-
-    customFields: Record<string, string | number>;
-
-
-    internalComments: string;
-    deliveryInstructions: string;
-
-    logisticsStatus: number;
-}
-
-export interface SalesOrderItem {
-    code: string;
-    name: string;
-    qty: number;
-    option1?: string;
-    option2?: string;
-    option3?: string;
-    unitPrice: number;
-    discount: number;
-    qtyShipped?: number;
-    actualQty?: number;
 }
 

@@ -167,3 +167,5 @@ export default class Cin7 {
     }
 
 }
+
+export * from "./resources/types";
