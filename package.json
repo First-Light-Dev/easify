@@ -1,6 +1,6 @@
 {
   "name": "@first-light-dev/easify",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A TypeScript-based utility library providing commonly used APIs and integrations",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -35,6 +35,19 @@
       "default": "./dist/index.js"
     }
   },
+  "typesVersions": {
+    "*": {
+      "cin7": [
+        "./dist/cin7/index.d.ts"
+      ],
+      "shopify": [
+        "./dist/shopify/index.d.ts"
+      ],
+      "logging": [
+        "./dist/logging/index.d.ts"
+      ]
+    }
+  },
   "author": "First Light Dev",
   "license": "MIT",
   "devDependencies": {
@@ -62,10 +75,10 @@
     "puppeteer": "^24.7.1"
   },
   "publishConfig": {
-    "@first-light-dev:registry": "https://npm.pkg.github.com"
+    "@First-Light-Dev:registry": "https://npm.pkg.github.com"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/first-light-dev/easify.git"
+    "url": "git+https://github.com/First-Light-Dev/easify.git"
   }
 }
