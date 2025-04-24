@@ -1,0 +1,74 @@
+import { AxiosInstance } from "axios";
+import { APIUpsertResponse } from "../types";
+import Cin7 from "..";
+export default class SalesOrders {
+    private axios;
+    private cin7;
+    constructor(axios: AxiosInstance, cin7: Cin7);
+    get(id: string): Promise<SalesOrder | undefined>;
+    getByRef(ref: string): Promise<SalesOrder | undefined>;
+    getByRefs(refs: string[]): Promise<SalesOrder[]>;
+    getByIds(ids: string[]): Promise<SalesOrder[]>;
+    create(salesOrder: Partial<SalesOrder>): Promise<string>;
+    createBatch(salesOrders: Partial<SalesOrder>[]): Promise<Array<APIUpsertResponse>>;
+    update(salesOrder: Partial<SalesOrder>): Promise<string>;
+    updateBatch(salesOrders: Partial<SalesOrder>[]): Promise<Array<APIUpsertResponse>>;
+    getRecentSalesOrders(timeWindow?: number): Promise<SalesOrder[]>;
+    getInternalCommentsData<T extends Record<string, string>>(salesOrder: SalesOrder, separator?: string): T;
+    getInternalCommentStr<T extends Record<string, string>>(data: T, separator?: string): string;
+}
+export interface SalesOrder {
+    id: number;
+    reference: string;
+    createdDate: string;
+    modifiedDate: string;
+    lineItems: Array<SalesOrderItem>;
+    productTotal: number;
+    costCenter: string;
+    alternativeTaxRate: string;
+    stage: string;
+    memberId: number;
+    memberEmail: string;
+    paymentTerms: string;
+    branchId: number;
+    deliveryFirstName: string;
+    deliveryLastName: string;
+    deliveryCompany: string;
+    deliveryAddress1: string;
+    deliveryAddress2: string;
+    deliveryCity: string;
+    deliveryState: string;
+    deliveryPostalCode: string;
+    deliveryCountry: string;
+    email: string;
+    phone: string;
+    customerOrderNo: string;
+    trackingCode: string;
+    dispatchedDate: string;
+    logisticsCarrier: string;
+    estimatedDeliveryDate: string;
+    invoiceDate: string;
+    discountTotal: number;
+    discountDescription: string;
+    freightTotal: number;
+    freightDescription: string;
+    total: number;
+    taxStatus: "Incl" | "Excl" | "Exempt";
+    taxRate: number;
+    customFields: Record<string, string | number>;
+    internalComments: string;
+    deliveryInstructions: string;
+    logisticsStatus: number;
+}
+export interface SalesOrderItem {
+    code: string;
+    name: string;
+    qty: number;
+    option1?: string;
+    option2?: string;
+    option3?: string;
+    unitPrice: number;
+    discount: number;
+    qtyShipped?: number;
+    actualQty?: number;
+}

@@ -16,9 +16,10 @@ export interface LogHelperOptions {
 export declare class LogHelper implements ILogHelper {
     private logger;
     private static instance;
-    private static isInitialized;
+    private static isInit;
+    private dislog?;
     private constructor();
-    static initialize(serviceName: string, options?: bunyan.LoggerOptions): LogHelper;
+    static initialize(options: LogHelperOptions): LogHelper;
     static getInstance(): LogHelper;
     debug(message: string, ...args: any[]): void;
     info(message: string, ...args: any[]): void;

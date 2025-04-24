@@ -1,52 +1,58 @@
 {
   "name": "@first-light-dev/easify",
-  "version": "0.0.1-alpha",
+  "version": "1.0.0",
   "description": "A TypeScript-based utility library providing commonly used APIs and integrations",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
-    "lint": "eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.ts\"",
-    "prepare": "husky install && npm run build",
-    "prepublishOnly": "npm test && npm run lint"
+    "prepare": "yarn build",
+    "codegen": "graphql-codegen && ts-node src/scripts/post-codegen.ts"
   },
   "keywords": [
     "typescript",
     "utilities",
-    "logging"
+    "logging",
+    "cin7",
+    "shopify"
   ],
+  "exports": {
+    "./shopify": "./dist/shopify/index.js",
+    "./cin7": "./dist/cin7/index.js",
+    "./logging": "./dist/logging/index.js"
+  },
   "author": "First Light Dev",
   "license": "MIT",
   "devDependencies": {
     "@types/bunyan": "^1.8.8",
-    "@types/jest": "^29.5.0",
-    "@types/node": "^18.15.11",
-    "@typescript-eslint/eslint-plugin": "^5.57.1",
-    "@typescript-eslint/parser": "^5.57.1",
-    "eslint": "^8.37.0",
-    "husky": "^8.0.3",
-    "jest": "^29.5.0",
     "prettier": "^2.8.7",
-    "ts-jest": "^29.1.0",
-    "typescript": "^5.0.3"
+    "@shopify/api-codegen-preset": "^1.1.7",
+    "@types/node": "^22.14.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3",
+    "@types/authenticator": "^1.1.4"
   },
   "peerDependencies": {
-    "@graphql-codegen/cli": "^5.0.0",
-    "@graphql-codegen/typescript": "^4.0.0",
-    "@graphql-codegen/typescript-operations": "^4.0.0",
-    "graphql": "^16.0.0"
+    "puppeteer": "^24.7.1"
+  },
+  "peerDependenciesMeta": {
+    "puppeteer": {
+      "optional": false
+    }
   },
   "dependencies": {
-    "axios": "^1.7.9",
-    "bunyan": "^1.8.15"
+    "bunyan": "^1.8.15",
+    "@shopify/admin-api-client": "^1.0.8",
+    "authenticator": "^1.1.5",
+    "axios": "^1.8.4",
+    "puppeteer": "^24.7.1"
   },
   "publishConfig": {
     "@First-Light-Dev:registry": "https://npm.pkg.github.com"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/First-Light-Dev/common-utils.git"
+    "url": "git+https://github.com/First-Light-Dev/easify.git"
   }
 }

@@ -32,27 +32,34 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LogHelper = void 0;
 const bunyan = __importStar(require("bunyan"));
+const Dislog_1 = __importDefault(require("./Dislog"));
 class LogHelper {
-    constructor(serviceName, options) {
+    constructor(options) {
         this.logger = bunyan.createLogger({
-            name: serviceName,
-            ...options
+            name: options.serviceName,
+            ...options.options
         });
+        if (options.discord) {
+            this.dislog = Dislog_1.default.initialize(options.discord.webhookUrl, options.discord.userId);
+        }
     }
-    static initialize(serviceName, options) {
-        if (LogHelper.isInitialized) {
+    static initialize(options) {
+        if (LogHelper.isInit) {
             console.warn('LogHelper is already initialized. Ignoring re-initialization attempt.');
             return LogHelper.instance;
         }
-        LogHelper.instance = new LogHelper(serviceName, options);
-        LogHelper.isInitialized = true;
+        LogHelper.instance = new LogHelper(options);
+        LogHelper.isInit = true;
         return LogHelper.instance;
     }
     static getInstance() {
-        if (!LogHelper.isInitialized) {
+        if (!LogHelper.isInit) {
             throw new Error('LogHelper not initialized. Call initialize() first with a service name.');
         }
         return LogHelper.instance;
@@ -67,13 +74,16 @@ class LogHelper {
         this.logger.warn(message, ...args);
     }
     error(message, error, ...args) {
+        var _a, _b;
         if (error) {
             this.logger.error({ err: error }, message, ...args);
+            (_a = this.dislog) === null || _a === void 0 ? void 0 : _a.alert(`Error: ${message}\n${error.stack || error.message}`);
         }
         else {
             this.logger.error(message, ...args);
+            (_b = this.dislog) === null || _b === void 0 ? void 0 : _b.alert(`Error: ${message}`);
         }
     }
 }
 exports.LogHelper = LogHelper;
-LogHelper.isInitialized = false;
+LogHelper.isInit = false;
