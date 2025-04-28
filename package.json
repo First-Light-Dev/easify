@@ -1,6 +1,6 @@
 {
   "name": "@first-light-dev/easify",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A TypeScript-based utility library providing commonly used APIs and integrations",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,6 +10,9 @@
     "prepare": "yarn build",
     "codegen": "graphql-codegen && ts-node src/scripts/post-codegen.ts"
   },
+  "files": [
+    "dist/**/*"
+  ],
   "keywords": [
     "typescript",
     "utilities",
