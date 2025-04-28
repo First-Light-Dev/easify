@@ -31,7 +31,7 @@ export default class Cin7 {
     public creditNotes: CreditNotes;
     public payments: Payments;
 
-    private constructor(config: Cin7Config) {
+    constructor(config: Cin7Config) {
         this.config = config;
         this.axios = axios.create({
             baseURL: "https://api.cin7.com/api/v1",
