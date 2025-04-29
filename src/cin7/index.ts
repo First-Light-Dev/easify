@@ -125,15 +125,12 @@ export default class Cin7 {
         await page.type(LOGIN.selectors.username, this.config.ui.username);
         await page.type(LOGIN.selectors.password, this.config.ui.password);
 
-        await Promise.race([ 
-            Promise.all([
-                page.waitForNavigation({
-                    waitUntil: 'networkidle0'
-                }),
-                page.click(LOGIN.selectors.loginButton)
-            ]),
-            page.waitForSelector(LOGIN.selectors.twoFAButton, { timeout: 10000 })
-        ]);
+        await Promise.all([
+            page.waitForNavigation({
+                waitUntil: "domcontentloaded"
+            }),
+            page.click(LOGIN.selectors.loginButton)
+        ])
 
         const currentUrl = page.url();
 
