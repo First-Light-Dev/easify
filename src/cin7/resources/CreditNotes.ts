@@ -118,9 +118,18 @@ export default class CreditNotes {
                         if (input) input.value = '';
                     }, CREDIT_NOTES.selectors.batchNumberField);
 
+                    // get value from this field CREDIT_NOTES.selectors.batchNumberField
+                    const batchNumber = await page.evaluate(selector => {
+                        const input = document.querySelector(selector) as HTMLInputElement;
+                        return input?.value ?? "";
+                    }, CREDIT_NOTES.selectors.batchNumberField);
+
                     await page.type(CREDIT_NOTES.selectors.actualQtyMovedField, `${-1 * Math.abs(stockReceipt.lines.find(line => line.sku === lineItem.sku)?.qty ?? 0)}`);
-                    await page.type(CREDIT_NOTES.selectors.batchNumberField, stockReceipt.lines.find(line => line.sku === lineItem.sku)?.batch ?? "");
-                    
+
+                    if (batchNumber !== "FIFO") {
+                        await page.type(CREDIT_NOTES.selectors.batchNumberField, stockReceipt.lines.find(line => line.sku === lineItem.sku)?.batch ?? "");
+                    }
+
                     await page.click(CREDIT_NOTES.selectors.saveIntakeButton);
                     await new Promise(resolve => setTimeout(resolve, 1000));
                 }
