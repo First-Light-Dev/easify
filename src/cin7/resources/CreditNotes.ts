@@ -229,7 +229,7 @@ export default class CreditNotes {
         const result: T = {} as T;
         splitComments.forEach(comment => {
             if(comment.includes('##')) {
-                comment = comment.replace('##', '');
+                comment = comment.split('##')[1];
             }
             if(comment.includes(': ')) {
                 const [key, value] = comment.split(': ');
