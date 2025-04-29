@@ -16,6 +16,9 @@ export interface Cin7Config {
         password: string;
         otpSecret: string;
     }
+    options?: {
+        headless?: boolean;
+    }
 }
 
 export default class Cin7 {
@@ -93,7 +96,7 @@ export default class Cin7 {
 
         const browser = await puppeteer.launch({
             timeout: 0,
-            headless: false,
+            headless: this.config.options?.headless || false,
             slowMo: 2,
             defaultViewport: {
                 width: 1024,
@@ -122,19 +125,20 @@ export default class Cin7 {
         await page.type(LOGIN.selectors.username, this.config.ui.username);
         await page.type(LOGIN.selectors.password, this.config.ui.password);
 
-        const [response] = await Promise.all([
-            page.waitForNavigation({
-                waitUntil: 'networkidle0'
-            }),
-            page.click(LOGIN.selectors.loginButton)
+        await Promise.race([ 
+            Promise.all([
+                page.waitForNavigation({
+                    waitUntil: 'networkidle0'
+                }),
+                page.click(LOGIN.selectors.loginButton)
+            ]),
+            page.waitForSelector(LOGIN.selectors.twoFAButton, { timeout: 10000 })
         ]);
 
-        if (!response) {
-            throw new Error("Failed to login");
-        }
+        const currentUrl = page.url();
 
         // check if the url contains the word "dashboard"
-        if (response.url().includes(LOGIN.selectors.twoFAURLIdentifier)) {
+        if (currentUrl.includes(LOGIN.selectors.twoFAURLIdentifier)) {
             await page.type(LOGIN.selectors.twoFA, authenticator.generateToken(this.config.ui.otpSecret || ""));
 
             const [response] = await Promise.all([
