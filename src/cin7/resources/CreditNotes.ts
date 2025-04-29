@@ -68,7 +68,7 @@ export default class CreditNotes {
         for (const stockReceipt of stockReceipts) {
             try {
                 console.log("Creating stock receipt", stockReceipt.id);
-                await page.waitForNavigation({ waitUntil: 'networkidle0' });
+                await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
                 await page.goto(CREDIT_NOTES.getUrl(stockReceipt.id));
                 // await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
@@ -175,7 +175,7 @@ export default class CreditNotes {
                 await Promise.all([
                     page.goto(CREDIT_NOTES.getUrl(creditNoteId)),
                     page.waitForNavigation({
-                        waitUntil: 'networkidle0'
+                        waitUntil: 'domcontentloaded'
                     })
                 ]);
 

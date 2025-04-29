@@ -140,7 +140,7 @@ export default class Cin7 {
 
             const [response] = await Promise.all([
                 page.waitForNavigation({
-                    waitUntil: 'networkidle0'
+                    waitUntil: "domcontentloaded"
                 }),
                 page.click(LOGIN.selectors.twoFAButton),
             ]);
