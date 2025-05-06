@@ -22,7 +22,7 @@ export const LOGIN = {
 }
 
 export const CREDIT_NOTES = {
-    getUrl: (id: string) => `https://go.cin7.com/Cloud/TransactionEntry/TransactionEntry.aspx?idCustomerAppsLink=1212022&OrderId=${id}`,
+    getUrl: (appLinkId: string, id: string) => `https://go.cin7.com/Cloud/TransactionEntry/TransactionEntry.aspx?idCustomerAppsLink=${appLinkId}&OrderId=${id}`,
     selectors: {
         branchOptionOpenDialogButton: "#BranchSelectedLink",
         branchOptions: "#MenuPanel1 a",

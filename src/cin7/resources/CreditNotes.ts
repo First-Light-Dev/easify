@@ -69,7 +69,7 @@ export default class CreditNotes {
             try {
                 console.log("Creating stock receipt", stockReceipt.id);
                 await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
-                await page.goto(CREDIT_NOTES.getUrl(stockReceipt.id));
+                await page.goto(CREDIT_NOTES.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.creditNotes ?? "", stockReceipt.id));
                 // await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
                 page.on('dialog', async dialog => {
@@ -180,13 +180,8 @@ export default class CreditNotes {
         let page = await this.cin7.getPuppeteerPage();
         for (const creditNoteId of creditNoteIds) {
             try {
-                console.log("Voiding credit note", creditNoteId, CREDIT_NOTES.getUrl(creditNoteId));
-                await Promise.all([
-                    page.goto(CREDIT_NOTES.getUrl(creditNoteId)),
-                    page.waitForNavigation({
-                        waitUntil: 'domcontentloaded'
-                    })
-                ]);
+                console.log("Voiding credit note", creditNoteId, CREDIT_NOTES.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.creditNotes ?? "", creditNoteId));
+                await page.goto(CREDIT_NOTES.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.creditNotes ?? "", creditNoteId), { waitUntil: 'domcontentloaded' });
 
                 await page.waitForSelector(CREDIT_NOTES.selectors.adminButton, { timeout: 5000 });
                 

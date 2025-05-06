@@ -7,24 +7,32 @@ import * as authenticator from "authenticator";
 import Payments from "./resources/Payments";
 
 export interface Cin7Config {
-    api: {
-        username: string;
-        password: string;
-    }
-    ui?: {
-        username: string;
-        password: string;
-        otpSecret: string;
+    auth: {
+        api: {
+            username: string;
+            password: string;
+        }
+        ui?: {
+            username: string;
+            password: string;
+            otpSecret: string;
+        }
     }
     options?: {
         headless?: boolean;
+        puppeteer?: {
+            appLinkIds?: {
+                creditNotes: string;
+            }
+        }
     }
+
 }
 
 export default class Cin7 {
-    private config: Cin7Config;
+    public config: Cin7Config;
 
-  
+
     private axios: AxiosInstance;
     private browser: Browser | null;
     private page: Page | null;
@@ -41,7 +49,7 @@ export default class Cin7 {
             headers: {
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-                "Authorization": `Basic ${Buffer.from(`${this.config.api.username}:${this.config.api.password}`).toString("base64")}`,
+                "Authorization": `Basic ${Buffer.from(`${this.config.auth.api.username}:${this.config.auth.api.password}`).toString("base64")}`,
             },
         });
 
@@ -118,12 +126,12 @@ export default class Cin7 {
             throw new Error("Failed to login");
         }
 
-        if(!this.config.ui) {
+        if (!this.config.auth.ui) {
             throw new Error("UI credentials not initialized. Call Cin7.init() with ui credentials first");
         }
 
-        await page.type(LOGIN.selectors.username, this.config.ui.username);
-        await page.type(LOGIN.selectors.password, this.config.ui.password);
+        await page.type(LOGIN.selectors.username, this.config.auth.ui.username);
+        await page.type(LOGIN.selectors.password, this.config.auth.ui.password);
 
         await Promise.all([
             page.waitForNavigation({
@@ -136,7 +144,7 @@ export default class Cin7 {
 
         // check if the url contains the word "dashboard"
         if (currentUrl.includes(LOGIN.selectors.twoFAURLIdentifier)) {
-            await page.type(LOGIN.selectors.twoFA, authenticator.generateToken(this.config.ui.otpSecret || ""));
+            await page.type(LOGIN.selectors.twoFA, authenticator.generateToken(this.config.auth.ui.otpSecret || ""));
 
             const [response] = await Promise.all([
                 page.waitForNavigation({
