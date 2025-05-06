@@ -181,6 +181,7 @@ export default class CreditNotes {
         for (const creditNoteId of creditNoteIds) {
             try {
                 console.log("Voiding credit note", creditNoteId, CREDIT_NOTES.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.creditNotes ?? "", creditNoteId));
+                await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
                 await page.goto(CREDIT_NOTES.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.creditNotes ?? "", creditNoteId), { waitUntil: 'domcontentloaded' });
 
                 await page.waitForSelector(CREDIT_NOTES.selectors.adminButton, { timeout: 5000 });
