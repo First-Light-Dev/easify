@@ -68,8 +68,7 @@ export default class CreditNotes {
         for (const stockReceipt of stockReceipts) {
             try {
                 console.log("Creating stock receipt", stockReceipt.id);
-                await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
-                await page.goto(CREDIT_NOTES.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.creditNotes ?? "", stockReceipt.id));
+                await page.goto(CREDIT_NOTES.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.creditNotes ?? "", stockReceipt.id), { waitUntil: 'domcontentloaded' });
                 // await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
                 page.on('dialog', async dialog => {
@@ -126,6 +125,8 @@ export default class CreditNotes {
 
                     await page.type(CREDIT_NOTES.selectors.actualQtyMovedField, `${-1 * Math.abs(stockReceipt.lines.find(line => line.sku === lineItem.sku)?.qty ?? 0)}`);
 
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+
                     if (batchNumber !== "FIFO") {
                         await page.type(CREDIT_NOTES.selectors.batchNumberField, stockReceipt.lines.find(line => line.sku === lineItem.sku)?.batch ?? "");
                     }
@@ -154,7 +155,7 @@ export default class CreditNotes {
                     ]);
                 }
 
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                await page.reload({ waitUntil: 'domcontentloaded' });
 
             } catch (error) {
                 console.error(`Error creating stock receipt for credit note ${stockReceipt}:`, error);

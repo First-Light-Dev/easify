@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from "axios";
 import SalesOrders from "./resources/SalesOrders";
 import CreditNotes from "./resources/CreditNotes";
 import puppeteer, { Browser, Page } from "puppeteer";
-import { LOGIN } from "./puppeteer/constants";
+import { GLOBAL, LOGIN } from "./puppeteer/constants";
 import * as authenticator from "authenticator";
 import Payments from "./resources/Payments";
 
@@ -152,6 +152,8 @@ export default class Cin7 {
                 }),
                 page.click(LOGIN.selectors.twoFAButton),
             ]);
+
+            await page.reload({ waitUntil: 'domcontentloaded' });
 
             if (!response) {
                 throw new Error("Failed to login twofa");
