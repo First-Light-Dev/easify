@@ -146,16 +146,14 @@ export default class CreditNotes {
                     await page.waitForSelector(CREDIT_NOTES.selectors.approveButton, { timeout: 4000 });
                     await Promise.all([
                         page.click(CREDIT_NOTES.selectors.approveButton),
-                        page.waitForNavigation()
+                        page.waitForNavigation({ waitUntil: 'domcontentloaded' })
                     ]);
                 } catch (error) {
                     await Promise.all([
                         page.click(CREDIT_NOTES.selectors.saveButton),
-                        page.waitForNavigation()
+                        page.waitForNavigation({ waitUntil: 'domcontentloaded' })
                     ]);
                 }
-
-                await page.reload({ waitUntil: 'domcontentloaded' });
 
             } catch (error) {
                 console.error(`Error creating stock receipt for credit note ${stockReceipt}:`, error);

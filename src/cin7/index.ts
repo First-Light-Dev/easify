@@ -153,8 +153,6 @@ export default class Cin7 {
                 page.click(LOGIN.selectors.twoFAButton),
             ]);
 
-            await page.reload({ waitUntil: 'domcontentloaded' });
-
             if (!response) {
                 throw new Error("Failed to login twofa");
             }
