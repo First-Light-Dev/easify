@@ -68,6 +68,17 @@ export default class CreditNotes {
         for (const stockReceipt of stockReceipts) {
             try {
                 console.log("Creating stock receipt", stockReceipt.id);
+                try {
+                    await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 10000 });
+                } catch (error) {
+                    if (error instanceof Error && error.name === 'TimeoutError') {
+                        console.warn('Navigation timeout - continuing with execution');
+                        // Optionally add a small delay to ensure page is in a stable state
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    } else {
+                        throw error; // Re-throw if it's not a timeout error
+                    }
+                }
                 await page.goto(CREDIT_NOTES.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.creditNotes ?? "", stockReceipt.id), { waitUntil: 'domcontentloaded' });
                 // await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
