@@ -125,15 +125,11 @@ export default class CreditNotes {
                         if (input) input.value = '';
                     }, CREDIT_NOTES.selectors.actualQtyMovedField);                    
 
-                    await page.evaluate(selector => {
-                        const input = document.querySelector(selector) as HTMLInputElement;
-                        if (input) input.value = '';
-                    }, CREDIT_NOTES.selectors.batchNumberField);
-
                     // get value from this field CREDIT_NOTES.selectors.batchNumberField
                     const batchNumber = await page.evaluate(selector => {
                         const input = document.querySelector(selector) as HTMLInputElement;
                         if(input.readOnly) return "FIFO";
+                        input.value = "";
                         return input?.value ?? "";
                     }, CREDIT_NOTES.selectors.batchNumberField);
 
