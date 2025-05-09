@@ -108,6 +108,13 @@ export default class CreditNotes {
                 }
                 await new Promise(resolve => setTimeout(resolve, 3000));
 
+                const currentDate = new Date();
+                const formattedDate = currentDate.toLocaleDateString('en-GB').replace(/\//g, '-'); // Format: DD-MM-YYYY
+                const formattedTime = currentDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); // Format: HH:MM AM/PM
+
+                await page.type(CREDIT_NOTES.selectors.completedDateField, formattedDate);
+                await page.type(CREDIT_NOTES.selectors.completedTimeField, formattedTime);
+
                 for (const lineItem of lineItemsTableData) {
                     await page.click(CREDIT_NOTES.selectors.getQtyMovedField(lineItem.nthChild));
                     console.log("Clicked qty moved field", lineItem.nthChild);
@@ -126,6 +133,7 @@ export default class CreditNotes {
                     // get value from this field CREDIT_NOTES.selectors.batchNumberField
                     const batchNumber = await page.evaluate(selector => {
                         const input = document.querySelector(selector) as HTMLInputElement;
+                        if(input.readOnly) return "FIFO";
                         return input?.value ?? "";
                     }, CREDIT_NOTES.selectors.batchNumberField);
 
@@ -140,13 +148,6 @@ export default class CreditNotes {
                     await page.click(CREDIT_NOTES.selectors.saveIntakeButton);
                     await new Promise(resolve => setTimeout(resolve, 1000));
                 }
-
-                const currentDate = new Date();
-                const formattedDate = currentDate.toLocaleDateString('en-GB').replace(/\//g, '-'); // Format: DD-MM-YYYY
-                const formattedTime = currentDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); // Format: HH:MM AM/PM
-
-                await page.type(CREDIT_NOTES.selectors.completedDateField, formattedDate);
-                await page.type(CREDIT_NOTES.selectors.completedTimeField, formattedTime);
 
                 try {
                     await page.waitForSelector(CREDIT_NOTES.selectors.approveButton, { timeout: 4000 });
