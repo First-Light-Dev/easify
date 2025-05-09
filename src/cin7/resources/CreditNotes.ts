@@ -69,7 +69,7 @@ export default class CreditNotes {
             try {
                 console.log("Creating stock receipt", stockReceipt.id);
                 try {
-                    await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 10000 });
+                    await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 3000 });
                 } catch (error) {
                     if (error instanceof Error && error.name === 'TimeoutError') {
                         console.warn('Navigation timeout - continuing with execution');
@@ -81,11 +81,6 @@ export default class CreditNotes {
                 }
                 await page.goto(CREDIT_NOTES.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.creditNotes ?? "", stockReceipt.id), { waitUntil: 'domcontentloaded' });
                 // await page.waitForNavigation({ waitUntil: 'networkidle0' });
-
-                page.on('dialog', async dialog => {
-                    console.log(`Dialog message: ${dialog.message()}`);
-                    await dialog.accept();
-                });
                 
                 console.log("Navigated to credit note");
                 const lineItemsTableData : {sku: string, nthChild: number}[] = await page.evaluate((selector) => {

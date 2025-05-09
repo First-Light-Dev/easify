@@ -37,6 +37,7 @@ export default class Cin7 {
     private browser: Browser | null;
     private page: Page | null;
     private isLoggedIn: boolean;
+    private hasDialogHandler: boolean;
 
     public salesOrders: SalesOrders;
     public creditNotes: CreditNotes;
@@ -95,6 +96,17 @@ export default class Cin7 {
         this.isLoggedIn = false;
         this.page = null;
         this.browser = null;
+        this.hasDialogHandler = false;
+    }
+
+    private ensureDialogHandler(page: Page) {
+        if (!this.hasDialogHandler) {
+            page.on('dialog', async dialog => {
+                console.log(`Dialog message: ${dialog.message()}`);
+                await dialog.accept();
+            });
+            this.hasDialogHandler = true;
+        }
     }
 
     async getPuppeteerPage(): Promise<Page> {
@@ -158,7 +170,7 @@ export default class Cin7 {
             }
         }
 
-
+        this.ensureDialogHandler(page);
         this.page = page;
         this.isLoggedIn = true;
 
@@ -172,6 +184,7 @@ export default class Cin7 {
             this.browser = null;
             this.page = null;
             this.isLoggedIn = false;
+            this.hasDialogHandler = false;
         }
     }
 
