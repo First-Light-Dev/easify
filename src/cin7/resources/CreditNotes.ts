@@ -135,8 +135,6 @@ export default class CreditNotes {
 
                     await page.type(CREDIT_NOTES.selectors.actualQtyMovedField, `${-1 * Math.abs(stockReceipt.lines.find(line => line.sku === lineItem.sku)?.qty ?? 0)}`);
 
-                    await new Promise(resolve => setTimeout(resolve, 5000));
-
                     if (batchNumber !== "FIFO") {
                         await page.type(CREDIT_NOTES.selectors.batchNumberField, stockReceipt.lines.find(line => line.sku === lineItem.sku)?.batch ?? "");
                     }
