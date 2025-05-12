@@ -61,7 +61,7 @@ export default class SalesOrders {
         return response.data as Array<APIUpsertResponse>;
     }
 
-    async getRecentSalesOrders(timeWindow: number = 18 * 60 * 1000): Promise<SalesOrder[]> {
+    async getRecentlyModified(timeWindow: number = 18 * 60 * 1000): Promise<SalesOrder[]> {
         const now = new Date();
     
         const timeWindowAgo = new Date(now.getTime() - timeWindow).toISOString(); 
@@ -74,6 +74,29 @@ export default class SalesOrders {
             const response = await this.axios.get(`/SalesOrders`, {
                 params: {
                     where: `modifiedDate >= '${timeWindowAgo}'`,
+                    page
+                }
+            });
+            salesOrders.push(...response.data);
+            if(response.data.length === 0) break;
+            page++;
+        }
+        return salesOrders;
+    }
+
+    async getRecentlyCreated(timeWindow: number = 18 * 60 * 1000): Promise<SalesOrder[]> {
+        const now = new Date();
+    
+        const timeWindowAgo = new Date(now.getTime() - timeWindow).toISOString(); 
+
+        const salesOrders = [];
+
+        let page = 1;
+        while(true) {
+            console.log(`Getting page ${page}`);
+            const response = await this.axios.get(`/SalesOrders`, {
+                params: {
+                    where: `createdDate >= '${timeWindowAgo}'`,
                     page
                 }
             });
