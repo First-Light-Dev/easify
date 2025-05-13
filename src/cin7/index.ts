@@ -1,10 +1,11 @@
 import axios, { AxiosInstance } from "axios";
 import SalesOrders from "./resources/SalesOrders";
 import CreditNotes from "./resources/CreditNotes";
-import puppeteer, { Browser, Page } from "puppeteer";
+import puppeteer, { Browser, Configuration, Page } from "puppeteer";
 import { GLOBAL, LOGIN } from "./puppeteer/constants";
 import * as authenticator from "authenticator";
 import Payments from "./resources/Payments";
+import { join } from "path";
 
 export interface Cin7Config {
     auth: {
@@ -109,6 +110,18 @@ export default class Cin7 {
         }
     }
 
+    async loadPuppeteerConfig(): Promise<Partial<Configuration>> {
+        try {
+            // Try to load the config from the application root
+            const configPath = join(process.cwd(), '.puppeteerrc.cjs');
+            const config = require(configPath);
+            return config;
+        } catch (error) {
+            // Fallback to default configuration if no .puppeteerrc.cjs is found
+            return {};
+        }
+    }
+
     async getPuppeteerPage(): Promise<Page> {
         if (this.isLoggedIn && this.page) {
             return this.page;
@@ -117,14 +130,15 @@ export default class Cin7 {
         const browser = await puppeteer.launch({
             timeout: 0,
             headless: this.config.options?.headless || false,
-            slowMo: 2,
-            defaultViewport: {
-                width: 1024,
-                height: 768,
-            },
+            slowMo: 0,
             args: [
+                '--disable-gpu',
+                '--disable-dev-shm-usage',
+                '--disable-setuid-sandbox',
+                '--no-first-run',
                 '--no-sandbox',
-                '--disable-setuid-sandbox'
+                '--no-zygote',
+                '--window-size=1280,720',
             ],
         });
 
