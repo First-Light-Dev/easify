@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import SalesOrders from "./resources/SalesOrders";
 import CreditNotes from "./resources/CreditNotes";
+import ProductOptions from "./resources/ProductOptions";
 import puppeteer, { Browser, Configuration, Page } from "puppeteer";
 import { GLOBAL, LOGIN } from "./puppeteer/constants";
 import * as authenticator from "authenticator";
@@ -43,7 +44,8 @@ export default class Cin7 {
     public salesOrders: SalesOrders;
     public creditNotes: CreditNotes;
     public payments: Payments;
-
+    public productOptions: ProductOptions;
+    
     constructor(config: Cin7Config) {
         this.config = config;
         this.axios = axios.create({
@@ -94,6 +96,7 @@ export default class Cin7 {
         this.salesOrders = new SalesOrders(this.axios, this);
         this.creditNotes = new CreditNotes(this.axios, this);
         this.payments = new Payments(this.axios, this);
+        this.productOptions = new ProductOptions(this.axios, this);
         this.isLoggedIn = false;
         this.page = null;
         this.browser = null;

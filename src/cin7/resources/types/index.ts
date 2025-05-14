@@ -10,3 +10,4 @@ export interface APIUpsertResponse {
 export * from "./CreditNotes";
 export * from "./Payments";
 export * from "./SalesOrders";
+export * from "./ProductOptions";
