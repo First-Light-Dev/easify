@@ -58,8 +58,10 @@ export interface SalesOrder {
 }
 
 export interface SalesOrderItem {
-    code: string;
-    name: string;
+    code?: string;
+    name?: string;
+    productOptionId?: number;
+    lineComments?: string;
     qty: number;
     option1?: string;
     option2?: string;

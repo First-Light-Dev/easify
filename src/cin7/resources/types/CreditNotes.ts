@@ -26,8 +26,10 @@ export interface CreditNote {
   }
   
   export interface CreditNoteItem {
-    code: string;
-    name: string;
+    code?: string;
+    name?: string;
+    productOptionId?: number;
+    lineComments?: string;
     qty: number;
     option1?: string;
     option2?: string;
