@@ -43,6 +43,7 @@ export interface CreditNote {
     id: string;
     lines: {
       sku: string;
+      barcode: string;
       qty: number;
       batch: string;
     }[];

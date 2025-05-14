@@ -83,13 +83,13 @@ export default class CreditNotes {
                 // await page.waitForNavigation({ waitUntil: 'networkidle0' });
                 
                 console.log("Navigated to credit note");
-                const lineItemsTableData : {sku: string, nthChild: number, variantSKU: string}[] = await page.evaluate((skuFieldsSelector, internalCommentsFieldsSelector) => {
+                const lineItemsTableData : {sku: string, nthChild: number, barcode: string}[] = await page.evaluate((skuFieldsSelector, internalCommentsFieldsSelector) => {
                     const skuFields = document.querySelectorAll(skuFieldsSelector);
                     const internalCommentsFields = document.querySelectorAll(internalCommentsFieldsSelector);
                     return Array.from(skuFields).map((skuField, index) => ({
                         sku: skuField.innerHTML?.trim() ?? "",
                         nthChild: index + 2,
-                        variantSKU: (internalCommentsFields[index]?.innerHTML?.trim() ?? "").includes("VariantSKU:") ? internalCommentsFields[index]?.innerHTML?.trim().split("Barcode:")[1]?.trim() ?? "" : "",
+                        barcode: (internalCommentsFields[index]?.innerHTML?.trim() ?? "").includes("Barcode:") ? internalCommentsFields[index]?.innerHTML?.trim().split("Barcode:")[1]?.trim() ?? "" : "",
                     })).filter(data => data.sku !== "" && !data.sku.includes("<i>Search...</i>"));
                 }, CREDIT_NOTES.selectors.skuFields, CREDIT_NOTES.selectors.internalCommentsFields);
 
@@ -137,7 +137,7 @@ export default class CreditNotes {
                     }, CREDIT_NOTES.selectors.batchNumberField);
 
                     const matchingStockReceiptLine = stockReceipt.lines.find(line => {
-                        if(lineItem.variantSKU && lineItem.variantSKU.toLowerCase() === line.sku.toLowerCase()) return true;
+                        if(lineItem.barcode && lineItem.barcode.toLowerCase() === line.barcode.toLowerCase()) return true;
                         if(line.sku.toLowerCase().startsWith(lineItem.sku.toLowerCase())) return true;
                         return false;
                     });
