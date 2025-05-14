@@ -83,30 +83,33 @@ export default class CreditNotes {
                 // await page.waitForNavigation({ waitUntil: 'networkidle0' });
                 
                 console.log("Navigated to credit note");
-                const lineItemsTableData : {sku: string, nthChild: number}[] = await page.evaluate((selector) => {
-                    const skuFields = document.querySelectorAll(selector);
+                const lineItemsTableData : {sku: string, nthChild: number, variantSKU: string}[] = await page.evaluate((skuFieldsSelector, internalCommentsFieldsSelector) => {
+                    const skuFields = document.querySelectorAll(skuFieldsSelector);
+                    const internalCommentsFields = document.querySelectorAll(internalCommentsFieldsSelector);
                     return Array.from(skuFields).map((skuField, index) => ({
                         sku: skuField.innerHTML?.trim() ?? "",
                         nthChild: index + 2,
+                        variantSKU: (internalCommentsFields[index]?.innerHTML?.trim() ?? "").includes("VariantSKU:") ? internalCommentsFields[index]?.innerHTML?.trim().split("Barcode:")[1]?.trim() ?? "" : "",
                     })).filter(data => data.sku !== "" && !data.sku.includes("<i>Search...</i>"));
-                }, CREDIT_NOTES.selectors.skuFields);
+                }, CREDIT_NOTES.selectors.skuFields, CREDIT_NOTES.selectors.internalCommentsFields);
 
                 console.log("Line items table data", JSON.stringify(lineItemsTableData));
 
-                await page.waitForSelector(CREDIT_NOTES.selectors.branchOptionOpenDialogButton, { visible: true });
-                await page.click(CREDIT_NOTES.selectors.branchOptionOpenDialogButton);
-                await new Promise(resolve => setTimeout(resolve, 3000));
+                // No need to do branch change
+                // await page.waitForSelector(CREDIT_NOTES.selectors.branchOptionOpenDialogButton, { visible: true });
+                // await page.click(CREDIT_NOTES.selectors.branchOptionOpenDialogButton);
+                // await new Promise(resolve => setTimeout(resolve, 3000));
         
-                const branchElements = await page.$$(CREDIT_NOTES.selectors.branchOptions);
-                for (const element of branchElements) {
-                    const onclickAttr = await element.evaluate(el => el.getAttribute('onclick'));
-                    const branchName = stockReceipt.branchName;
-                    if (onclickAttr?.split("'").includes(branchName)) {
-                        await element.click();
-                        break;
-                    }
-                }
-                await new Promise(resolve => setTimeout(resolve, 3000));
+                // const branchElements = await page.$$(CREDIT_NOTES.selectors.branchOptions);
+                // for (const element of branchElements) {
+                //     const onclickAttr = await element.evaluate(el => el.getAttribute('onclick'));
+                //     const branchName = stockReceipt.branchName;
+                //     if (onclickAttr?.split("'").includes(branchName)) {
+                //         await element.click();
+                //         break;
+                //     }
+                // }
+                // await new Promise(resolve => setTimeout(resolve, 3000));
 
                 const currentDate = new Date();
                 const formattedDate = currentDate.toLocaleDateString('en-GB').replace(/\//g, '-'); // Format: DD-MM-YYYY
@@ -133,10 +136,16 @@ export default class CreditNotes {
                         return input?.value ?? "";
                     }, CREDIT_NOTES.selectors.batchNumberField);
 
-                    await page.type(CREDIT_NOTES.selectors.actualQtyMovedField, `${-1 * Math.abs(stockReceipt.lines.find(line => line.sku === lineItem.sku)?.qty ?? 0)}`);
+                    const matchingStockReceiptLine = stockReceipt.lines.find(line => {
+                        if(lineItem.variantSKU && lineItem.variantSKU.toLowerCase() === line.sku.toLowerCase()) return true;
+                        if(line.sku.toLowerCase().startsWith(lineItem.sku.toLowerCase())) return true;
+                        return false;
+                    });
+
+                    await page.type(CREDIT_NOTES.selectors.actualQtyMovedField, `${-1 * Math.abs(matchingStockReceiptLine?.qty ?? 0)}`);
 
                     if (batchNumber !== "FIFO") {
-                        await page.type(CREDIT_NOTES.selectors.batchNumberField, stockReceipt.lines.find(line => line.sku === lineItem.sku)?.batch ?? "");
+                        await page.type(CREDIT_NOTES.selectors.batchNumberField, matchingStockReceiptLine?.batch ?? "");
                     }
 
                     await page.click(CREDIT_NOTES.selectors.saveIntakeButton);

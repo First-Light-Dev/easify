@@ -16,6 +16,12 @@ export default class ProductOptions {
         return response.data as ProductOption[];
     }
 
+    async getByCodes(codes: string[]): Promise<ProductOption[]> {
+        const _codes = codes.map(code => code.replace(/#/g, "%23"));
+        const response = await this.axios.get(`/ProductOptions?where=${_codes.map(code => `code='${code}'`).join(' OR ')}`);
+        return response.data as ProductOption[];
+    }
+
     async getByIds(ids: string[]): Promise<ProductOption[]> {
         const response = await this.axios.get(`/ProductOptions?where=${ids.map(id => `Id=${id}`).join(' OR ')}`);
         return response.data as ProductOption[];

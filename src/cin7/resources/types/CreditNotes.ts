@@ -41,8 +41,6 @@ export interface CreditNote {
   
   export interface CreditNoteStockReceipt {
     id: string;
-    branchId: string;
-    branchName: string;
     lines: {
       sku: string;
       qty: number;
