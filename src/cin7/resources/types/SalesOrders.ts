@@ -60,7 +60,7 @@ export interface SalesOrder {
 export interface SalesOrderItem {
     code?: string;
     name?: string;
-    productOptionId?: number;
+    barcode?: string;
     lineComments?: string;
     qty: number;
     option1?: string;
