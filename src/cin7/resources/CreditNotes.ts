@@ -56,16 +56,36 @@ export default class CreditNotes {
         return data[0].id.toString();
     }
 
-    async updateBatch(creditNotes: (Partial<CreditNote>)[]): Promise<Array<APIUpsertResponse>> {
+    async updateBatch(creditNotes: (Partial<CreditNote> & { id: number })[]): Promise<Array<APIUpsertResponse>> {
         const response = await this.axios.put(`/CreditNotes`, creditNotes);
         return response.data as Array<APIUpsertResponse>;
     }
 
-    async createStockReceipts(stockReceipts: CreditNoteStockReceipt[]): Promise<Array<{ success: boolean, error: string }>> {
-        let returnValues: Array<{ success: boolean, error: string }> = [];
+    async createStockReceipts(stockReceipts: CreditNoteStockReceipt[]): Promise<Array<{ success: boolean, error: string, creditNoteId: string }>> {
+        let returnValues: Array<{ success: boolean, error: string, creditNoteId: string }> = [];
+
+        let [CNR, nonCNR] = stockReceipts.reduce((acc, receipt) => {
+            if(receipt.lines.some(line => line.returnQty !== line.restockQty)) {
+                acc[0].push(receipt);
+            } else {
+                acc[1].push(receipt);
+            }
+            return acc;
+        }, [[], []] as CreditNoteStockReceipt[][]);
+
+        if(nonCNR.length > 0) {
+            const creditNoteUpdatePayloads : (Partial<CreditNote> & { id: number })[] = [];
+            for(const receipt of nonCNR) {
+                creditNoteUpdatePayloads.push({ id: parseInt(receipt.id), completedDate: new Date().toISOString(), isApproved: true });
+            }
+            await this.updateBatch(creditNoteUpdatePayloads).then(responses => {
+                returnValues.push(...responses.map((r, idx) => ({ success: r.success, error: r.errors.join(', '), creditNoteId: `${nonCNR[idx].id}` })));
+            });
+        }
+
         let page = await this.cin7.getPuppeteerPage();
         console.log("Creating stock receipts");
-        for (const stockReceipt of stockReceipts) {
+        for (const stockReceipt of CNR) {
             try {
                 console.log("Creating stock receipt", stockReceipt.id);
                 try {
@@ -142,7 +162,7 @@ export default class CreditNotes {
                         return false;
                     });
 
-                    await page.type(CREDIT_NOTES.selectors.actualQtyMovedField, `${-1 * Math.abs(matchingStockReceiptLine?.qty ?? 0)}`);
+                    await page.type(CREDIT_NOTES.selectors.actualQtyMovedField, `${-1 * Math.abs(matchingStockReceiptLine?.restockQty ?? 0)}`);
 
                     if (batchNumber !== "FIFO") {
                         await page.type(CREDIT_NOTES.selectors.batchNumberField, matchingStockReceiptLine?.batch ?? "");
@@ -164,21 +184,23 @@ export default class CreditNotes {
                         page.waitForNavigation({ waitUntil: 'domcontentloaded' })
                     ]);
                 }
+                returnValues.push({
+                    success: true,
+                    error: "",
+                    creditNoteId: `${stockReceipt.id}`
+                });
 
             } catch (error) {
                 console.error(`Error creating stock receipt for credit note ${stockReceipt}:`, error);
                 returnValues.push({
                     success: false,
                     error: error instanceof Error ? error.message : `Error: ${error}`,
+                    creditNoteId: `${stockReceipt.id}`
                 });
                 await this.cin7.closeBrowser();
                 page = await this.cin7.getPuppeteerPage();
             }
         }
-        returnValues.push({
-            success: true,
-            error: "",
-        });
         await this.cin7.closeBrowser();
         return returnValues;
     }

@@ -4,6 +4,7 @@ export interface CreditNote {
     salesReference: string;
     createdDate: string;
     modifiedDate: string;
+    completedDate: string;
   
     lineItems: Array<CreditNoteItem>;
   
@@ -45,7 +46,8 @@ export interface CreditNote {
     lines: {
       sku: string;
       barcode: string;
-      qty: number;
+      restockQty: number;
+      returnQty: number;
       batch: string;
     }[];
   }
