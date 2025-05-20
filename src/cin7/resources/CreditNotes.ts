@@ -65,7 +65,7 @@ export default class CreditNotes {
         let returnValues: Array<{ success: boolean, error: string, creditNoteId: string }> = [];
 
         let [CNR, nonCNR] = stockReceipts.reduce((acc, receipt) => {
-            if(receipt.lines.some(line => line.returnQty !== line.restockQty)) {
+            if (receipt.lines.some(line => line.returnQty !== line.restockQty)) {
                 acc[0].push(receipt);
             } else {
                 acc[1].push(receipt);
@@ -73,9 +73,9 @@ export default class CreditNotes {
             return acc;
         }, [[], []] as CreditNoteStockReceipt[][]);
 
-        if(nonCNR.length > 0) {
-            const creditNoteUpdatePayloads : (Partial<CreditNote> & { id: number })[] = [];
-            for(const receipt of nonCNR) {
+        if (nonCNR.length > 0) {
+            const creditNoteUpdatePayloads: (Partial<CreditNote> & { id: number })[] = [];
+            for (const receipt of nonCNR) {
                 creditNoteUpdatePayloads.push({ id: parseInt(receipt.id), completedDate: new Date().toISOString(), isApproved: true });
             }
             await this.updateBatch(creditNoteUpdatePayloads).then(responses => {
@@ -83,125 +83,127 @@ export default class CreditNotes {
             });
         }
 
-        let page = await this.cin7.getPuppeteerPage();
-        console.log("Creating stock receipts");
-        for (const stockReceipt of CNR) {
-            try {
-                console.log("Creating stock receipt", stockReceipt.id);
+        if (CNR.length > 0) {
+            let page = await this.cin7.getPuppeteerPage();
+            console.log("Creating stock receipts");
+            for (const stockReceipt of CNR) {
                 try {
-                    await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 3000 });
-                } catch (error) {
-                    if (error instanceof Error && error.name === 'TimeoutError') {
-                        console.warn('Navigation timeout - continuing with execution');
-                        // Optionally add a small delay to ensure page is in a stable state
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                    } else {
-                        throw error; // Re-throw if it's not a timeout error
+                    console.log("Creating stock receipt", stockReceipt.id);
+                    try {
+                        await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 3000 });
+                    } catch (error) {
+                        if (error instanceof Error && error.name === 'TimeoutError') {
+                            console.warn('Navigation timeout - continuing with execution');
+                            // Optionally add a small delay to ensure page is in a stable state
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                        } else {
+                            throw error; // Re-throw if it's not a timeout error
+                        }
                     }
-                }
-                await page.goto(CREDIT_NOTES.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.creditNotes ?? "", stockReceipt.id), { waitUntil: 'domcontentloaded' });
-                // await page.waitForNavigation({ waitUntil: 'networkidle0' });
-                
-                console.log("Navigated to credit note");
-                const lineItemsTableData : {sku: string, nthChild: number, barcode: string}[] = await page.evaluate((skuFieldsSelector, internalCommentsFieldsSelector) => {
-                    const skuFields = document.querySelectorAll(skuFieldsSelector);
-                    const internalCommentsFields = document.querySelectorAll(internalCommentsFieldsSelector);
-                    return Array.from(skuFields).map((skuField, index) => ({
-                        sku: skuField.innerHTML?.trim() ?? "",
-                        nthChild: index + 2,
-                        barcode: (internalCommentsFields[index]?.innerHTML?.trim() ?? "").includes("Barcode:") ? internalCommentsFields[index]?.innerHTML?.trim().split("Barcode:")[1]?.trim() ?? "" : "",
-                    })).filter(data => data.sku !== "" && !data.sku.includes("<i>Search...</i>"));
-                }, CREDIT_NOTES.selectors.skuFields, CREDIT_NOTES.selectors.internalCommentsFields);
+                    await page.goto(CREDIT_NOTES.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.creditNotes ?? "", stockReceipt.id), { waitUntil: 'domcontentloaded' });
+                    // await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
-                console.log("Line items table data", JSON.stringify(lineItemsTableData));
+                    console.log("Navigated to credit note");
+                    const lineItemsTableData: { sku: string, nthChild: number, barcode: string }[] = await page.evaluate((skuFieldsSelector, internalCommentsFieldsSelector) => {
+                        const skuFields = document.querySelectorAll(skuFieldsSelector);
+                        const internalCommentsFields = document.querySelectorAll(internalCommentsFieldsSelector);
+                        return Array.from(skuFields).map((skuField, index) => ({
+                            sku: skuField.innerHTML?.trim() ?? "",
+                            nthChild: index + 2,
+                            barcode: (internalCommentsFields[index]?.innerHTML?.trim() ?? "").includes("Barcode:") ? internalCommentsFields[index]?.innerHTML?.trim().split("Barcode:")[1]?.trim() ?? "" : "",
+                        })).filter(data => data.sku !== "" && !data.sku.includes("<i>Search...</i>"));
+                    }, CREDIT_NOTES.selectors.skuFields, CREDIT_NOTES.selectors.internalCommentsFields);
 
-                // No need to do branch change
-                // await page.waitForSelector(CREDIT_NOTES.selectors.branchOptionOpenDialogButton, { visible: true });
-                // await page.click(CREDIT_NOTES.selectors.branchOptionOpenDialogButton);
-                // await new Promise(resolve => setTimeout(resolve, 3000));
-        
-                // const branchElements = await page.$$(CREDIT_NOTES.selectors.branchOptions);
-                // for (const element of branchElements) {
-                //     const onclickAttr = await element.evaluate(el => el.getAttribute('onclick'));
-                //     const branchName = stockReceipt.branchName;
-                //     if (onclickAttr?.split("'").includes(branchName)) {
-                //         await element.click();
-                //         break;
-                //     }
-                // }
-                // await new Promise(resolve => setTimeout(resolve, 3000));
+                    console.log("Line items table data", JSON.stringify(lineItemsTableData));
 
-                const currentDate = new Date();
-                const formattedDate = currentDate.toLocaleDateString('en-GB').replace(/\//g, '-'); // Format: DD-MM-YYYY
-                const formattedTime = currentDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); // Format: HH:MM AM/PM
+                    // No need to do branch change
+                    // await page.waitForSelector(CREDIT_NOTES.selectors.branchOptionOpenDialogButton, { visible: true });
+                    // await page.click(CREDIT_NOTES.selectors.branchOptionOpenDialogButton);
+                    // await new Promise(resolve => setTimeout(resolve, 3000));
 
-                await page.type(CREDIT_NOTES.selectors.completedDateField, formattedDate);
-                await page.type(CREDIT_NOTES.selectors.completedTimeField, formattedTime);
+                    // const branchElements = await page.$$(CREDIT_NOTES.selectors.branchOptions);
+                    // for (const element of branchElements) {
+                    //     const onclickAttr = await element.evaluate(el => el.getAttribute('onclick'));
+                    //     const branchName = stockReceipt.branchName;
+                    //     if (onclickAttr?.split("'").includes(branchName)) {
+                    //         await element.click();
+                    //         break;
+                    //     }
+                    // }
+                    // await new Promise(resolve => setTimeout(resolve, 3000));
 
-                for (const lineItem of lineItemsTableData) {
-                    await page.click(CREDIT_NOTES.selectors.getQtyMovedField(lineItem.nthChild));
-                    console.log("Clicked qty moved field", lineItem.nthChild);
-                    await page.waitForSelector(CREDIT_NOTES.selectors.actualQtyMovedField, { timeout: 5000 });
-                    console.log("Waited for actual qty moved field");
-                    await page.evaluate(selector => {
-                        const input = document.querySelector(selector) as HTMLInputElement;
-                        if (input) input.value = '';
-                    }, CREDIT_NOTES.selectors.actualQtyMovedField);                    
+                    const currentDate = new Date();
+                    const formattedDate = currentDate.toLocaleDateString('en-GB').replace(/\//g, '-'); // Format: DD-MM-YYYY
+                    const formattedTime = currentDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); // Format: HH:MM AM/PM
 
-                    // get value from this field CREDIT_NOTES.selectors.batchNumberField
-                    const batchNumber = await page.evaluate(selector => {
-                        const input = document.querySelector(selector) as HTMLInputElement;
-                        if(input.readOnly) return "FIFO";
-                        input.value = "";
-                        return input?.value ?? "";
-                    }, CREDIT_NOTES.selectors.batchNumberField);
+                    await page.type(CREDIT_NOTES.selectors.completedDateField, formattedDate);
+                    await page.type(CREDIT_NOTES.selectors.completedTimeField, formattedTime);
 
-                    const matchingStockReceiptLine = stockReceipt.lines.find(line => {
-                        if(lineItem.barcode && lineItem.barcode.toLowerCase() === line.barcode.toLowerCase()) return true;
-                        if(line.sku.toLowerCase().startsWith(lineItem.sku.toLowerCase())) return true;
-                        return false;
+                    for (const lineItem of lineItemsTableData) {
+                        await page.click(CREDIT_NOTES.selectors.getQtyMovedField(lineItem.nthChild));
+                        console.log("Clicked qty moved field", lineItem.nthChild);
+                        await page.waitForSelector(CREDIT_NOTES.selectors.actualQtyMovedField, { timeout: 5000 });
+                        console.log("Waited for actual qty moved field");
+                        await page.evaluate(selector => {
+                            const input = document.querySelector(selector) as HTMLInputElement;
+                            if (input) input.value = '';
+                        }, CREDIT_NOTES.selectors.actualQtyMovedField);
+
+                        // get value from this field CREDIT_NOTES.selectors.batchNumberField
+                        const batchNumber = await page.evaluate(selector => {
+                            const input = document.querySelector(selector) as HTMLInputElement;
+                            if (input.readOnly) return "FIFO";
+                            input.value = "";
+                            return input?.value ?? "";
+                        }, CREDIT_NOTES.selectors.batchNumberField);
+
+                        const matchingStockReceiptLine = stockReceipt.lines.find(line => {
+                            if (lineItem.barcode && lineItem.barcode.toLowerCase() === line.barcode.toLowerCase()) return true;
+                            if (line.sku.toLowerCase().startsWith(lineItem.sku.toLowerCase())) return true;
+                            return false;
+                        });
+
+                        await page.type(CREDIT_NOTES.selectors.actualQtyMovedField, `${-1 * Math.abs(matchingStockReceiptLine?.restockQty ?? 0)}`);
+
+                        if (batchNumber !== "FIFO") {
+                            await page.type(CREDIT_NOTES.selectors.batchNumberField, matchingStockReceiptLine?.batch ?? "");
+                        }
+
+                        await page.click(CREDIT_NOTES.selectors.saveIntakeButton);
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+
+                    try {
+                        await page.waitForSelector(CREDIT_NOTES.selectors.approveButton, { timeout: 4000 });
+                        await Promise.all([
+                            page.click(CREDIT_NOTES.selectors.approveButton),
+                            page.waitForNavigation({ waitUntil: 'domcontentloaded' })
+                        ]);
+                    } catch (error) {
+                        await Promise.all([
+                            page.click(CREDIT_NOTES.selectors.saveButton),
+                            page.waitForNavigation({ waitUntil: 'domcontentloaded' })
+                        ]);
+                    }
+                    returnValues.push({
+                        success: true,
+                        error: "",
+                        creditNoteId: `${stockReceipt.id}`
                     });
 
-                    await page.type(CREDIT_NOTES.selectors.actualQtyMovedField, `${-1 * Math.abs(matchingStockReceiptLine?.restockQty ?? 0)}`);
-
-                    if (batchNumber !== "FIFO") {
-                        await page.type(CREDIT_NOTES.selectors.batchNumberField, matchingStockReceiptLine?.batch ?? "");
-                    }
-
-                    await page.click(CREDIT_NOTES.selectors.saveIntakeButton);
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-
-                try {
-                    await page.waitForSelector(CREDIT_NOTES.selectors.approveButton, { timeout: 4000 });
-                    await Promise.all([
-                        page.click(CREDIT_NOTES.selectors.approveButton),
-                        page.waitForNavigation({ waitUntil: 'domcontentloaded' })
-                    ]);
                 } catch (error) {
-                    await Promise.all([
-                        page.click(CREDIT_NOTES.selectors.saveButton),
-                        page.waitForNavigation({ waitUntil: 'domcontentloaded' })
-                    ]);
+                    console.error(`Error creating stock receipt for credit note ${stockReceipt}:`, error);
+                    returnValues.push({
+                        success: false,
+                        error: error instanceof Error ? error.message : `Error: ${error}`,
+                        creditNoteId: `${stockReceipt.id}`
+                    });
+                    await this.cin7.closeBrowser();
+                    page = await this.cin7.getPuppeteerPage();
                 }
-                returnValues.push({
-                    success: true,
-                    error: "",
-                    creditNoteId: `${stockReceipt.id}`
-                });
-
-            } catch (error) {
-                console.error(`Error creating stock receipt for credit note ${stockReceipt}:`, error);
-                returnValues.push({
-                    success: false,
-                    error: error instanceof Error ? error.message : `Error: ${error}`,
-                    creditNoteId: `${stockReceipt.id}`
-                });
-                await this.cin7.closeBrowser();
-                page = await this.cin7.getPuppeteerPage();
             }
+            await this.cin7.closeBrowser();
         }
-        await this.cin7.closeBrowser();
         // sort returnValues in the input order
         returnValues = returnValues.sort((a, b) => {
             const indexA = stockReceipts.findIndex(receipt => receipt.id === a.creditNoteId);
@@ -212,7 +214,7 @@ export default class CreditNotes {
     }
 
     async voidCreditNotes(creditNoteIds: string[]): Promise<Array<{ success: boolean, error: string }>> {
-        
+
         let returnValues: Array<{ success: boolean, error: string }> = [];
         let page = await this.cin7.getPuppeteerPage();
         for (const creditNoteId of creditNoteIds) {
@@ -222,7 +224,7 @@ export default class CreditNotes {
                 await page.goto(CREDIT_NOTES.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.creditNotes ?? "", creditNoteId), { waitUntil: 'domcontentloaded' });
 
                 await page.waitForSelector(CREDIT_NOTES.selectors.adminButton, { timeout: 5000 });
-                
+
                 page.on('dialog', async dialog => {
                     console.log(`Dialog message: ${dialog.message()}`);
                     await dialog.accept();
@@ -270,10 +272,10 @@ export default class CreditNotes {
         const splitComments = creditNote.internalComments.split(separator);
         const result: T = {} as T;
         splitComments.forEach(comment => {
-            if(comment.includes('##')) {
+            if (comment.includes('##')) {
                 comment = comment.split('##')[1];
             }
-            if(comment.includes(': ')) {
+            if (comment.includes(': ')) {
                 const [key, value] = comment.split(': ');
                 result[key as keyof T] = value as T[keyof T];
             }
