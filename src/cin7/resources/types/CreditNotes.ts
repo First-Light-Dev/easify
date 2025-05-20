@@ -18,7 +18,9 @@ export interface CreditNote {
     freightDescription: string;
     total: number;
     branchId: number;
-  
+    accountingAttributes: {
+      accountingImportStatus: string;
+    };
     isApproved: boolean;
   
     internalComments: string;
