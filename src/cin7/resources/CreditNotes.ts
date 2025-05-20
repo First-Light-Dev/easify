@@ -202,6 +202,12 @@ export default class CreditNotes {
             }
         }
         await this.cin7.closeBrowser();
+        // sort returnValues in the input order
+        returnValues = returnValues.sort((a, b) => {
+            const indexA = stockReceipts.findIndex(receipt => receipt.id === a.creditNoteId);
+            const indexB = stockReceipts.findIndex(receipt => receipt.id === b.creditNoteId);
+            return indexA - indexB;
+        });
         return returnValues;
     }
 
