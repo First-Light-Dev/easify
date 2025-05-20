@@ -17,6 +17,7 @@ export interface SalesOrder {
     memberEmail: string;
     paymentTerms: string;
     branchId: number;
+    distributionBranchId: number;
     
     // Address
     deliveryFirstName: string;
