@@ -18,6 +18,8 @@ export interface SalesOrder {
     paymentTerms: string;
     branchId: number;
     distributionBranchId: number;
+
+    isVoid: boolean;
     
     // Address
     deliveryFirstName: string;
