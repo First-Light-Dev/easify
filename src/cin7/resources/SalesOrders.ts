@@ -120,12 +120,16 @@ export default class SalesOrders {
     // }
 
     getInternalCommentsData<T extends Record<string, string>>(salesOrder: SalesOrder, separator: string = '#--#'): T {
-        const splitComments = salesOrder.internalComments.split(separator);
         const result: T = {} as T;
+        
+        // Extract content between #FL# tags
+        const matches = salesOrder.internalComments.match(/#FL#(.*?)#FL#/);
+        if (!matches || !matches[1]) return result;
+        
+        // Split the extracted content by separator
+        const splitComments = matches[1].split(separator);
+        
         splitComments.forEach(comment => {
-            if(comment.includes('#FL#')) {
-                comment = comment.replace('#FL#', '');
-            }
             if(comment.includes(': ')) {
                 const [key, value] = comment.split(': ');
                 result[key as keyof T] = value as T[keyof T];

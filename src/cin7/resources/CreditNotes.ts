@@ -268,14 +268,33 @@ export default class CreditNotes {
         return returnValues;
     }
 
+    // getInternalCommentsData<T extends Record<string, string>>(creditNote: CreditNote, separator: string = '#--#'): T {
+    //     const splitComments = creditNote.internalComments.split(separator);
+    //     const result: T = {} as T;
+    //     splitComments.forEach(comment => {
+    //         if (comment.includes('##')) {
+    //             comment = comment.split('##')[1];
+    //         }
+    //         if (comment.includes(': ')) {
+    //             const [key, value] = comment.split(': ');
+    //             result[key as keyof T] = value as T[keyof T];
+    //         }
+    //     });
+    //     return result;
+    // }
+
     getInternalCommentsData<T extends Record<string, string>>(creditNote: CreditNote, separator: string = '#--#'): T {
-        const splitComments = creditNote.internalComments.split(separator);
         const result: T = {} as T;
+        
+        // Extract content between #FL# tags
+        const matches = creditNote.internalComments.match(/##(.*?)##/);
+        if (!matches || !matches[1]) return result;
+        
+        // Split the extracted content by separator
+        const splitComments = matches[1].split(separator);
+        
         splitComments.forEach(comment => {
-            if (comment.includes('##')) {
-                comment = comment.split('##')[1];
-            }
-            if (comment.includes(': ')) {
+            if(comment.includes(': ')) {
                 const [key, value] = comment.split(': ');
                 result[key as keyof T] = value as T[keyof T];
             }
