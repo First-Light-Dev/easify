@@ -23,6 +23,15 @@ export default class Payments {
         }
     }
 
+    async getByOrderIds(orderIds: number[]): Promise<Payment[]> {
+        try {
+            const response = await this.axios.get(`/Payments?where=${orderIds.map(id => `orderId=${id}`).join(' OR ')}`);
+            return response.data;
+        } catch (error) {
+            return [];  
+        }
+    }
+
     async create(payments: Partial<Payment>[]) {
         try {
             const response = await this.axios.post(`/Payments`, payments);
