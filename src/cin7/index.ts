@@ -7,6 +7,13 @@ import { GLOBAL, LOGIN } from "./puppeteer/constants";
 import * as authenticator from "authenticator";
 import Payments from "./resources/Payments";
 import { join } from "path";
+import { APICallCounter } from "./resources/types";
+
+declare module 'axios' {
+    interface AxiosRequestConfig {
+        apiKeyIndex?: string;
+    }
+}
 
 export interface Cin7Config {
     auth: {
@@ -26,6 +33,12 @@ export interface Cin7Config {
             appLinkIds?: {
                 creditNotes: string;
             }
+        }
+        multiAPIKeyHandling?: {
+            enabled: boolean;
+            additionalAPIKeys: string[];
+            keyCounter: APICallCounter;
+            cutoffAPICallCount: number;
         }
     }
 
@@ -57,9 +70,31 @@ export default class Cin7 {
             },
         });
 
+        this.axios.interceptors.request.use(async (config) => {
+            if (!this.config.options?.multiAPIKeyHandling?.enabled) {
+                return config;
+            }
+
+            const cin7ApiKeys = [this.config.auth.api.password, ...(this.config.options?.multiAPIKeyHandling?.additionalAPIKeys ?? [])];
+
+            const apiCallCounts = await this.config.options?.multiAPIKeyHandling?.keyCounter.get();
+            const apiKeyIndex = Object.keys(apiCallCounts).findIndex((count) => apiCallCounts[count] < (this.config.options?.multiAPIKeyHandling?.cutoffAPICallCount ?? 4500));
+            
+            if (apiKeyIndex === -1) {
+                throw new Error("All API keys have reached their rate limit");
+            }
+            
+            config.apiKeyIndex = `${apiKeyIndex}`;
+            config.headers['Authorization'] = `Basic ${Buffer.from(`${this.config.auth.api.username}:${cin7ApiKeys[apiKeyIndex]}`).toString('base64')}`;
+            return config;
+        });
+
         // A basic retry mechanism for 429 errors
         this.axios.interceptors.response.use(
             async response => {
+                if (this.config.options?.multiAPIKeyHandling?.enabled) {
+                    await this.config.options?.multiAPIKeyHandling?.keyCounter.increment(`${response.config.apiKeyIndex}`);
+                }
                 return response;
             },
             async (error: any) => {
