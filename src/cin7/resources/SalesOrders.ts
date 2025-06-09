@@ -119,8 +119,10 @@ export default class SalesOrders {
     //     };
     // }
 
-    getInternalCommentsData<T extends Record<string, string>>(salesOrder: SalesOrder, separator: string = '#--#'): T {
+    getInternalCommentsData<T extends Record<string, string>>(salesOrder: Partial<SalesOrder>, separator: string = '#--#'): T {
         const result: T = {} as T;
+
+        if(!salesOrder.internalComments) return result;
         
         // Extract content between #FL# tags
         const matches = salesOrder.internalComments.match(/#FL#(.*?)#FL#/);
