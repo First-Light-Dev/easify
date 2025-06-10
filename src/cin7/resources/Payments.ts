@@ -50,4 +50,14 @@ export default class Payments {
         const response = await this.axios.post(`/Payments`, payments);
         return response.data as Array<APIUpsertResponse>;
     }
+
+    async update(payment: Partial<Payment>) {
+        const response = await this.axios.put(`/Payments/${payment.id}`, payment);
+        return response.data as APIUpsertResponse;
+    }
+
+    async updateBatch(payments: Partial<Payment>[]) {
+        const response = await this.axios.put(`/Payments`, payments);
+        return response.data as Array<APIUpsertResponse>;
+    }
 }
