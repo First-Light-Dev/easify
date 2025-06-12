@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import SalesOrders from "./resources/SalesOrders";
 import CreditNotes from "./resources/CreditNotes";
 import ProductOptions from "./resources/ProductOptions";
@@ -9,10 +9,9 @@ import Payments from "./resources/Payments";
 import { join } from "path";
 import { APICallCounter } from "./resources/types";
 
-declare module 'axios' {
-    interface AxiosRequestConfig {
-        apiKeyIndex?: string;
-    }
+// Update the interface to extend InternalAxiosRequestConfig
+interface EasifyCin7AxiosRequestConfig extends InternalAxiosRequestConfig {
+    apiKeyIndex?: string;
 }
 
 export interface Cin7Config {
@@ -70,7 +69,7 @@ export default class Cin7 {
             },
         });
 
-        this.axios.interceptors.request.use(async (config) => {
+        this.axios.interceptors.request.use(async (config: EasifyCin7AxiosRequestConfig) => {
             if (!this.config.options?.multiAPIKeyHandling?.enabled) {
                 return config;
             }
@@ -78,7 +77,7 @@ export default class Cin7 {
             const cin7ApiKeys = [this.config.auth.api.password, ...(this.config.options?.multiAPIKeyHandling?.additionalAPIKeys ?? [])];
 
             const apiCallCounts = await this.config.options?.multiAPIKeyHandling?.keyCounter.get();
-            const apiKeyIndex = Object.keys(apiCallCounts).findIndex((count) => apiCallCounts[count] < (this.config.options?.multiAPIKeyHandling?.cutoffAPICallCount ?? 4500));
+            const apiKeyIndex = Object.keys(apiCallCounts).findIndex((count) => apiCallCounts[count] < (this.config.options?.multiAPIKeyHandling?.cutoffAPICallCount ?? 4900));
             
             if (apiKeyIndex === -1) {
                 throw new Error("All API keys have reached their rate limit");
@@ -93,7 +92,7 @@ export default class Cin7 {
         this.axios.interceptors.response.use(
             async response => {
                 if (this.config.options?.multiAPIKeyHandling?.enabled) {
-                    await this.config.options?.multiAPIKeyHandling?.keyCounter.increment(`${response.config.apiKeyIndex}`);
+                    await this.config.options?.multiAPIKeyHandling?.keyCounter.increment(`${(response.config as EasifyCin7AxiosRequestConfig).apiKeyIndex}`);
                 }
                 return response;
             },
