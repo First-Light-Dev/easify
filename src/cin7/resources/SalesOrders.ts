@@ -61,6 +61,18 @@ export default class SalesOrders {
         return response.data as Array<APIUpsertResponse>;
     }
 
+    async query(where: string, page: number = 1, rows: number = 100, order?: {field: string, direction : "ASC" | "DESC"}): Promise<SalesOrder[]> {
+        const response = await this.axios.get(`/SalesOrders`, {
+            params: {
+                where,
+                page,
+                rows,
+                ...(order ? { order: `${order.field} ${order.direction}` } : {})
+            }
+        });
+        return response.data as SalesOrder[];
+    }
+
     async getRecentlyModified(timeWindow: number = 18 * 60 * 1000): Promise<SalesOrder[]> {
         const now = new Date();
     
