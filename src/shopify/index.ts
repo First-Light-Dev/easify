@@ -33,7 +33,7 @@ interface ShopifyGraphQLResponse<T> {
 }
 
 export default class ShopifyGraphQLClient {
-  protected client: AxiosInstance;
+  private client: AxiosInstance;
   private readonly maxRetries: number;
 
   constructor(
