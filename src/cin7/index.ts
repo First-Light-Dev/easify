@@ -70,6 +70,8 @@ export default class Cin7 {
         });
 
         this.axios.interceptors.request.use(async (config: EasifyCin7AxiosRequestConfig) => {
+            console.log("Cin7 Request URL", config.baseURL, config.url);
+
             if (!this.config.options?.multiAPIKeyHandling?.enabled) {
                 return config;
             }
