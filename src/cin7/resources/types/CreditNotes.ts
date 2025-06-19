@@ -9,6 +9,7 @@ export interface CreditNote {
     lineItems: Array<CreditNoteItem>;
   
     memberEmail: string;
+    memberId: number;
   
     // Money Related
     invoiceDate: string;
