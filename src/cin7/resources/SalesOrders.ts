@@ -2,6 +2,7 @@ import { AxiosInstance } from "axios";
 import { APIUpsertResponse } from "./types";
 import Cin7 from "..";
 import { SalesOrder } from "./types/SalesOrders";
+import { SALES_ORDERS } from "../puppeteer/constants";
 export default class SalesOrders {
     constructor(private axios: AxiosInstance, private cin7: Cin7) {}
 
@@ -117,6 +118,61 @@ export default class SalesOrders {
             page++;
         }
         return salesOrders;
+    }
+
+    async void(ids: string[]): Promise<Array<{ success: boolean, error: string }>> {
+
+        let returnValues: Array<{ success: boolean, error: string }> = [];
+        let page = await this.cin7.getPuppeteerPage();
+        for (const salesOrderId of ids) {
+            try {
+                console.log("Voiding credit note", salesOrderId, SALES_ORDERS.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.salesOrders ?? "", salesOrderId));
+                await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
+                await page.goto(SALES_ORDERS.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.salesOrders ?? "", salesOrderId), { waitUntil: 'domcontentloaded' });
+
+                await page.waitForSelector(SALES_ORDERS.selectors.adminButton, { timeout: 5000 });
+
+                page.on('dialog', async dialog => {
+                    console.log(`Dialog message: ${dialog.message()}`);
+                    await dialog.accept();
+                });
+
+                const [response] = await Promise.all([
+                    page.waitForNavigation(),
+                    page.click(SALES_ORDERS.selectors.adminButton)
+                ]);
+
+                if (!response) {
+                    throw new Error("Failed to go to admin page");
+                }
+
+                await page.waitForSelector(SALES_ORDERS.selectors.voidButton, { timeout: 5000 });
+
+                const [voidResponse] = await Promise.all([
+                    page.waitForNavigation(),
+                    page.click(SALES_ORDERS.selectors.voidButton)
+                ]);
+
+                if (!voidResponse) {
+                    throw new Error("Failed to void sales order");
+                }
+
+                returnValues.push({
+                    success: true,
+                    error: "",
+                });
+            } catch (error) {
+                console.error(`Error voiding sales order ${salesOrderId}:`, error);
+                returnValues.push({
+                    success: false,
+                    error: error instanceof Error ? error.message : `Error: ${error}`,
+                });
+                await page.close();
+                page = await this.cin7.getPuppeteerPage();
+            }
+        }
+        await this.cin7.closeBrowser();
+        return returnValues;
     }
 
     // // Utility Functions

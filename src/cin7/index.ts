@@ -31,6 +31,7 @@ export interface Cin7Config {
         puppeteer?: {
             appLinkIds?: {
                 creditNotes: string;
+                salesOrders: string;
             }
         }
         multiAPIKeyHandling?: {

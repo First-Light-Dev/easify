@@ -22,6 +22,7 @@ export const LOGIN = {
 }
 
 export const CREDIT_NOTES = {
+    
     getUrl: (appLinkId: string, id: string) => `https://go.cin7.com/Cloud/TransactionEntry/TransactionEntry.aspx?idCustomerAppsLink=${appLinkId}&OrderId=${id}`,
     selectors: {
         branchOptionOpenDialogButton: "#BranchSelectedLink",
@@ -41,5 +42,13 @@ export const CREDIT_NOTES = {
         adminButton: "#AdminButton",
         voidButton: "#ctl00_ContentPlaceHolder1_DeleteLinkButton",
         saveButton: "#ctl00_ContentPlaceHolder1_SaveButton",
+    }
+}
+
+export const SALES_ORDERS = {
+    getUrl: (appLinkId: string, id: string) => `https://go.cin7.com/Cloud/TransactionEntry/TransactionEntry.aspx?idCustomerAppsLink=${appLinkId}&OrderId=${id}`,
+    selectors: {
+        adminButton: "#AdminButton",
+        voidButton: "#ctl00_ContentPlaceHolder1_DeleteLinkButton",
     }
 }
