@@ -219,16 +219,25 @@ export default class CreditNotes {
         let page = await this.cin7.getPuppeteerPage();
         for (const creditNoteId of creditNoteIds) {
             try {
+                this.cin7.ensureDialogHandler(page);
+
+                try {
+                    await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 3000 });
+                } catch (error) {
+                    if (error instanceof Error && error.name === 'TimeoutError') {
+                        console.warn('Navigation timeout - continuing with execution');
+                        // Optionally add a small delay to ensure page is in a stable state
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    } else {
+                        throw error; // Re-throw if it's not a timeout error
+                    }
+                }
+
                 console.log("Voiding credit note", creditNoteId, CREDIT_NOTES.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.creditNotes ?? "", creditNoteId));
-                await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
+                
                 await page.goto(CREDIT_NOTES.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.creditNotes ?? "", creditNoteId), { waitUntil: 'domcontentloaded' });
 
                 await page.waitForSelector(CREDIT_NOTES.selectors.adminButton, { timeout: 5000 });
-
-                page.on('dialog', async dialog => {
-                    console.log(`Dialog message: ${dialog.message()}`);
-                    await dialog.accept();
-                });
 
                 const [response] = await Promise.all([
                     page.waitForNavigation(),

@@ -140,14 +140,14 @@ export default class Cin7 {
         this.hasDialogHandler = false;
     }
 
-    private ensureDialogHandler(page: Page) {
-        if (!this.hasDialogHandler) {
-            page.on('dialog', async dialog => {
-                console.log(`Dialog message: ${dialog.message()}`);
-                await dialog.accept();
-            });
-            this.hasDialogHandler = true;
-        }
+    private dialogHandler = async (dialog: any) => {
+        console.log(`Dialog message: ${dialog.message()}`);
+        await dialog.accept();
+    };
+
+    ensureDialogHandler(page: Page) {
+        page.removeAllListeners('dialog');
+        page.on('dialog', this.dialogHandler);
     }
 
     async loadPuppeteerConfig(): Promise<Partial<Configuration>> {
