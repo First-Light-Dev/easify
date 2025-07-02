@@ -100,3 +100,5 @@ export class ShopifyGraphQLClient {
     throw new Error('Max retries exceeded');
   }
 }
+
+export default ShopifyGraphQLClient;

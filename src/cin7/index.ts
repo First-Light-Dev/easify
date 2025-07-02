@@ -244,4 +244,6 @@ export class Cin7 {
 
 }
 
+export default Cin7;
+
 export * from "./resources/types";
