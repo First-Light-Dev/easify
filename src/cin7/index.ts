@@ -44,7 +44,7 @@ export interface Cin7Config {
 
 }
 
-export default class Cin7 {
+export class Cin7 {
     public config: Cin7Config;
 
 

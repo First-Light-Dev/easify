@@ -32,7 +32,7 @@ interface ShopifyGraphQLResponse<T> {
   };
 }
 
-export default class ShopifyGraphQLClient {
+export class ShopifyGraphQLClient {
   private client: AxiosInstance;
   private readonly maxRetries: number;
 
