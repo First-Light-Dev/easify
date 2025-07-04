@@ -127,7 +127,7 @@ export default class SalesOrders {
         for (const salesOrderId of ids) {
             try {
                 this.cin7.ensureDialogHandler(page);
-                console.log("Voiding credit note", salesOrderId, SALES_ORDERS.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.salesOrders ?? "", salesOrderId));
+                console.log("Voiding sales order", salesOrderId, SALES_ORDERS.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.salesOrders ?? "", salesOrderId));
                 try {
                     await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 3000 });
                 } catch (error) {
@@ -139,21 +139,20 @@ export default class SalesOrders {
                         throw error; // Re-throw if it's not a timeout error
                     }
                 }
-                await page.goto(SALES_ORDERS.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.salesOrders ?? "", salesOrderId), { waitUntil: 'domcontentloaded' });
 
-                await page.waitForSelector(SALES_ORDERS.selectors.adminButton, { timeout: 5000 });
+                await page.waitForFunction(() => {
+                    return document.readyState === 'complete';
+                    // Keeps polling until readyState is 'complete' or timeout occurs
+                }, { timeout: 10000 });
 
+                await page.goto(SALES_ORDERS.getAdminUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.salesOrderAdmin ?? "", salesOrderId), { waitUntil: 'domcontentloaded' });
 
-                const [response] = await Promise.all([
-                    page.waitForNavigation(),
-                    page.click(SALES_ORDERS.selectors.adminButton)
-                ]);
+                await page.waitForFunction(() => {
+                    return document.readyState === 'complete';
+                    // Keeps polling until readyState is 'complete' or timeout occurs
+                }, { timeout: 10000 });
 
-                if (!response) {
-                    throw new Error("Failed to go to admin page");
-                }
-
-                await page.waitForSelector(SALES_ORDERS.selectors.voidButton, { timeout: 5000 });
+                await page.waitForSelector(SALES_ORDERS.selectors.voidButton, { timeout: 10000 });
 
                 const [voidResponse] = await Promise.all([
                     page.waitForNavigation(),

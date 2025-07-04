@@ -32,6 +32,7 @@ export interface Cin7Config {
             appLinkIds?: {
                 creditNotes: string;
                 salesOrders: string;
+                salesOrderAdmin: string;
             }
         }
         multiAPIKeyHandling?: {

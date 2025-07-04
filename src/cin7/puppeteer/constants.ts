@@ -47,6 +47,7 @@ export const CREDIT_NOTES = {
 
 export const SALES_ORDERS = {
     getUrl: (appLinkId: string, id: string) => `https://go.cin7.com/Cloud/TransactionEntry/TransactionEntry.aspx?idCustomerAppsLink=${appLinkId}&OrderId=${id}`,
+    getAdminUrl: (appLinkId: string, id: string) => `https://go.cin7.com/Cloud/ShoppingCartAdmin/Orders/OrderDetails.aspx?idCustomerAppsLink=${appLinkId}&idOrder=${id}`,
     selectors: {
         adminButton: "#AdminButton",
         voidButton: "#ctl00_ContentPlaceHolder1_DeleteLinkButton",
