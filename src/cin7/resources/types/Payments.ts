@@ -6,5 +6,8 @@ export interface Payment {
     method: string;
     comments: string;
     orderId: string;
+    orderRef: string;
     paymentDate: string;
+    createdDate: string;
+    modifiedDate: string;
 }
