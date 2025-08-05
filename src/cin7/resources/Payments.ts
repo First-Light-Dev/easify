@@ -60,4 +60,16 @@ export default class Payments {
         const response = await this.axios.put(`/Payments`, payments);
         return response.data as Array<APIUpsertResponse>;
     }
+
+    async query(where: string, page: number = 1, rows: number = 100, order?: {field: string, direction : "ASC" | "DESC"}): Promise<Payment[]> {
+        const response = await this.axios.get(`/Payments`, {
+            params: {
+                where,
+                page,
+                rows,
+                ...(order ? { order: `${order.field} ${order.direction}` } : {})
+            }
+        });
+        return response.data as Payment[];
+    }
 }
