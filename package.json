@@ -1,6 +1,6 @@
 {
   "name": "@first-light-dev/easify",
-  "version": "1.1.25",
+  "version": "1.1.26",
   "description": "A TypeScript-based utility library providing commonly used APIs and integrations",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
