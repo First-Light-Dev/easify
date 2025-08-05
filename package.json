@@ -73,7 +73,7 @@
   "dependencies": {
     "@shopify/admin-api-client": "^1.0.8",
     "authenticator": "^1.1.5",
-    "axios": "^1.8.4",
+    "axios": "^1.11.0",
     "bunyan": "^1.8.15",
     "puppeteer": "^24.2.1"
   },
