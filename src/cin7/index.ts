@@ -8,6 +8,7 @@ import * as authenticator from "authenticator";
 import Payments from "./resources/Payments";
 import { join } from "path";
 import { APICallCounter } from "./resources/types";
+import StockLevels from "./resources/StockLevels";
 
 // Update the interface to extend InternalAxiosRequestConfig
 interface EasifyCin7AxiosRequestConfig extends InternalAxiosRequestConfig {
@@ -59,6 +60,7 @@ export class Cin7 {
     public creditNotes: CreditNotes;
     public payments: Payments;
     public productOptions: ProductOptions;
+    public stockLevels: StockLevels;
     
     constructor(config: Cin7Config) {
         this.config = config;
@@ -135,6 +137,7 @@ export class Cin7 {
         this.creditNotes = new CreditNotes(this.axios, this);
         this.payments = new Payments(this.axios, this);
         this.productOptions = new ProductOptions(this.axios, this);
+        this.stockLevels = new StockLevels(this.axios, this);
         this.isLoggedIn = false;
         this.page = null;
         this.browser = null;

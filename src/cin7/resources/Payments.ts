@@ -34,7 +34,7 @@ export default class Payments {
 
     async getByOrderRefs(orderRefs: string[]): Promise<Payment[]> {
         try {
-            const response = await this.axios.get(`/Payments?where=${orderRefs.map(ref => `orderRef=${ref.replace("#", "%23")}`).join(' OR ')}`);
+            const response = await this.axios.get(`/Payments?where=${orderRefs.map(ref => `orderRef='${ref.replace("#", "%23")}'`).join(' OR ')}`);
             return response.data;
         } catch (error) {
             return [];  
