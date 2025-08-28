@@ -58,6 +58,9 @@ export interface SalesOrder {
     deliveryInstructions: string;
 
     logisticsStatus: number;
+    accountingAttributes: {
+        accountingImportStatus: "DoNotImport" | "NotImported" | "Imported" | "Error";
+    }
 }
 
 export interface SalesOrderItem {
