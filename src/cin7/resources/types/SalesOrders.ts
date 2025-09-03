@@ -35,6 +35,19 @@ export interface SalesOrder {
     phone: string;
     customerOrderNo: string;
 
+    firstName: string;
+    lastName: string;
+
+    billingFirstName: string;
+    billingLastName: string;
+    billingCompany: string;
+    billingAddress1: string;
+    billingAddress2: string;
+    billingCity: string;
+    billingState: string;
+    billingPostalCode: string;
+    billingCountry: string;
+
     // Fulfillment Relatef
     trackingCode: string;
     dispatchedDate: string; 
