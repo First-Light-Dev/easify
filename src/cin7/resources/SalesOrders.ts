@@ -140,17 +140,24 @@ export default class SalesOrders {
                     }
                 }
 
+                await page.waitForSelector(SALES_ORDERS.selectors.adminButton, { timeout: 5000 });
+
+                const [response] = await Promise.all([
+                    page.waitForNavigation(),
+                    page.click(SALES_ORDERS.selectors.adminButton)
+                ]);
+
                 await page.waitForFunction(() => {
                     return document.readyState === 'complete';
                     // Keeps polling until readyState is 'complete' or timeout occurs
                 }, { timeout: 10000 });
 
-                await page.goto(SALES_ORDERS.getAdminUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.salesOrderAdmin ?? "", salesOrderId), { waitUntil: 'domcontentloaded' });
+                // await page.goto(SALES_ORDERS.getAdminUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.salesOrderAdmin ?? "", salesOrderId), { waitUntil: 'domcontentloaded' });
 
-                await page.waitForFunction(() => {
-                    return document.readyState === 'complete';
-                    // Keeps polling until readyState is 'complete' or timeout occurs
-                }, { timeout: 10000 });
+                // await page.waitForFunction(() => {
+                //     return document.readyState === 'complete';
+                //     // Keeps polling until readyState is 'complete' or timeout occurs
+                // }, { timeout: 10000 });
 
                 await page.waitForSelector(SALES_ORDERS.selectors.voidButton, { timeout: 10000 });
 
