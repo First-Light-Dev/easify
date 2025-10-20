@@ -128,8 +128,6 @@ export default class SalesOrders {
             try {
                 this.cin7.ensureDialogHandler(page);
                 console.log("Voiding sales order", salesOrderId, SALES_ORDERS.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.salesOrders ?? "", salesOrderId));
-                await page.goto(SALES_ORDERS.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.salesOrders ?? "", salesOrderId), { waitUntil: 'domcontentloaded' });
-
                 try {
                     await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 3000 });
                 } catch (error) {
@@ -141,6 +139,12 @@ export default class SalesOrders {
                         throw error; // Re-throw if it's not a timeout error
                     }
                 }
+                await page.goto(SALES_ORDERS.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.salesOrders ?? "", salesOrderId), { waitUntil: 'domcontentloaded' });
+                
+                await page.waitForFunction(() => {
+                    return document.readyState === 'complete';
+                    // Keeps polling until readyState is 'complete' or timeout occurs
+                }, { timeout: 10000 });
 
                 await page.waitForSelector(SALES_ORDERS.selectors.adminButton, { timeout: 5000 });
 
