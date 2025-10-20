@@ -128,6 +128,8 @@ export default class SalesOrders {
             try {
                 this.cin7.ensureDialogHandler(page);
                 console.log("Voiding sales order", salesOrderId, SALES_ORDERS.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.salesOrders ?? "", salesOrderId));
+                await page.goto(SALES_ORDERS.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.salesOrders ?? "", salesOrderId), { waitUntil: 'domcontentloaded' });
+
                 try {
                     await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 3000 });
                 } catch (error) {
