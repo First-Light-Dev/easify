@@ -194,6 +194,85 @@ export default class SalesOrders {
         return returnValues;
     }
 
+    async unvoid(ids: string[]): Promise<Array<{ success: boolean, error: string }>> {
+
+        let returnValues: Array<{ success: boolean, error: string }> = [];
+        let page = await this.cin7.getPuppeteerPage();
+        for (const salesOrderId of ids) {
+            try {
+                this.cin7.ensureDialogHandler(page);
+                console.log("Voiding sales order", salesOrderId, SALES_ORDERS.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.salesOrders ?? "", salesOrderId));
+                try {
+                    await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 3000 });
+                } catch (error) {
+                    if (error instanceof Error && error.name === 'TimeoutError') {
+                        console.warn('Navigation timeout - continuing with execution');
+                        // Optionally add a small delay to ensure page is in a stable state
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    } else {
+                        throw error; // Re-throw if it's not a timeout error
+                    }
+                }
+                await page.goto(SALES_ORDERS.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.salesOrders ?? "", salesOrderId), { waitUntil: 'domcontentloaded' });
+                
+                await page.waitForFunction(() => {
+                    return document.readyState === 'complete';
+                    // Keeps polling until readyState is 'complete' or timeout occurs
+                }, { timeout: 10000 });
+
+                await page.waitForSelector(SALES_ORDERS.selectors.adminButton, { timeout: 5000 });
+
+                const [response] = await Promise.all([
+                    page.waitForNavigation(),
+                    page.click(SALES_ORDERS.selectors.adminButton)
+                ]);
+
+                await page.waitForFunction(() => {
+                    return document.readyState === 'complete';
+                    // Keeps polling until readyState is 'complete' or timeout occurs
+                }, { timeout: 10000 });
+
+                // await page.goto(SALES_ORDERS.getAdminUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.salesOrderAdmin ?? "", salesOrderId), { waitUntil: 'domcontentloaded' });
+
+                // await page.waitForFunction(() => {
+                //     return document.readyState === 'complete';
+                //     // Keeps polling until readyState is 'complete' or timeout occurs
+                // }, { timeout: 10000 });
+
+                // in this select dropdown, #ctl00_ContentPlaceHolder1_FormView1_AcceptanceDropDownList
+                // select the option with value = "1"
+
+                await page.waitForSelector(SALES_ORDERS.selectors.adminCin7SaveButton, { timeout: 10000 });
+
+                await page.select(SALES_ORDERS.selectors.adminCin7StatusDropdown, '1');
+
+                const [saveResponse] = await Promise.all([
+                    page.waitForNavigation(),
+                    page.click(SALES_ORDERS.selectors.adminCin7SaveButton)
+                ]);
+
+                if (!saveResponse) {
+                    throw new Error("Failed to save sales order");
+                }
+
+                returnValues.push({
+                    success: true,
+                    error: "",
+                });
+            } catch (error) {
+                console.error(`Error voiding sales order ${salesOrderId}:`, error);
+                returnValues.push({
+                    success: false,
+                    error: error instanceof Error ? error.message : `Error: ${error}`,
+                });
+                await page.close();
+                page = await this.cin7.getPuppeteerPage();
+            }
+        }
+        await this.cin7.closeBrowser();
+        return returnValues;
+    }
+
     // // Utility Functions
     // getDataFromSalesOrderComments(salesOrder: SalesOrder): { returnId: string, fulfilmentOrderId: string } {
     //     const splitComments = salesOrder.internalComments.split('#--#');
