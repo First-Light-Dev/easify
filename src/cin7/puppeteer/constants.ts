@@ -51,7 +51,7 @@ export const SALES_ORDERS = {
     selectors: {
         adminButton: "#AdminButton",
         voidButton: "#ctl00_ContentPlaceHolder1_DeleteLinkButton",
-        adminCin7StatusDropdown: "#ctl00_ContentPlaceHolder1_FormView1_SaveButton",
+        adminCin7StatusDropdown: "#ctl00_ContentPlaceHolder1_FormView1_AcceptanceDropDownList",
         adminCin7SaveButton: "#ctl00_ContentPlaceHolder1_FormView1_SaveButton"
     }
 }
