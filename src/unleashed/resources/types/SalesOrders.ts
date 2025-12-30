@@ -174,7 +174,7 @@ export const SalesOrderSchema = z.object({
 export const SalesOrderUpdateSchema = z.object({
     Comments: z.string().max(2048),
     CustomOrderStatus: z.string().max(15),
-    CustomerRef: z.string().max(500),
+    // CustomerRef: z.string().max(500),
     DeliveryCity: z.string().max(500),
     DeliveryCountry: z.string().max(500),
     DeliveryInstruction: z.string().max(500),
@@ -188,12 +188,12 @@ export const SalesOrderUpdateSchema = z.object({
     DiscountRate: z.number(),
     ExchangeRate: z.number(),
     OrderStatus: z.string().max(20),
-    RequiredDate: z.iso.datetime(),
+    // RequiredDate: z.iso.datetime(),
     SalesOrderGroup: z.string().max(50),
     Salesperson: z.object({
         Guid: z.string()
     }),
-    SourceId: z.string().max(500),
+    // SourceId: z.string().max(500),
     Tax: z.object({
         Guid: z.string()
     }),
