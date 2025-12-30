@@ -18,7 +18,8 @@
     "utilities",
     "logging",
     "cin7",
-    "shopify"
+    "shopify",
+    "unleashed"
   ],
   "exports": {
     "./shopify": {
@@ -32,6 +33,10 @@
     "./logging": {
       "types": "./dist/logging/index.d.ts",
       "default": "./dist/logging/index.js"
+    },
+    "./unleashed": {
+      "types": "./dist/unleashed/index.d.ts",
+      "default": "./dist/unleashed/index.js"
     },
     ".": {
       "types": "./dist/index.d.ts",
@@ -75,7 +80,8 @@
     "authenticator": "^1.1.5",
     "axios": "^1.11.0",
     "bunyan": "^1.8.15",
-    "puppeteer": "^24.2.1"
+    "puppeteer": "^24.2.1",
+    "zod": "^4.2.1"
   },
   "publishConfig": {
     "@First-Light-Dev:registry": "https://npm.pkg.github.com"
