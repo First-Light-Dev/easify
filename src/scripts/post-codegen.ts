@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-const filePath = 'src/services/shopify/generated/admin.generated.d.ts';
+const filePath = 'src/shopify/generated/admin.generated.d.ts';
 let content = fs.readFileSync(filePath, 'utf8');
 
 content = content.replace('interface AdminQueries', 'interface PkgAdminQueries')

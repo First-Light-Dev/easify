@@ -8,7 +8,7 @@ export default {
     // To produce variable / return types for Admin API operations
     default: shopifyApiProject({
       apiType: ApiType.Admin,
-      apiVersion: '2025-01',
+      apiVersion: '2025-10',
       documents: ['./src/**/*.{js,ts,jsx,tsx}'],
       outputDir: './src/shopify/generated'
     }),
