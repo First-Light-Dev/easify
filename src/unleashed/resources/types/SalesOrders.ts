@@ -137,10 +137,10 @@ export const SalesOrderSchema = z.object({
     DeliveryContact: DeliveryContactSchema,
     DeliveryCountry: z.string().max(500),
     DeliveryInstruction: z.string().max(500).nullable(),
-    DeliveryMethod: z.string().max(50),
+    DeliveryMethod: z.string().max(50).nullable(), 
     DeliveryName: z.string().max(500),
-    DeliveryPostCode: z.string().max(50),
-    DeliveryRegion: z.string().max(500),
+    DeliveryPostCode: z.string().max(50).nullable(),
+    DeliveryRegion: z.string().max(500).nullable(),
     DeliveryStreetAddress: z.string().max(500),
     DeliveryStreetAddress2: z.string().max(500).nullable(),
     DeliverySuburb: z.string().max(500).nullable(),
@@ -168,7 +168,7 @@ export const SalesOrderSchema = z.object({
     TotalVolume: z.number().nullable(),
     TotalWeight: z.number().nullable(),
     Warehouse: WarehouseSchema,
-    XeroTaxCode: z.string().max(50)
+    XeroTaxCode: z.string().max(50).nullable()
 });
 
 export const SalesOrderUpdateSchema = z.object({
