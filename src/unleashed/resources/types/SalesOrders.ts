@@ -16,8 +16,8 @@ function parseDotNetDate(dotNetDate: string | null): string | null {
 export const CurrencySchema = z.object({
     CurrencyCode: z.string().max(3),
     Description: z.string().max(200),
-    DefaultBuyRate: z.number(),
-    DefaultSellRate: z.number(),
+    DefaultBuyRate: z.number().nullable(),
+    DefaultSellRate: z.number().nullable(),
     Guid: z.string(),
     LastModifiedOn: z.string().transform(parseDotNetDate)
 });
@@ -38,7 +38,7 @@ export const DeliveryContactSchema = z.object({
     MobilePhone: z.string().max(500),
     OfficePhone: z.string().max(500),
     PhoneNumber: z.string().max(500)
-});
+}).nullable();
 
 export const SalespersonSchema = z.object({
     Email: z.string().max(500),
@@ -46,7 +46,7 @@ export const SalespersonSchema = z.object({
     Guid: z.string(),
     Obsolete: z.boolean(),
     LastModifiedOn: z.string().transform(parseDotNetDate)
-});
+}).nullable().optional();
 
 export const TaxSchema = z.object({
     CanApplyToExpenses: z.boolean(),
@@ -61,16 +61,16 @@ export const TaxSchema = z.object({
 
 export const WarehouseSchema = z.object({
     AddressLine1: z.string().max(500),
-    AddressLine2: z.string().max(500),
-    City: z.string().max(500),
+    AddressLine2: z.string().max(500).nullable(),
+    City: z.string().max(500).nullable(),
     ContactName: z.string().max(50),
     Country: z.string().max(500),
-    DDINumber: z.string().max(25),
-    FaxNumber: z.string().max(25),
+    DDINumber: z.string().max(25).nullable(),
+    FaxNumber: z.string().max(25).nullable(),
     Guid: z.string(),
     IsDefault: z.boolean(),
     LastModifiedOn: z.string().transform(parseDotNetDate),
-    MobileNumber: z.string().max(25),
+    MobileNumber: z.string().max(25).nullable(),
     Obsolete: z.boolean(),
     PostCode: z.string().max(500),
     PhoneNumber: z.string().max(25),
@@ -85,11 +85,11 @@ export const AssemblySchema = z.object({
     Guid: z.string(),
     AssemblyNumber: z.string().max(15),
     AssemblyStatus: z.string().max(15)
-});
+}).nullable();
 
 export const ProductSchema = z.object({
     Guid: z.string(),
-    ProductCode: z.string().max(100),
+    ProductCode: z.string().max(100).nullable(),
     ProductDescription: z.string().max(500)
 });
 
@@ -98,25 +98,25 @@ export const SalesOrderLineSchema = z.object({
     BCLineTax: z.number(),
     BCLineTotal: z.number(),
     BCUnitPrice: z.number(),
-    Comments: z.string().max(1024),
-    CostOfGoodsAccount: z.string().max(50),
+    Comments: z.string().max(1024).nullable(),
+    CostOfGoodsAccount: z.string().max(50).nullable(),
     DiscountRate: z.number(),
     DueDate: z.string().transform(parseDotNetDate),
     Guid: z.string(),
     LastModifiedOn: z.string().nullable().transform(parseDotNetDate),
     LineNumber: z.number(),
-    LineType: z.string(),
+    LineType: z.string().nullable(),
     LineTax: z.number(),
-    LineTaxCode: z.string().max(50),
+    LineTaxCode: z.string().max(50).nullable(),
     LineTotal: z.number(),
     OrderQuantity: z.number(),
     Product: ProductSchema,
     TaxRate: z.number().nullable(),
-    UnitCost: z.number().nullable(),
+    UnitCost: z.number().nullable().optional(),
     UnitPrice: z.number(),
     Volume: z.number().nullable(),
     Weight: z.number().nullable(),
-    XeroSalesAccount: z.string().max(500),
+    XeroSalesAccount: z.string().max(500).nullable(),
     XeroTaxCode: z.string().max(50)
 });
 
@@ -125,25 +125,25 @@ export const SalesOrderSchema = z.object({
     BCSubTotal: z.number().nullable(),
     BCTaxTotal: z.number().nullable(),
     BCTotal: z.number().nullable(),
-    Comments: z.string().max(2048),
+    Comments: z.string().max(2048).nullable(),
     CompletedDate: z.string().nullable().transform(parseDotNetDate),
     CreatedBy: z.string().max(50),
     CreatedOn: z.string().transform(parseDotNetDate),
     Currency: CurrencySchema,
     Customer: CustomerSchema,
-    CustomerRef: z.string().max(500),
-    CustomOrderStatus: z.string().max(15),
-    DeliveryCity: z.string().max(500),
+    CustomerRef: z.string().max(500).nullable(),
+    CustomOrderStatus: z.string().max(15).nullable(),
+    DeliveryCity: z.string().max(500).nullable(),
     DeliveryContact: DeliveryContactSchema,
     DeliveryCountry: z.string().max(500),
-    DeliveryInstruction: z.string().max(500),
+    DeliveryInstruction: z.string().max(500).nullable(),
     DeliveryMethod: z.string().max(50),
     DeliveryName: z.string().max(500),
     DeliveryPostCode: z.string().max(50),
     DeliveryRegion: z.string().max(500),
     DeliveryStreetAddress: z.string().max(500),
-    DeliveryStreetAddress2: z.string().max(500),
-    DeliverySuburb: z.string().max(500),
+    DeliveryStreetAddress2: z.string().max(500).nullable(),
+    DeliverySuburb: z.string().max(500).nullable(),
     DiscountRate: z.number(),
     ExchangeRate: z.number().nullable(),
     Guid: z.string(),
@@ -156,10 +156,10 @@ export const SalesOrderSchema = z.object({
     ReceivedDate: z.string().nullable().transform(parseDotNetDate),
     RequiredDate: z.string().nullable().transform(parseDotNetDate),
     SalesOrderGroup: z.string().max(50),
-    SalesAccount: z.string().max(50),
+    SalesAccount: z.string().max(50).nullable(),
     SalesOrderLines: z.array(SalesOrderLineSchema),
     Salesperson: SalespersonSchema,
-    SourceId: z.string().max(500),
+    SourceId: z.string().max(500).nullable(),
     SubTotal: z.number(),
     Tax: TaxSchema,
     TaxRate: z.number().nullable(),

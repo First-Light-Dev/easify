@@ -38,7 +38,7 @@ export class Unleashed {
             // the query string should be "page=1&pageSize=100"
             const url = axios.getUri(config);
             const queryString = url.split('?')[1] || '';
-            const signature = crypto.createHmac('sha256', this.config.auth.api.key).update(queryString).digest('hex');
+            const signature = crypto.createHmac('sha256', this.config.auth.api.key).update(queryString).digest('base64');
             config.headers['api-auth-signature'] = signature;
 
             return config;
@@ -46,6 +46,9 @@ export class Unleashed {
 
         // A basic retry mechanism for 429 errors
         this.axios.interceptors.response.use(
+            async response => {
+                return response;
+            },
             async (error: any) => {
                 const { config, response } = error;
 
