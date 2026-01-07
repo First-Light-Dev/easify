@@ -117,7 +117,7 @@ export const SalesOrderLineSchema = z.object({
     Volume: z.number().nullable(),
     Weight: z.number().nullable(),
     XeroSalesAccount: z.string().max(500).nullable(),
-    XeroTaxCode: z.string().max(50)
+    XeroTaxCode: z.string().max(50).nullable()
 });
 
 // Main SalesOrder Schema
