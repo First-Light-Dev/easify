@@ -43,6 +43,7 @@ export default class SalesOrders {
 
     async createBatch(salesOrders: Partial<SalesOrder>[]): Promise<Array<APIUpsertResponse>> {
         const response = await this.axios.post(`/SalesOrders`, salesOrders);
+        console.log("Sales Orders Create Batch Response", JSON.stringify(response.data));
         return response.data as Array<APIUpsertResponse>;
     }
 
