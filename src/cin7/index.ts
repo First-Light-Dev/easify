@@ -74,7 +74,12 @@ export class Cin7 {
         });
 
         this.axios.interceptors.request.use(async (config: EasifyCin7AxiosRequestConfig) => {
-            console.log("Cin7 Request URL", config.baseURL, config.url, config.method);
+            console.log("Cin7 Request", {
+                url: `${config.baseURL}${config.url}`,
+                method: config.method?.toUpperCase(),
+                payload: config.data || null,
+                params: config.params || null
+            });
 
             if (!this.config.options?.multiAPIKeyHandling?.enabled) {
                 return config;
@@ -100,13 +105,22 @@ export class Cin7 {
                 if (this.config.options?.multiAPIKeyHandling?.enabled) {
                     await this.config.options?.multiAPIKeyHandling?.keyCounter.increment(`${(response.config as EasifyCin7AxiosRequestConfig).apiKeyIndex}`);
                 }
-                console.log("Cin7 Response", JSON.stringify(response.data));
+                console.log("Cin7 Response", {
+                    status: response.status,
+                    url: response.config.url,
+                    data: response.data
+                });
                 return response;
             },
             async (error: any) => {
                 const { config, response } = error;
 
-                console.log("Cin7 Error", JSON.stringify(error));
+                console.log("Cin7 Error", {
+                    url: config?.url,
+                    method: config?.method,
+                    status: response?.status,
+                    error: response?.data || error.message
+                });
 
                 if (response?.status !== 429) {
                     return Promise.reject(error);
