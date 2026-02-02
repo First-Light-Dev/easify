@@ -8,5 +8,5 @@ dayjs.extend(timezone);
 
 export const formatDateToTimezone = (isoDate: string, timezone: string, format: "date" | "time" = "date") => {
     const date = dayjs(isoDate);
-    return date.tz(timezone).format(format === "date" ? "DD-MM-YYYY" : "HH:mm A");
+    return date.tz(timezone).format(format === "date" ? "DD-MM-YYYY" : "hh:mm A");
 }
