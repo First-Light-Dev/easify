@@ -57,9 +57,12 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node 20
-        run: nvm use 20
-      - run: yarn install --frozen-lockfile
+      - name: Use Node 20 and install dependencies
+        run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm use 20
+          yarn install --frozen-lockfile
 
   publish-gpr:
     needs: build
@@ -70,14 +73,14 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node 20
-        run: nvm use 20
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          registry-url: https://npm.pkg.github.com/
-          scope: "@first-light-dev"
-      - run: yarn install --frozen-lockfile
-      - run: yarn publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}} 
+      - name: Setup npm registry
+        run: |
+          echo "@first-light-dev:registry=https://npm.pkg.github.com/" > .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
+      - name: Use Node 20, install and publish
+        run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm use 20
+          yarn install --frozen-lockfile
+          yarn publish 
