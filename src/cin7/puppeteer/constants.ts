@@ -38,6 +38,8 @@ export const CREDIT_NOTES = {
         saveIntakeButton: "#SerialNumber_SaveButton",
         completedDateField: "#ctl00_ContentPlaceHolder1_datOrders_87",
         completedTimeField: "#ctl00_ContentPlaceHolder1_datOrders_87_Time",
+        creditNoteDateField: "#ctl00_ContentPlaceHolder1_datOrders_124",
+        creditNoteTimeField: "#ctl00_ContentPlaceHolder1_datOrders_124_Time",
         approveButton: "#ctl00_ContentPlaceHolder1_ApproveButton",
         adminButton: "#AdminButton",
         voidButton: "#ctl00_ContentPlaceHolder1_DeleteLinkButton",

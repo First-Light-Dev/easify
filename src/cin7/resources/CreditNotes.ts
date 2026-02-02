@@ -76,7 +76,9 @@ export default class CreditNotes {
         if (nonCNR.length > 0) {
             const creditNoteUpdatePayloads: (Partial<CreditNote> & { id: number })[] = [];
             for (const receipt of nonCNR) {
-                creditNoteUpdatePayloads.push({ id: parseInt(receipt.id), completedDate: new Date().toISOString(), isApproved: true });
+                const completedDate = receipt.closedAt ? new Date(receipt.closedAt).toISOString() : new Date().toISOString();
+                const createdDate = receipt.approvedAt ? new Date(receipt.approvedAt).toISOString() : undefined;
+                creditNoteUpdatePayloads.push({ id: parseInt(receipt.id), ...(createdDate ? { createdDate : createdDate } : {}), completedDate: completedDate, creditNoteDate: completedDate, isApproved: true });
             }
             await this.updateBatch(creditNoteUpdatePayloads).then(responses => {
                 returnValues.push(...responses.map((r, idx) => ({ success: r.success, error: r.errors.join(', '), creditNoteId: `${nonCNR[idx].id}` })));
@@ -132,12 +134,14 @@ export default class CreditNotes {
                     // }
                     // await new Promise(resolve => setTimeout(resolve, 3000));
 
-                    const currentDate = new Date();
-                    const formattedDate = currentDate.toLocaleDateString('en-GB').replace(/\//g, '-'); // Format: DD-MM-YYYY
-                    const formattedTime = currentDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); // Format: HH:MM AM/PM
+                    const completedDate = stockReceipt.closedAt ? new Date(stockReceipt.closedAt) : new Date();
+                    const formattedDate = completedDate.toLocaleDateString('en-GB').replace(/\//g, '-'); // Format: DD-MM-YYYY
+                    const formattedTime = completedDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); // Format: HH:MM AM/PM
 
                     await page.type(CREDIT_NOTES.selectors.completedDateField, formattedDate);
                     await page.type(CREDIT_NOTES.selectors.completedTimeField, formattedTime);
+                    await page.type(CREDIT_NOTES.selectors.creditNoteDateField, formattedDate);
+                    await page.type(CREDIT_NOTES.selectors.creditNoteTimeField, formattedTime);
 
                     for (const lineItem of lineItemsTableData) {
                         await page.click(CREDIT_NOTES.selectors.getQtyMovedField(lineItem.nthChild));

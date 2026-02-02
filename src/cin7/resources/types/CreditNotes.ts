@@ -5,6 +5,7 @@ export interface CreditNote {
     createdDate: string;
     modifiedDate: string;
     completedDate: string;
+    creditNoteDate: string;
   
     lineItems: Array<CreditNoteItem>;
   
@@ -53,4 +54,6 @@ export interface CreditNote {
       returnQty: number;
       batch: string;
     }[];
+    approvedAt?: string;
+    closedAt?: string;
   }
