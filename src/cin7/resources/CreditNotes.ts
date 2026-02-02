@@ -353,12 +353,19 @@ export default class CreditNotes {
             const createdDate = formatDateToTimezone(creditNote.createdDate, creditNote.timezone, "date");
             const createdTime = formatDateToTimezone(creditNote.createdDate, creditNote.timezone, "time");
 
-            await page.type(CREDIT_NOTES.selectors.completedDateField, completedDate);
-            await page.type(CREDIT_NOTES.selectors.completedTimeField, completedTime);
-            await page.type(CREDIT_NOTES.selectors.creditNoteDateField, completedDate);
-            await page.type(CREDIT_NOTES.selectors.creditNoteTimeField, completedTime);
-            await page.type(CREDIT_NOTES.selectors.createdDateField, createdDate);
-            await page.type(CREDIT_NOTES.selectors.createdTimeField, createdTime);
+            // Helper function to clear and type into a field
+            const clearAndType = async (selector: string, value: string) => {
+                await page.click(selector, { clickCount: 3 }); // Triple-click to select all
+                await page.keyboard.press('Backspace'); // Clear selected content
+                await page.type(selector, value);
+            };
+
+            await clearAndType(CREDIT_NOTES.selectors.completedDateField, completedDate);
+            await clearAndType(CREDIT_NOTES.selectors.completedTimeField, completedTime);
+            await clearAndType(CREDIT_NOTES.selectors.creditNoteDateField, completedDate);
+            await clearAndType(CREDIT_NOTES.selectors.creditNoteTimeField, completedTime);
+            await clearAndType(CREDIT_NOTES.selectors.createdDateField, createdDate);
+            await clearAndType(CREDIT_NOTES.selectors.createdTimeField, createdTime);
 
             try {
                 await Promise.all([
