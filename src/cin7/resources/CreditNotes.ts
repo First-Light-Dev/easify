@@ -367,11 +367,28 @@ export default class CreditNotes {
             await clearAndType(CREDIT_NOTES.selectors.creditNoteDateField, completedDate);
             await clearAndType(CREDIT_NOTES.selectors.creditNoteTimeField, completedTime);
             
+            // Wait a bit for form to update after typing
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
             try {
+                // Wait for the button to be visible and enabled
+                await page.waitForSelector(CREDIT_NOTES.selectors.saveToAdminButton, { visible: true, timeout: 5000 });
+                
+                // Scroll button into view
+                await page.evaluate((selector) => {
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, CREDIT_NOTES.selectors.saveToAdminButton);
+                
+                // Wait a bit after scrolling
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Click and wait for navigation
                 await Promise.all([
-                    page.click(CREDIT_NOTES.selectors.saveToAdminButton),
-                    page.waitForNavigation({ waitUntil: 'domcontentloaded' })
+                    page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 }),
+                    page.click(CREDIT_NOTES.selectors.saveToAdminButton)
                 ]);
                 returnValues.push({
                     id: creditNote.id,
