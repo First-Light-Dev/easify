@@ -46,6 +46,7 @@ export const CREDIT_NOTES = {
         adminButton: "#AdminButton",
         voidButton: "#ctl00_ContentPlaceHolder1_DeleteLinkButton",
         saveButton: "#ctl00_ContentPlaceHolder1_SaveButton",
+        saveToAdminButton: "#ctl00_ContentPlaceHolder1_ApproveButton",
     }
 }
 

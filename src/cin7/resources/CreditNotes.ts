@@ -360,18 +360,19 @@ export default class CreditNotes {
                 await page.type(selector, value);
             };
 
-            await clearAndType(CREDIT_NOTES.selectors.completedDateField, completedDate);
-            await clearAndType(CREDIT_NOTES.selectors.completedTimeField, completedTime);
-            await new Promise(resolve => setTimeout(resolve, 3000));
-            await clearAndType(CREDIT_NOTES.selectors.creditNoteDateField, completedDate);
-            await clearAndType(CREDIT_NOTES.selectors.creditNoteTimeField, completedTime);
-            await new Promise(resolve => setTimeout(resolve, 3000));
             await clearAndType(CREDIT_NOTES.selectors.createdDateField, createdDate);
             await clearAndType(CREDIT_NOTES.selectors.createdTimeField, createdTime);
+            await clearAndType(CREDIT_NOTES.selectors.completedDateField, completedDate);
+            await clearAndType(CREDIT_NOTES.selectors.completedTimeField, completedTime);
+            await clearAndType(CREDIT_NOTES.selectors.creditNoteDateField, completedDate);
+            await clearAndType(CREDIT_NOTES.selectors.creditNoteTimeField, completedTime);
+            
 
-            await new Promise(resolve => setTimeout(resolve, 13000));
             try {
-                await page.click(CREDIT_NOTES.selectors.saveButton);
+                await Promise.all([
+                    page.click(CREDIT_NOTES.selectors.saveToAdminButton),
+                    page.waitForNavigation({ waitUntil: 'domcontentloaded' })
+                ]);
                 returnValues.push({
                     id: creditNote.id,
                     success: true,
@@ -387,6 +388,7 @@ export default class CreditNotes {
             }
             
         }
+        await new Promise(resolve => setTimeout(resolve, 15000));
         await this.cin7.closeBrowser();
         return returnValues;
     }
