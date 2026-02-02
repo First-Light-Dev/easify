@@ -362,16 +362,16 @@ export default class CreditNotes {
 
             await clearAndType(CREDIT_NOTES.selectors.completedDateField, completedDate);
             await clearAndType(CREDIT_NOTES.selectors.completedTimeField, completedTime);
+            await new Promise(resolve => setTimeout(resolve, 3000));
             await clearAndType(CREDIT_NOTES.selectors.creditNoteDateField, completedDate);
             await clearAndType(CREDIT_NOTES.selectors.creditNoteTimeField, completedTime);
+            await new Promise(resolve => setTimeout(resolve, 3000));
             await clearAndType(CREDIT_NOTES.selectors.createdDateField, createdDate);
             await clearAndType(CREDIT_NOTES.selectors.createdTimeField, createdTime);
 
+            await new Promise(resolve => setTimeout(resolve, 13000));
             try {
-                await Promise.all([
-                    page.click(CREDIT_NOTES.selectors.saveButton),
-                    page.waitForNavigation({ waitUntil: 'domcontentloaded' })
-                ]);
+                await page.click(CREDIT_NOTES.selectors.saveButton);
                 returnValues.push({
                     id: creditNote.id,
                     success: true,
