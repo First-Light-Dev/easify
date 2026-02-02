@@ -56,4 +56,5 @@ export interface CreditNote {
     }[];
     approvedAt?: string;
     closedAt?: string;
+    timezone: string;
   }

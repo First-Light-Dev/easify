@@ -81,6 +81,7 @@
     "authenticator": "^1.1.5",
     "axios": "^1.13.2",
     "bunyan": "^1.8.15",
+    "dayjs": "^1.11.19",
     "puppeteer": "^24.34.0",
     "zod": "^4.2.1"
   },

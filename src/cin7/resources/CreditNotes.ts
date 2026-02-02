@@ -3,6 +3,7 @@ import Cin7 from "..";
 import { CREDIT_NOTES } from "../puppeteer/constants";
 import { CreditNote, CreditNoteStockReceipt } from "./types/CreditNotes";
 import { APIUpsertResponse } from "./types";
+import { formatDateToTimezone } from "../../utils/timezone";
 
 export default class CreditNotes {
     constructor(private axios: AxiosInstance, private cin7: Cin7) { }
@@ -134,14 +135,14 @@ export default class CreditNotes {
                     // }
                     // await new Promise(resolve => setTimeout(resolve, 3000));
 
-                    const completedDate = stockReceipt.closedAt ? new Date(stockReceipt.closedAt) : new Date();
-                    const formattedDate = completedDate.toLocaleDateString('en-GB').replace(/\//g, '-'); // Format: DD-MM-YYYY
-                    const formattedTime = completedDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); // Format: HH:MM AM/PM
+                    const completedDateIsoString = stockReceipt.closedAt ? stockReceipt.closedAt : new Date().toISOString();
+                    const completedDate = formatDateToTimezone(completedDateIsoString, stockReceipt.timezone, "date");
+                    const completedTime = formatDateToTimezone(completedDateIsoString, stockReceipt.timezone, "time");
 
-                    await page.type(CREDIT_NOTES.selectors.completedDateField, formattedDate);
-                    await page.type(CREDIT_NOTES.selectors.completedTimeField, formattedTime);
-                    await page.type(CREDIT_NOTES.selectors.creditNoteDateField, formattedDate);
-                    await page.type(CREDIT_NOTES.selectors.creditNoteTimeField, formattedTime);
+                    await page.type(CREDIT_NOTES.selectors.completedDateField, completedDate);
+                    await page.type(CREDIT_NOTES.selectors.completedTimeField, completedTime);
+                    await page.type(CREDIT_NOTES.selectors.creditNoteDateField, completedDate);
+                    await page.type(CREDIT_NOTES.selectors.creditNoteTimeField, completedTime);
 
                     for (const lineItem of lineItemsTableData) {
                         await page.click(CREDIT_NOTES.selectors.getQtyMovedField(lineItem.nthChild));
@@ -317,6 +318,70 @@ export default class CreditNotes {
 
     getInternalCommentStr<T extends Record<string, string>>(data: T, separator: string = '#--#'): string {
         return `##${Object.entries(data).map(([key, value]) => `${key}: ${value}`).join(separator)}##`;
+    }
+
+    async updateDatesToCreditNote(creditNotes: { id: string, createdDate: string, completedDate: string, creditNoteDate: string, timezone: string}[]): Promise<Array<{ id: string, success: boolean, error: string }>> {
+        const page = await this.cin7.getPuppeteerPage();
+
+        const returnValues: Array<{ id: string, success: boolean, error: string }> = [];
+
+        for (const creditNote of creditNotes) {
+            console.log("Updating dates to credit note", creditNote.id);
+            try {
+                await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 3000 });
+            } catch (error) {
+                if (error instanceof Error && error.name === 'TimeoutError') {
+                    console.warn('Navigation timeout - continuing with execution');
+                    // Optionally add a small delay to ensure page is in a stable state
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                } else {
+                    throw error; // Re-throw if it's not a timeout error
+                }
+            }
+            await page.goto(CREDIT_NOTES.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.creditNotes ?? "", creditNote.id), { waitUntil: 'domcontentloaded' });
+
+            await page.waitForFunction(() => {
+                return document.readyState === 'complete';
+                // Keeps polling until readyState is 'complete' or timeout occurs
+            }, { timeout: 10000 });
+
+            await page.waitForSelector(CREDIT_NOTES.selectors.completedDateField, { timeout: 5000 });
+            
+            const completedDate = formatDateToTimezone(creditNote.completedDate, creditNote.timezone, "date");
+            const completedTime = formatDateToTimezone(creditNote.completedDate, creditNote.timezone, "time");
+
+            const createdDate = formatDateToTimezone(creditNote.createdDate, creditNote.timezone, "date");
+            const createdTime = formatDateToTimezone(creditNote.createdDate, creditNote.timezone, "time");
+
+            await page.type(CREDIT_NOTES.selectors.completedDateField, completedDate);
+            await page.type(CREDIT_NOTES.selectors.completedTimeField, completedTime);
+            await page.type(CREDIT_NOTES.selectors.creditNoteDateField, completedDate);
+            await page.type(CREDIT_NOTES.selectors.creditNoteTimeField, completedTime);
+            await page.type(CREDIT_NOTES.selectors.createdDateField, createdDate);
+            await page.type(CREDIT_NOTES.selectors.createdTimeField, createdTime);
+
+            try {
+                await Promise.all([
+                    page.click(CREDIT_NOTES.selectors.saveButton),
+                    page.waitForNavigation({ waitUntil: 'domcontentloaded' })
+                ]);
+                returnValues.push({
+                    id: creditNote.id,
+                    success: true,
+                    error: "",
+                });
+            } catch (error) {
+                console.error(`Error updating dates to credit note ${creditNote.id}:`, error);
+                returnValues.push({
+                    id: creditNote.id,
+                    success: false,
+                    error: error instanceof Error ? error.message : `Error: ${error}`,
+                });
+            }
+            
+        }
+        await this.cin7.closeBrowser();
+        return returnValues;
     }
 
 }

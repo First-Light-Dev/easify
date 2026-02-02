@@ -36,6 +36,8 @@ export const CREDIT_NOTES = {
         actualQtyMovedField: "#SerialNumbers_intQtyItem",
         batchNumberField: "#SerialNumbers_strSerialAvailable",
         saveIntakeButton: "#SerialNumber_SaveButton",
+        createdDateField: "#ctl00_ContentPlaceHolder1_datCreatedDate",
+        createdTimeField: "#ctl00_ContentPlaceHolder1_datCreatedDate_Time",
         completedDateField: "#ctl00_ContentPlaceHolder1_datOrders_87",
         completedTimeField: "#ctl00_ContentPlaceHolder1_datOrders_87_Time",
         creditNoteDateField: "#ctl00_ContentPlaceHolder1_datOrders_124",
