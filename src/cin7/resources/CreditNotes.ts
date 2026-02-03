@@ -366,11 +366,39 @@ export default class CreditNotes {
             await clearAndType(CREDIT_NOTES.selectors.completedTimeField, completedTime);
             await clearAndType(CREDIT_NOTES.selectors.creditNoteDateField, completedDate);
             await clearAndType(CREDIT_NOTES.selectors.creditNoteTimeField, completedTime);
+
+            // Check if both firstNameField and companyNameField are empty
+            const firstNameValue = await page.evaluate((selector) => {
+                const el = document.querySelector(selector) as HTMLInputElement;
+                const value = el ? el.value.trim() : '';
+                // Treat "Search..." placeholder as empty
+                return value === 'Search...' ? '' : value;
+            }, CREDIT_NOTES.selectors.firstNameField);
+            
+            const companyNameValue = await page.evaluate((selector) => {
+                const el = document.querySelector(selector) as HTMLInputElement;
+                const value = el ? el.value.trim() : '';
+                // Treat "Search..." placeholder as empty
+                return value === 'Search...' ? '' : value;
+            }, CREDIT_NOTES.selectors.companyNameField);
+            
+            if (!firstNameValue && !companyNameValue) {
+                // Ask team tomorrow on how to handle these
+                // await clearAndType(CREDIT_NOTES.selectors.firstNameField, "N/A");
+            }
             
             // Wait a bit for form to update after typing
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             try {
+                if(!firstNameValue && !companyNameValue) {
+                    returnValues.push({
+                        id: creditNote.id,
+                        success: false,
+                        error: "Both firstName and companyName are empty",
+                    });
+                    continue;
+                }
                 // Wait for the button to be visible and enabled
                 await page.waitForSelector(CREDIT_NOTES.selectors.saveToAdminButton, { visible: true, timeout: 5000 });
                 

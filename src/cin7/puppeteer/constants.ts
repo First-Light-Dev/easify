@@ -47,6 +47,8 @@ export const CREDIT_NOTES = {
         voidButton: "#ctl00_ContentPlaceHolder1_DeleteLinkButton",
         saveButton: "#ctl00_ContentPlaceHolder1_SaveButton",
         saveToAdminButton: "#ctl00_ContentPlaceHolder1_ApproveButton",
+        firstNameField: "#ctl00_ContentPlaceHolder1_strOrders_37",
+        companyNameField: "#ctl00_ContentPlaceHolder1_strOrders_75",
     }
 }
 
