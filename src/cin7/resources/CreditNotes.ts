@@ -325,19 +325,20 @@ export default class CreditNotes {
 
         const returnValues: Array<{ id: string, success: boolean, error: string }> = [];
 
+        try {
+            await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 3000 });
+        } catch (error) {
+            if (error instanceof Error && error.name === 'TimeoutError') {
+                console.warn('Navigation timeout - continuing with execution');
+                // Optionally add a small delay to ensure page is in a stable state
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            } else {
+                throw error; // Re-throw if it's not a timeout error
+            }
+        }
+
         for (const creditNote of creditNotes) {
             console.log("Updating dates to credit note", creditNote.id);
-            try {
-                await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 3000 });
-            } catch (error) {
-                if (error instanceof Error && error.name === 'TimeoutError') {
-                    console.warn('Navigation timeout - continuing with execution');
-                    // Optionally add a small delay to ensure page is in a stable state
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                } else {
-                    throw error; // Re-throw if it's not a timeout error
-                }
-            }
             await page.goto(CREDIT_NOTES.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.creditNotes ?? "", creditNote.id), { waitUntil: 'domcontentloaded' });
 
             await page.waitForFunction(() => {
@@ -388,7 +389,7 @@ export default class CreditNotes {
             }
             
             // Wait a bit for form to update after typing
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 500));
 
             try {
                 if(!firstNameValue && !companyNameValue) {
@@ -415,7 +416,7 @@ export default class CreditNotes {
                 
                 // Click and wait for navigation
                 await Promise.all([
-                    page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 }),
+                    page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 6000 }),
                     page.click(CREDIT_NOTES.selectors.saveToAdminButton)
                 ]);
                 returnValues.push({
@@ -431,7 +432,7 @@ export default class CreditNotes {
                     error: error instanceof Error ? error.message : `Error: ${error}`,
                 });
             }
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 300));
         }
         await this.cin7.closeBrowser();
         return returnValues;
