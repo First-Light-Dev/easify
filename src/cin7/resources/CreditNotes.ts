@@ -403,9 +403,8 @@ export default class CreditNotes {
                     error: error instanceof Error ? error.message : `Error: ${error}`,
                 });
             }
-            
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
-        await new Promise(resolve => setTimeout(resolve, 15000));
         await this.cin7.closeBrowser();
         return returnValues;
     }
