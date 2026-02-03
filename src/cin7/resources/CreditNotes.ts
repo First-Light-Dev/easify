@@ -369,14 +369,14 @@ export default class CreditNotes {
             await clearAndType(CREDIT_NOTES.selectors.creditNoteTimeField, completedTime);
 
             // Check if both firstNameField and companyNameField are empty
-            const firstNameValue = await page.evaluate((selector) => {
+            let firstNameValue = await page.evaluate((selector) => {
                 const el = document.querySelector(selector) as HTMLInputElement;
                 const value = el ? el.value.trim() : '';
                 // Treat "Search..." placeholder as empty
                 return value === 'Search...' ? '' : value;
             }, CREDIT_NOTES.selectors.firstNameField);
             
-            const companyNameValue = await page.evaluate((selector) => {
+            let companyNameValue = await page.evaluate((selector) => {
                 const el = document.querySelector(selector) as HTMLInputElement;
                 const value = el ? el.value.trim() : '';
                 // Treat "Search..." placeholder as empty
@@ -385,7 +385,8 @@ export default class CreditNotes {
             
             if (!firstNameValue && !companyNameValue) {
                 // Ask team tomorrow on how to handle these
-                // await clearAndType(CREDIT_NOTES.selectors.firstNameField, "N/A");
+                await clearAndType(CREDIT_NOTES.selectors.companyNameField, "Retail Customer");
+                companyNameValue = "Retail Customer";
             }
             
             // Wait a bit for form to update after typing
