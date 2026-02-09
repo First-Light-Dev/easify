@@ -384,9 +384,23 @@ export default class CreditNotes {
             }, CREDIT_NOTES.selectors.companyNameField);
             
             if (!firstNameValue && !companyNameValue) {
-                // Ask team tomorrow on how to handle these
-                await clearAndType(CREDIT_NOTES.selectors.companyNameField, "Retail Customer");
-                companyNameValue = "Retail Customer";
+                // Get value from email field
+                const emailValue = await page.evaluate((selector) => {
+                    const el = document.querySelector(selector) as HTMLInputElement;
+                    return el ? el.value.trim() : '';
+                }, CREDIT_NOTES.selectors.emailField);
+                
+                if(!emailValue) {
+                    returnValues.push({
+                        id: creditNote.id,
+                        success: false,
+                        error: "Email is empty when both firstName and companyName are empty",
+                    });
+                    continue;
+                }
+
+                await clearAndType(CREDIT_NOTES.selectors.firstNameField, emailValue);
+                firstNameValue = emailValue;
             }
             
             // Wait a bit for form to update after typing

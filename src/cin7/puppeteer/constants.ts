@@ -49,6 +49,7 @@ export const CREDIT_NOTES = {
         saveToAdminButton: "#ctl00_ContentPlaceHolder1_ApproveButton",
         firstNameField: "#ctl00_ContentPlaceHolder1_strOrders_37",
         companyNameField: "#ctl00_ContentPlaceHolder1_strOrders_75",
+        emailField: "#ctl00_ContentPlaceHolder1_strOrders_23"
     }
 }
 
