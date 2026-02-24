@@ -139,10 +139,17 @@ export default class CreditNotes {
                     const completedDate = formatDateToTimezone(completedDateIsoString, stockReceipt.timezone, "date");
                     const completedTime = formatDateToTimezone(completedDateIsoString, stockReceipt.timezone, "time");
 
-                    await page.type(CREDIT_NOTES.selectors.completedDateField, completedDate);
-                    await page.type(CREDIT_NOTES.selectors.completedTimeField, completedTime);
-                    await page.type(CREDIT_NOTES.selectors.creditNoteDateField, completedDate);
-                    await page.type(CREDIT_NOTES.selectors.creditNoteTimeField, completedTime);
+                    // Helper function to clear and type into a field
+                    const clearAndType = async (selector: string, value: string) => {
+                        await page.click(selector, { clickCount: 3 }); // Triple-click to select all
+                        await page.keyboard.press('Backspace'); // Clear selected content
+                        await page.type(selector, value);
+                    };
+
+                    await clearAndType(CREDIT_NOTES.selectors.completedDateField, completedDate);
+                    await clearAndType(CREDIT_NOTES.selectors.completedTimeField, completedTime);
+                    await clearAndType(CREDIT_NOTES.selectors.creditNoteDateField, completedDate);
+                    await clearAndType(CREDIT_NOTES.selectors.creditNoteTimeField, completedTime);
 
                     for (const lineItem of lineItemsTableData) {
                         await page.click(CREDIT_NOTES.selectors.getQtyMovedField(lineItem.nthChild));
