@@ -31,13 +31,17 @@ export class Unleashed {
         });
 
         this.axios.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
-            
-            // sign the request using the query parameters and the api key
-            // we need the exact query parameters as a string
-            // Example for request to /api/v1/sales-orders?page=1&pageSize=100
-            // the query string should be "page=1&pageSize=100"
-            const url = axios.getUri(config);
-            const queryString = url.split('?')[1] || '';
+
+            // Sign the request: Unleashed expects the decoded query string (e.g. orderNumber=DTC#13633),
+            // not the URL-encoded form (orderNumber=DTC%2313633), because the server verifies against decoded params.
+            const params = config.params as Record<string, unknown> | undefined;
+            let queryString = '';
+            if (params && typeof params === 'object') {
+                const pairs = Object.entries(params)
+                    .filter(([, value]) => value !== undefined && value !== null)
+                    .map(([key, value]) => `${key}=${value}`);
+                queryString = pairs.join('&');
+            }
             const signature = crypto.createHmac('sha256', this.config.auth.api.key).update(queryString).digest('base64');
             config.headers['api-auth-signature'] = signature;
 
