@@ -20,6 +20,7 @@ export interface CreditNote {
     freightDescription: string;
     total: number;
     branchId: number;
+    distributionBranchId: number;
     accountingAttributes: {
       accountingImportStatus: string;
     };

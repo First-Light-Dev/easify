@@ -178,7 +178,7 @@ export default class CreditNotes {
                         await page.type(CREDIT_NOTES.selectors.actualQtyMovedField, `${-1 * Math.abs(matchingStockReceiptLine?.restockQty ?? 0)}`);
 
                         if (batchNumber !== "FIFO") {
-                            await page.type(CREDIT_NOTES.selectors.batchNumberField, matchingStockReceiptLine?.batch ?? "");
+                            await clearAndType(CREDIT_NOTES.selectors.batchNumberField, matchingStockReceiptLine?.batch ?? "");
                         }
 
                         await page.click(CREDIT_NOTES.selectors.saveIntakeButton);
@@ -192,6 +192,7 @@ export default class CreditNotes {
                             page.waitForNavigation({ waitUntil: 'domcontentloaded' })
                         ]);
                     } catch (error) {
+                        console.error(`Error approving stock receipt for credit note ${stockReceipt.id}:`, error);
                         await Promise.all([
                             page.click(CREDIT_NOTES.selectors.saveButton),
                             page.waitForNavigation({ waitUntil: 'domcontentloaded' })
