@@ -461,4 +461,50 @@ export default class CreditNotes {
         return returnValues;
     }
 
+    async setDistributionBranch(creditNoteId: string, distributionBranchId: number): Promise<{ success: boolean, error: string }> {
+        const page = await this.cin7.getPuppeteerPage();
+
+        try {
+            try {
+                await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 3000 });
+            } catch (error) {
+                if (error instanceof Error && error.name === 'TimeoutError') {
+                    console.warn('Navigation timeout - continuing with execution');
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                } else {
+                    throw error;
+                }
+            }
+
+            console.log("Setting distribution branch for credit note", creditNoteId, "to branch", distributionBranchId);
+            await page.goto(CREDIT_NOTES.getUrl(this.cin7.config.options?.puppeteer?.appLinkIds?.creditNotes ?? "", creditNoteId), { waitUntil: 'domcontentloaded' });
+
+            await page.waitForFunction(() => document.readyState === 'complete', { timeout: 10000 });
+
+            await page.evaluate((branchId) => {
+                const panel = document.getElementById('DistributionBranchSelect');
+                if (!panel) throw new Error('DistributionBranchSelect panel not found on page');
+                const html = panel.innerHTML;
+                const match = html.match(new RegExp(`DistributionBranchSelect\\('${branchId}'[^)]*\\)`));
+                if (!match) throw new Error(`Branch ID ${branchId} not found on page`);
+                eval(match[0]);
+            }, String(distributionBranchId));
+
+            await Promise.all([
+                page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 10000 }),
+                page.click(CREDIT_NOTES.selectors.saveButton),
+            ]);
+
+            console.log(`Distribution branch ${distributionBranchId} set and saved for credit note ${creditNoteId}`);
+            return { success: true, error: "" };
+        } catch (error) {
+            console.error(`Error setting distribution branch for credit note ${creditNoteId}:`, error);
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : `Error: ${error}`,
+            };
+        } finally {
+            await this.cin7.closeBrowser();
+        }
+    }
 }
