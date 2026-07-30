@@ -9,7 +9,8 @@
     "watch": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts\"",
     "prepare": "yarn build",
-    "codegen": "graphql-codegen && ts-node src/scripts/post-codegen.ts"
+    "codegen": "graphql-codegen && ts-node src/scripts/post-codegen.ts",
+    "codegen:cin7-omni": "ts-node --compiler-options '{\"module\":\"commonjs\",\"moduleResolution\":\"node\"}' src/scripts/cin7-omni-codegen.ts"
   },
   "files": [
     "dist/**/*"
@@ -19,6 +20,7 @@
     "utilities",
     "logging",
     "cin7",
+    "cin7-omni",
     "shopify",
     "unleashed"
   ],
@@ -30,6 +32,10 @@
     "./cin7": {
       "types": "./dist/cin7/index.d.ts",
       "default": "./dist/cin7/index.js"
+    },
+    "./cin7-omni": {
+      "types": "./dist/cin7-omni/index.d.ts",
+      "default": "./dist/cin7-omni/index.js"
     },
     "./logging": {
       "types": "./dist/logging/index.d.ts",
@@ -49,6 +55,12 @@
       "cin7": [
         "./dist/cin7/index.d.ts"
       ],
+      "cin7-omni": [
+        "./dist/cin7-omni/index.d.ts"
+      ],
+      "unleashed": [
+        "./dist/unleashed/index.d.ts"
+      ],
       "shopify": [
         "./dist/shopify/index.d.ts"
       ],
@@ -64,6 +76,7 @@
     "@types/authenticator": "^1.1.4",
     "@types/bunyan": "^1.8.8",
     "@types/node": "^22.14.1",
+    "@types/prettier": "^2",
     "prettier": "^2.8.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
