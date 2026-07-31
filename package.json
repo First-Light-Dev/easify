@@ -10,7 +10,8 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "prepare": "yarn build",
     "codegen": "graphql-codegen && ts-node src/scripts/post-codegen.ts",
-    "codegen:cin7-omni": "ts-node --compiler-options '{\"module\":\"commonjs\",\"moduleResolution\":\"node\"}' src/scripts/cin7-omni-codegen.ts"
+    "codegen:cin7-omni": "ts-node --compiler-options '{\"module\":\"commonjs\",\"moduleResolution\":\"node\"}' src/scripts/cin7-omni-codegen.ts",
+    "codegen:cin7-core": "ts-node --compiler-options '{\"module\":\"commonjs\",\"moduleResolution\":\"node\"}' src/scripts/cin7-core-codegen.ts"
   },
   "files": [
     "dist/**/*"
@@ -21,6 +22,7 @@
     "logging",
     "cin7",
     "cin7-omni",
+    "cin7-core",
     "shopify",
     "unleashed"
   ],
@@ -36,6 +38,10 @@
     "./cin7-omni": {
       "types": "./dist/cin7-omni/index.d.ts",
       "default": "./dist/cin7-omni/index.js"
+    },
+    "./cin7-core": {
+      "types": "./dist/cin7-core/index.d.ts",
+      "default": "./dist/cin7-core/index.js"
     },
     "./logging": {
       "types": "./dist/logging/index.d.ts",
@@ -57,6 +63,9 @@
       ],
       "cin7-omni": [
         "./dist/cin7-omni/index.d.ts"
+      ],
+      "cin7-core": [
+        "./dist/cin7-core/index.d.ts"
       ],
       "unleashed": [
         "./dist/unleashed/index.d.ts"
