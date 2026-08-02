@@ -17,6 +17,7 @@
  */
 
 import * as fs from 'fs';
+import * as graphql from 'graphql';
 import * as path from 'path';
 import * as prettier from 'prettier';
 
@@ -47,6 +48,8 @@ interface TypeDef {
   fields: FieldDef[];
   enumValues: { name: string; description?: string }[];
   possibleTypes: string[];
+  /** Interfaces the type declares, as listed in the docs' `Implements` section. */
+  interfaces: string[];
 }
 
 interface OperationDef {
@@ -274,7 +277,8 @@ function parseTypePage(html: string): TypeDef | undefined {
     description: description(content),
     fields: [],
     enumValues: [],
-    possibleTypes: []
+    possibleTypes: [],
+    interfaces: []
   };
 
   const fields = sectionAfter(content, 'Fields');
@@ -302,6 +306,15 @@ function parseTypePage(html: string): TypeDef | undefined {
   if (possible && def.kind === 'union') {
     for (const match of possible.matchAll(/<a href="\.\.\/types\/[^"]+">([A-Za-z0-9_]+)<\/a>/g)) {
       def.possibleTypes.push(match[1]);
+    }
+  }
+
+  const implemented = sectionAfter(content, 'Implements');
+  if (implemented) {
+    for (const match of implemented.matchAll(
+      /<a href="\.\.\/types\/[^"]+">([A-Za-z0-9_]+)<\/a>/g
+    )) {
+      def.interfaces.push(match[1]);
     }
   }
 
@@ -475,6 +488,190 @@ const HEADER = [
   '// Run `yarn codegen:shiphero` to regenerate. Do not edit by hand.',
   ''
 ].join('\n');
+
+// ---------------------------------------------------------------------------
+// SDL rendering
+// ---------------------------------------------------------------------------
+
+const BUILTIN_SCALARS = new Set(['String', 'ID', 'Int', 'Float', 'Boolean']);
+
+/** Descriptions are collapsed to a single line upstream, so a quoted string is enough. */
+function sdlDescription(value: string | undefined, pad = ''): string {
+  return value ? `${pad}${JSON.stringify(value)}\n` : '';
+}
+
+function sdlDeprecated(reason: string | undefined): string {
+  return reason ? ` @deprecated(reason: ${JSON.stringify(reason)})` : '';
+}
+
+/**
+ * The docs split nullability across two columns for arguments: the type column
+ * usually carries the `!`, but the required column is authoritative when it does not.
+ */
+function sdlTypeRef(field: FieldDef): string {
+  const type = field.type || 'String';
+  return field.required && !type.endsWith('!') ? `${type}!` : type;
+}
+
+/** Emits a default only when the documented text is a parseable GraphQL literal. */
+function sdlDefault(field: FieldDef, gql: typeof import('graphql')): string {
+  if (!field.default) return '';
+  try {
+    gql.parseValue(field.default);
+    return ` = ${field.default}`;
+  } catch {
+    return '';
+  }
+}
+
+function sdlArgs(args: FieldDef[] | undefined, gql: typeof import('graphql')): string {
+  if (!args?.length) return '';
+  const rendered = args.map((arg) => `${arg.name}: ${sdlTypeRef(arg)}${sdlDefault(arg, gql)}`);
+  return `(${rendered.join(', ')})`;
+}
+
+/**
+ * Renders the whole schema as SDL. ShipHero exposes no introspection endpoint, so
+ * this file is what lets a consuming project run graphql-codegen against the API.
+ */
+function renderSDL(
+  types: Map<string, TypeDef>,
+  operations: OperationDef[],
+  gql: typeof import('graphql')
+): { sdl: string; warnings: string[] } {
+  const warnings: string[] = [];
+  const referenced = new Set<string>();
+  const note = (type: string) => {
+    const bare = type.replace(/[[\]!]/g, '');
+    if (bare) referenced.add(bare);
+  };
+
+  for (const def of types.values()) {
+    for (const name of def.interfaces) referenced.add(name);
+    for (const name of def.possibleTypes) referenced.add(name);
+    for (const field of def.fields) {
+      note(field.type);
+      for (const arg of field.args ?? []) note(arg.type);
+    }
+  }
+  for (const op of operations) {
+    for (const arg of op.args) note(arg.type);
+    if (op.returnType) note(op.returnType);
+  }
+
+  const blocks: string[] = [];
+  const byKind = (kind: TypeKind) =>
+    [...types.values()]
+      .filter((def) => def.kind === kind)
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+  // Any type the docs reference but never define has to be declared as a custom
+  // scalar, otherwise the schema will not build.
+  const undeclared = [...referenced]
+    .filter((name) => !types.has(name) && !BUILTIN_SCALARS.has(name))
+    .sort();
+  if (undeclared.length)
+    warnings.push(`Undocumented types emitted as scalars: ${undeclared.join(', ')}`);
+
+  for (const name of [...byKind('scalar').map((def) => def.name), ...undeclared].sort()) {
+    if (BUILTIN_SCALARS.has(name)) continue;
+    blocks.push(`${sdlDescription(types.get(name)?.description)}scalar ${name}`);
+  }
+
+  for (const def of byKind('enum')) {
+    const values = def.enumValues.length
+      ? def.enumValues.map((v) => `${sdlDescription(v.description, '  ')}  ${v.name}`)
+      : ['  UNKNOWN'];
+    if (!def.enumValues.length) warnings.push(`Enum ${def.name} has no documented values`);
+    blocks.push(`${sdlDescription(def.description)}enum ${def.name} {\n${values.join('\n')}\n}`);
+  }
+
+  const renderFields = (def: TypeDef, input: boolean) =>
+    def.fields.map((field) => {
+      // @deprecated on input fields is only valid for optional ones, so it is
+      // simply left off inputs rather than risking an invalid schema.
+      const suffix = input ? '' : sdlDeprecated(field.deprecated);
+      const args = input ? '' : sdlArgs(field.args, gql);
+      return `${sdlDescription(field.description, '  ')}  ${field.name}${args}: ${sdlTypeRef(
+        field
+      )}${suffix}`;
+    });
+
+  for (const kind of ['interface', 'object'] as const) {
+    for (const def of byKind(kind)) {
+      if (!def.fields.length) {
+        // GraphQL forbids an empty object, so a fieldless type degrades to a scalar.
+        warnings.push(`${def.name} has no documented fields; emitted as a scalar`);
+        blocks.push(`${sdlDescription(def.description)}scalar ${def.name}`);
+        continue;
+      }
+      const keyword = kind === 'interface' ? 'interface' : 'type';
+      const implts = def.interfaces.length ? ` implements ${def.interfaces.join(' & ')}` : '';
+      blocks.push(
+        `${sdlDescription(def.description)}${keyword} ${def.name}${implts} {\n${renderFields(
+          def,
+          false
+        ).join('\n')}\n}`
+      );
+    }
+  }
+
+  for (const def of byKind('union')) {
+    if (!def.possibleTypes.length) {
+      warnings.push(`Union ${def.name} has no members; emitted as a scalar`);
+      blocks.push(`${sdlDescription(def.description)}scalar ${def.name}`);
+      continue;
+    }
+    blocks.push(
+      `${sdlDescription(def.description)}union ${def.name} = ${def.possibleTypes.join(' | ')}`
+    );
+  }
+
+  for (const def of byKind('input')) {
+    if (!def.fields.length) {
+      warnings.push(`Input ${def.name} has no documented fields; emitted as a scalar`);
+      blocks.push(`${sdlDescription(def.description)}scalar ${def.name}`);
+      continue;
+    }
+    blocks.push(
+      `${sdlDescription(def.description)}input ${def.name} {\n${renderFields(def, true).join(
+        '\n'
+      )}\n}`
+    );
+  }
+
+  const renderRoot = (name: 'Query' | 'Mutation', kind: 'query' | 'mutation') => {
+    const ops = operations
+      .filter((op) => op.kind === kind)
+      .sort((a, b) => a.name.localeCompare(b.name));
+    const fields = ops.map((op) => {
+      if (!op.returnType)
+        warnings.push(`${op.kind} ${op.name} has no return type; defaulted to Boolean`);
+      return `${sdlDescription(op.description, '  ')}  ${op.name}${sdlArgs(op.args, gql)}: ${
+        op.returnType ?? 'Boolean'
+      }`;
+    });
+    blocks.push(`type ${name} {\n${fields.join('\n')}\n}`);
+  };
+
+  renderRoot('Query', 'query');
+  renderRoot('Mutation', 'mutation');
+
+  const sdl = [
+    '# Generated by src/scripts/shiphero-codegen.ts from the ShipHero GraphQL schema',
+    '# reference (https://developer.shiphero.com/schema/).',
+    '# Run `yarn codegen:shiphero` to regenerate. Do not edit by hand.',
+    '',
+    'schema {',
+    '  query: Query',
+    '  mutation: Mutation',
+    '}',
+    '',
+    ...blocks.map((block) => `${block}\n`)
+  ].join('\n');
+
+  return { sdl, warnings };
+}
 
 // ---------------------------------------------------------------------------
 // Entry point
@@ -729,6 +926,23 @@ async function main() {
     )
   );
   console.log('  wrote metadata.ts');
+
+  // schema.graphql — the SDL consumers point graphql-codegen at. ShipHero exposes
+  // no introspection endpoint, so this file is the only machine-readable schema.
+  const { sdl, warnings } = renderSDL(types, operations, graphql);
+  fs.writeFileSync(path.join(OUT_DIR, 'schema.graphql'), sdl);
+  try {
+    const schema = graphql.buildSchema(sdl, { assumeValidSDL: false });
+    const errors = graphql.validateSchema(schema);
+    if (errors.length) {
+      throw new Error(errors.map((error) => error.message).join('\n  '));
+    }
+    console.log(`  wrote schema.graphql (${(sdl.length / 1024).toFixed(0)} KB, validates)`);
+  } catch (error) {
+    console.error('  schema.graphql FAILED to build:', (error as Error).message);
+    process.exitCode = 1;
+  }
+  for (const warning of warnings) console.warn(`    ${warning}`);
 
   fs.writeFileSync(
     path.join(OUT_DIR, 'index.ts'),

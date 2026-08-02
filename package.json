@@ -5,15 +5,14 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node src/scripts/copy-assets.js",
     "watch": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts\"",
     "prepare": "yarn build",
     "codegen": "graphql-codegen && ts-node src/scripts/post-codegen.ts",
     "codegen:cin7-omni": "ts-node --compiler-options '{\"module\":\"commonjs\",\"moduleResolution\":\"node\"}' src/scripts/cin7-omni-codegen.ts",
     "codegen:cin7-core": "ts-node --compiler-options '{\"module\":\"commonjs\",\"moduleResolution\":\"node\"}' src/scripts/cin7-core-codegen.ts",
-    "codegen:shiphero": "ts-node --compiler-options '{\"module\":\"commonjs\",\"moduleResolution\":\"node\"}' src/scripts/shiphero-codegen.ts",
-    "check:shiphero": "ts-node --compiler-options '{\"module\":\"commonjs\",\"moduleResolution\":\"node\"}' src/scripts/shiphero-check-selections.ts"
+    "codegen:shiphero": "ts-node --compiler-options '{\"module\":\"commonjs\",\"moduleResolution\":\"node\"}' src/scripts/shiphero-codegen.ts"
   },
   "files": [
     "dist/**/*"
@@ -50,6 +49,7 @@
       "types": "./dist/shiphero/index.d.ts",
       "default": "./dist/shiphero/index.js"
     },
+    "./shiphero/schema.graphql": "./dist/shiphero/generated/schema.graphql",
     "./logging": {
       "types": "./dist/logging/index.d.ts",
       "default": "./dist/logging/index.js"
@@ -96,14 +96,19 @@
     "@types/bunyan": "^1.8.8",
     "@types/node": "^22.14.1",
     "@types/prettier": "^2",
+    "graphql": "^16.10.0",
     "prettier": "^2.8.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "peerDependencies": {
+    "graphql": "^16.0.0",
     "puppeteer": "^24.7.1"
   },
   "peerDependenciesMeta": {
+    "graphql": {
+      "optional": true
+    },
     "puppeteer": {
       "optional": false
     }
