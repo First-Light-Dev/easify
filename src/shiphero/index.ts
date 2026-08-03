@@ -25,8 +25,9 @@ export { ShipHeroClient as ShipHero } from './client';
 export { default } from './client';
 
 /**
- * Absolute path to the bundled SDL for the ShipHero schema. ShipHero publishes no
- * introspection endpoint, so point graphql-codegen at this file:
+ * Absolute path to the SDL for the ShipHero schema, shipped as-is in the published
+ * package. ShipHero publishes no introspection endpoint, so run codegen in your own
+ * project and point it at this file:
  *
  * ```ts
  * import { SHIPHERO_SCHEMA_PATH } from 'easify/shiphero';
@@ -38,8 +39,15 @@ export { default } from './client';
  * };
  * ```
  */
-export const SHIPHERO_SCHEMA_PATH = path.join(__dirname, 'generated', 'schema.graphql');
+export const SHIPHERO_SCHEMA_PATH = path.join(
+  __dirname,
+  '..',
+  '..',
+  'src',
+  'shiphero',
+  'generated',
+  'schema.graphql'
+);
 
 export * from './client';
 export * from './errors';
-export * from './generated';

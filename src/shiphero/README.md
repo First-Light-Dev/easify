@@ -195,24 +195,14 @@ id rather than raising the inner page size, which multiplies the credit cost of 
 `ShipHeroThrottleError` carries `requiredCredits`, `remainingCredits` and `retryAfterMs` so a job
 runner can reschedule rather than fail.
 
-## Generated types
+## The schema
 
-`generated/` is produced by `yarn codegen:shiphero` and holds:
+`generated/schema.graphql` is the only generated artefact, and this package publishes no
+TypeScript types of its own. Types come from the codegen you run in your project, which is
+strictly better than anything shipped here could be: it describes the selection sets you
+actually use, rather than every field of every type in the schema.
 
-| File | Contents |
-| --- | --- |
-| `schema.graphql` | the full SDL, for graphql-codegen |
-| `objects.ts` | object and interface types, all fields optional since a response only carries what was selected |
-| `inputs.ts` | mutation input types, with the nullability the schema declares |
-| `enums.ts`, `scalars.ts` | enum unions and how each custom scalar maps to TypeScript |
-| `operations.ts` | per-operation argument interfaces, plus name-keyed lookup maps |
-| `metadata.ts` | runtime facts about each operation: whether it paginates, and where a 3PL passes `customer_account_id` |
-
-These are useful for hand-written helpers and for typing raw-string queries. Once codegen is set up
-in the connector, prefer the types it produces, since those describe your actual selection sets
-rather than the whole schema.
-
-Regenerate from the live docs with:
+Regenerate the SDL from the live docs with:
 
 ```bash
 yarn codegen:shiphero --refresh

@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc && node src/scripts/copy-assets.js",
+    "build": "tsc",
     "watch": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts\"",
     "prepare": "yarn build",
@@ -15,7 +15,8 @@
     "codegen:shiphero": "ts-node --compiler-options '{\"module\":\"commonjs\",\"moduleResolution\":\"node\"}' src/scripts/shiphero-codegen.ts"
   },
   "files": [
-    "dist/**/*"
+    "dist/**/*",
+    "src/shiphero/generated/schema.graphql"
   ],
   "keywords": [
     "typescript",
@@ -49,7 +50,7 @@
       "types": "./dist/shiphero/index.d.ts",
       "default": "./dist/shiphero/index.js"
     },
-    "./shiphero/schema.graphql": "./dist/shiphero/generated/schema.graphql",
+    "./shiphero/schema.graphql": "./src/shiphero/generated/schema.graphql",
     "./logging": {
       "types": "./dist/logging/index.d.ts",
       "default": "./dist/logging/index.js"

@@ -1,6 +1,6 @@
 /**
- * Generates TypeScript types under src/shiphero/generated from the ShipHero
- * GraphQL schema reference published at https://developer.shiphero.com/schema/.
+ * Renders src/shiphero/generated/schema.graphql from the ShipHero GraphQL schema
+ * reference published at https://developer.shiphero.com/schema/.
  *
  * Usage:
  *   ts-node src/scripts/shiphero-codegen.ts [--refresh]
@@ -11,15 +11,14 @@
  * cached under .cache/shiphero-schema so reruns are offline; pass --refresh to
  * re-download.
  *
- * Object fields are emitted as optional because a GraphQL response only carries
- * the fields named in the selection set. Input fields keep the nullability the
- * schema declares.
+ * The SDL is the only output. Projects using this package run graphql-codegen
+ * against it and generate types for their own operations, so no TypeScript is
+ * generated or published here.
  */
 
 import * as fs from 'fs';
 import * as graphql from 'graphql';
 import * as path from 'path';
-import * as prettier from 'prettier';
 
 const SCHEMA_BASE = 'https://developer.shiphero.com/schema';
 const CACHE_DIR = path.join(__dirname, '..', '..', '.cache', 'shiphero-schema');
@@ -59,31 +58,6 @@ interface OperationDef {
   args: FieldDef[];
   returnType?: string;
 }
-
-/**
- * GraphQL scalars are inlined as primitives rather than aliased so generated
- * names never shadow globals such as `Date` or `BigInt`.
- */
-const SCALAR_TS: Record<string, string> = {
-  String: 'string',
-  ID: 'string',
-  Int: 'number',
-  Float: 'number',
-  Boolean: 'boolean',
-  BigInt: 'number',
-  Decimal: 'string',
-  Date: 'string',
-  DateTime: 'string',
-  ISODateTime: 'string',
-  Time: 'string',
-  JSONString: 'string',
-  UUID: 'string',
-  Upload: 'unknown',
-  GenericScalar: 'unknown',
-  Money: 'string',
-  URL: 'string',
-  JSONObjectScalar: 'Record<string, unknown>'
-};
 
 // ---------------------------------------------------------------------------
 // Fetching
@@ -349,147 +323,6 @@ function parseOperationPage(html: string, kind: 'query' | 'mutation'): Operation
 }
 
 // ---------------------------------------------------------------------------
-// TypeScript rendering
-// ---------------------------------------------------------------------------
-
-const unknownScalars = new Set<string>();
-
-/** Converts a GraphQL type reference into a TypeScript type expression. */
-function tsType(graphqlType: string, known: Map<string, TypeDef>): string {
-  const nonNull = graphqlType.endsWith('!');
-  const inner = nonNull ? graphqlType.slice(0, -1) : graphqlType;
-
-  if (inner.startsWith('[') && inner.endsWith(']')) {
-    const element = tsType(inner.slice(1, -1), known);
-    const wrapped = /[|&]/.test(element) ? `(${element})` : element;
-    return `${wrapped}[]`;
-  }
-
-  const def = known.get(inner);
-  if (def && def.kind === 'scalar')
-    return SCALAR_TS[inner] ?? (unknownScalars.add(inner), 'unknown');
-  if (!def && SCALAR_TS[inner]) return SCALAR_TS[inner];
-  if (!def) {
-    if (!SCALAR_TS[inner]) unknownScalars.add(inner);
-    return 'unknown';
-  }
-  return inner;
-}
-
-/** `true` when a nullable GraphQL type should also admit `null` in TypeScript. */
-function nullable(graphqlType: string): boolean {
-  return !graphqlType.endsWith('!');
-}
-
-function docComment(lines: (string | undefined)[], indent = '  '): string {
-  const parts = lines.filter((line): line is string => Boolean(line && line.trim()));
-  if (!parts.length) return '';
-  if (parts.length === 1 && parts[0].length < 90) return `${indent}/** ${parts[0]} */\n`;
-  return [`${indent}/**`, ...parts.map((line) => `${indent} * ${line}`), `${indent} */`, ''].join(
-    '\n'
-  );
-}
-
-function propertyName(name: string): string {
-  return /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(name) ? name : JSON.stringify(name);
-}
-
-function renderInterface(def: TypeDef, known: Map<string, TypeDef>, partial: boolean): string {
-  const lines: string[] = [];
-  lines.push(docComment([def.description, `GraphQL \`${def.kind} ${def.name}\`.`], ''));
-  lines.push(`export interface ${def.name} {`);
-
-  if (!def.fields.length) lines.push('  [key: string]: unknown;');
-
-  for (const field of def.fields) {
-    const base = tsType(field.type, known);
-    // Output fields are always optional: a response only holds what was selected.
-    const optional = partial || nullable(field.type);
-    const value = nullable(field.type) ? `${base} | null` : base;
-    const fieldArgs = field.args?.map((arg) => `${arg.name}: ${arg.type}`).join(', ');
-    lines.push(
-      docComment([
-        field.description,
-        field.deprecated ? `@deprecated ${field.deprecated}` : undefined,
-        `GraphQL type: \`${field.type}\``,
-        fieldArgs ? `Accepts arguments: \`${fieldArgs}\`` : undefined
-      ])
-    );
-    lines.push(`  ${propertyName(field.name)}${optional ? '?' : ''}: ${value};`);
-  }
-
-  lines.push('}');
-  return lines.join('\n');
-}
-
-function renderEnum(def: TypeDef): string {
-  const values = def.enumValues.length
-    ? def.enumValues.map((value) => `  | '${value.name}'`).join('\n')
-    : '  | string';
-  return [
-    docComment([def.description, `GraphQL \`enum ${def.name}\`.`], ''),
-    `export type ${def.name} =`,
-    values + ';'
-  ].join('\n');
-}
-
-function renderUnion(def: TypeDef): string {
-  const members = def.possibleTypes.length ? def.possibleTypes.join(' | ') : 'unknown';
-  return [
-    docComment([def.description, `GraphQL \`union ${def.name}\`.`], ''),
-    `export type ${def.name} = ${members};`
-  ].join('\n');
-}
-
-function pascalCase(name: string): string {
-  return name
-    .split(/[^A-Za-z0-9]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('');
-}
-
-function argsInterfaceName(op: OperationDef): string {
-  return `${pascalCase(op.name)}${op.kind === 'query' ? 'Query' : 'Mutation'}Args`;
-}
-
-function renderOperationArgs(op: OperationDef, known: Map<string, TypeDef>): string {
-  const lines: string[] = [];
-  lines.push(
-    docComment(
-      [op.description, `Arguments for the \`${op.name}\` ${op.kind}.`].filter(Boolean) as string[],
-      ''
-    )
-  );
-  lines.push(`export interface ${argsInterfaceName(op)} {`);
-
-  if (!op.args.length) lines.push('  [key: string]: never;');
-
-  for (const arg of op.args) {
-    const base = tsType(arg.type, known);
-    const value = nullable(arg.type) ? `${base} | null` : base;
-    lines.push(
-      docComment([
-        arg.description,
-        arg.default ? `@default ${arg.default}` : undefined,
-        `GraphQL type: \`${arg.type}\``
-      ])
-    );
-    lines.push(`  ${propertyName(arg.name)}${arg.required ? '' : '?'}: ${value};`);
-  }
-
-  lines.push('}');
-  return lines.join('\n');
-}
-
-const HEADER = [
-  '// Generated by src/scripts/shiphero-codegen.ts from the ShipHero GraphQL schema',
-  '// reference (https://developer.shiphero.com/schema/).',
-  '// Run `yarn codegen:shiphero` to regenerate. Do not edit by hand.',
-  ''
-].join('\n');
-
-// ---------------------------------------------------------------------------
 // SDL rendering
 // ---------------------------------------------------------------------------
 
@@ -722,213 +555,9 @@ async function main() {
   );
 
   fs.mkdirSync(OUT_DIR, { recursive: true });
-  const prettierOptions = await prettier.resolveConfig(OUT_DIR);
-  const format = (contents: string) =>
-    prettier.format(contents, { ...prettierOptions, parser: 'typescript' });
 
-  // scalars.ts — documents how each custom scalar is represented.
-  const scalarRows = scalars
-    .map((def) => `  ${propertyName(def.name)}: ${SCALAR_TS[def.name] ?? 'unknown'};`)
-    .join('\n');
-  fs.writeFileSync(
-    path.join(OUT_DIR, 'scalars.ts'),
-    format(
-      [
-        HEADER,
-        '/**',
-        ' * How ShipHero custom scalars are represented in TypeScript. Scalars are inlined',
-        ' * at each use site; this map is exported for reference only.',
-        ' */',
-        'export interface ShipHeroScalars {',
-        '  String: string;',
-        '  ID: string;',
-        '  Int: number;',
-        '  Float: number;',
-        '  Boolean: boolean;',
-        scalarRows,
-        '}',
-        ''
-      ].join('\n')
-    )
-  );
-  console.log('  wrote scalars.ts');
-
-  fs.writeFileSync(
-    path.join(OUT_DIR, 'enums.ts'),
-    format([HEADER, ...enums.map(renderEnum), ''].join('\n\n'))
-  );
-  console.log(`  wrote enums.ts (${enums.length} enums)`);
-
-  const objectImports = enums.length
-    ? `import type { ${enums.map((e) => e.name).join(', ')} } from './enums';`
-    : '';
-  fs.writeFileSync(
-    path.join(OUT_DIR, 'objects.ts'),
-    format(
-      [
-        HEADER,
-        objectImports,
-        ...unions.map(renderUnion),
-        ...objects.map((def) => renderInterface(def, types, true)),
-        ''
-      ].join('\n\n')
-    )
-  );
-  console.log(`  wrote objects.ts (${objects.length + unions.length} types)`);
-
-  fs.writeFileSync(
-    path.join(OUT_DIR, 'inputs.ts'),
-    format(
-      [HEADER, objectImports, ...inputs.map((def) => renderInterface(def, types, false)), ''].join(
-        '\n\n'
-      )
-    )
-  );
-  console.log(`  wrote inputs.ts (${inputs.length} inputs)`);
-
-  // operations.ts — argument interfaces plus name -> args/result lookup maps.
-  const queries = operations
-    .filter((op) => op.kind === 'query')
-    .sort((a, b) => a.name.localeCompare(b.name));
-  const mutations = operations
-    .filter((op) => op.kind === 'mutation')
-    .sort((a, b) => a.name.localeCompare(b.name));
-
-  const referenced = new Set<string>();
-  for (const op of operations) {
-    for (const arg of op.args) {
-      const bare = arg.type.replace(/[[\]!]/g, '');
-      if (types.has(bare) && types.get(bare)!.kind === 'enum') referenced.add(bare);
-      if (types.has(bare) && types.get(bare)!.kind === 'input') referenced.add(bare);
-    }
-    if (op.returnType && types.has(op.returnType)) referenced.add(op.returnType);
-  }
-
-  const enumNames = new Set(enums.map((def) => def.name));
-  const inputNames = new Set(inputs.map((def) => def.name));
-  const fromEnums = [...referenced].filter((name) => enumNames.has(name)).sort();
-  const fromInputs = [...referenced].filter((name) => inputNames.has(name)).sort();
-  const fromObjects = [...referenced]
-    .filter((name) => !enumNames.has(name) && !inputNames.has(name))
-    .sort();
-
-  const resultEntry = (op: OperationDef) =>
-    `  ${propertyName(op.name)}: ${
-      op.returnType && fromObjects.includes(op.returnType) ? op.returnType : 'unknown'
-    };`;
-
-  fs.writeFileSync(
-    path.join(OUT_DIR, 'operations.ts'),
-    format(
-      [
-        HEADER,
-        fromEnums.length ? `import type { ${fromEnums.join(', ')} } from './enums';` : '',
-        fromInputs.length ? `import type { ${fromInputs.join(', ')} } from './inputs';` : '',
-        fromObjects.length ? `import type { ${fromObjects.join(', ')} } from './objects';` : '',
-        ...queries.map((op) => renderOperationArgs(op, types)),
-        ...mutations.map((op) => renderOperationArgs(op, types)),
-        '/** Argument type for every documented ShipHero query, keyed by operation name. */',
-        'export interface ShipHeroQueryArgs {',
-        ...queries.map((op) => `  ${propertyName(op.name)}: ${argsInterfaceName(op)};`),
-        '}',
-        '/** Result type for every documented ShipHero query, keyed by operation name. */',
-        'export interface ShipHeroQueryResults {',
-        ...queries.map(resultEntry),
-        '}',
-        '/** Argument type for every documented ShipHero mutation, keyed by operation name. */',
-        'export interface ShipHeroMutationArgs {',
-        ...mutations.map((op) => `  ${propertyName(op.name)}: ${argsInterfaceName(op)};`),
-        '}',
-        '/** Result type for every documented ShipHero mutation, keyed by operation name. */',
-        'export interface ShipHeroMutationResults {',
-        ...mutations.map(resultEntry),
-        '}',
-        'export type ShipHeroQueryName = keyof ShipHeroQueryArgs;',
-        'export type ShipHeroMutationName = keyof ShipHeroMutationArgs;',
-        ''
-      ].join('\n\n')
-    )
-  );
-  console.log(`  wrote operations.ts (${queries.length} queries, ${mutations.length} mutations)`);
-
-  // metadata.ts — runtime description of each operation, used to build documents.
-  const metadata = (op: OperationDef) => {
-    const argTypes = Object.fromEntries(op.args.map((arg) => [arg.name, arg.type]));
-    const result = op.returnType ? types.get(op.returnType) : undefined;
-    // Most operations wrap their payload in a BaseResponse alongside request_id and
-    // complexity; a few (user_quota, uuid) return the payload object directly.
-    const wrapped = (result?.fields ?? []).some((field) => field.name === 'request_id');
-    const payload = (result?.fields ?? []).filter(
-      (field) => field.name !== 'request_id' && field.name !== 'complexity'
-    );
-    const data = wrapped ? payload.find((field) => field.name === 'data') ?? payload[0] : undefined;
-    const bare = data ? data.type.replace(/[[\]!]/g, '') : op.returnType;
-
-    // 3PL users scope an operation with customer_account_id, which sits either on the
-    // operation itself (queries) or inside its input object (mutations).
-    const dataInput = types.get((argTypes.data ?? '').replace(/[[\]!]/g, ''));
-    const customerAccountId = argTypes.customer_account_id
-      ? 'arg'
-      : dataInput?.fields.some((field) => field.name === 'customer_account_id')
-      ? 'data'
-      : undefined;
-
-    return {
-      name: op.name,
-      argTypes,
-      returnType: op.returnType,
-      /** Field on the result that carries the payload, e.g. `data` or `purchase_order`. */
-      payloadField: data?.name,
-      payloadType: bare,
-      paginated: Boolean(bare?.endsWith('Connection')),
-      payloadArgTypes: Object.fromEntries((data?.args ?? []).map((arg) => [arg.name, arg.type])),
-      customerAccountId
-    };
-  };
-
-  const renderMetadata = (name: string, ops: OperationDef[]) =>
-    [
-      `export const ${name}: Record<string, ShipHeroOperationMeta> = ${JSON.stringify(
-        Object.fromEntries(ops.map((op) => [op.name, metadata(op)])),
-        null,
-        2
-      )};`
-    ].join('\n');
-
-  fs.writeFileSync(
-    path.join(OUT_DIR, 'metadata.ts'),
-    format(
-      [
-        HEADER,
-        '/** Runtime description of a ShipHero operation, used to build GraphQL documents. */',
-        'export interface ShipHeroOperationMeta {',
-        '  name: string;',
-        '  /** Argument name to GraphQL type, e.g. `{ sku: "String" }`. */',
-        '  argTypes: Record<string, string>;',
-        '  returnType?: string;',
-        '  /** Result field carrying the payload, e.g. `data` or `purchase_order`. */',
-        '  payloadField?: string;',
-        '  payloadType?: string;',
-        '  /** True when the payload is a Relay connection and needs pagination arguments. */',
-        '  paginated: boolean;',
-        '  /** Arguments the payload field accepts, e.g. `{ first: "Int", after: "String" }`. */',
-        '  payloadArgTypes: Record<string, string>;',
-        '  /**',
-        '   * Where a 3PL passes `customer_account_id`: as an operation argument, as a field',
-        '   * of the `data` input, or nowhere because the operation does not support it.',
-        '   */',
-        "  customerAccountId?: 'arg' | 'data';",
-        '}',
-        renderMetadata('SHIPHERO_QUERIES', queries),
-        renderMetadata('SHIPHERO_MUTATIONS', mutations),
-        ''
-      ].join('\n\n')
-    )
-  );
-  console.log('  wrote metadata.ts');
-
-  // schema.graphql — the SDL consumers point graphql-codegen at. ShipHero exposes
-  // no introspection endpoint, so this file is the only machine-readable schema.
+  // schema.graphql is the only output. Consumers generate their own TypeScript from
+  // it, so their types describe the selection sets they actually use.
   const { sdl, warnings } = renderSDL(types, operations, graphql);
   fs.writeFileSync(path.join(OUT_DIR, 'schema.graphql'), sdl);
   try {
@@ -943,27 +572,6 @@ async function main() {
     process.exitCode = 1;
   }
   for (const warning of warnings) console.warn(`    ${warning}`);
-
-  fs.writeFileSync(
-    path.join(OUT_DIR, 'index.ts'),
-    format(
-      [
-        HEADER,
-        "export * from './scalars';",
-        "export * from './enums';",
-        "export * from './objects';",
-        "export * from './inputs';",
-        "export * from './operations';",
-        "export * from './metadata';",
-        ''
-      ].join('\n')
-    )
-  );
-  console.log('  wrote index.ts');
-
-  if (unknownScalars.size) {
-    console.warn(`Unmapped scalars (emitted as unknown): ${[...unknownScalars].sort().join(', ')}`);
-  }
 }
 
 main().catch((error) => {
