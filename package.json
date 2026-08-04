@@ -11,12 +11,10 @@
     "prepare": "yarn build",
     "codegen": "graphql-codegen && ts-node src/scripts/post-codegen.ts",
     "codegen:cin7-omni": "ts-node --compiler-options '{\"module\":\"commonjs\",\"moduleResolution\":\"node\"}' src/scripts/cin7-omni-codegen.ts",
-    "codegen:cin7-core": "ts-node --compiler-options '{\"module\":\"commonjs\",\"moduleResolution\":\"node\"}' src/scripts/cin7-core-codegen.ts",
-    "codegen:shiphero": "ts-node --compiler-options '{\"module\":\"commonjs\",\"moduleResolution\":\"node\"}' src/scripts/shiphero-codegen.ts"
+    "codegen:cin7-core": "ts-node --compiler-options '{\"module\":\"commonjs\",\"moduleResolution\":\"node\"}' src/scripts/cin7-core-codegen.ts"
   },
   "files": [
-    "dist/**/*",
-    "src/shiphero/generated/schema.graphql"
+    "dist/**/*"
   ],
   "keywords": [
     "typescript",
@@ -50,7 +48,6 @@
       "types": "./dist/shiphero/index.d.ts",
       "default": "./dist/shiphero/index.js"
     },
-    "./shiphero/schema.graphql": "./src/shiphero/generated/schema.graphql",
     "./logging": {
       "types": "./dist/logging/index.d.ts",
       "default": "./dist/logging/index.js"

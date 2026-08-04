@@ -4,8 +4,8 @@ A TypeScript client for the [ShipHero public GraphQL API](https://developer.ship
 
 This module is a **transport, not a query library**. It owns authentication, token refresh,
 credit-based throttling and retries, and it executes whatever document you give it. The queries
-themselves live in the connector project, generated against the schema this package ships, so
-adding an operation never requires a release here.
+themselves live in the connector project, generated straight off ShipHero's live schema, so adding
+an operation never requires a release here.
 
 It follows the same shape as the Shopify client in this repo: a thin `query`/`mutate` pair whose
 types come from codegen rather than from hand-written resource classes.
@@ -29,18 +29,26 @@ That works, but you lose type safety on the result. Set up codegen and you get i
 
 ## Codegen
 
-ShipHero publishes no introspection endpoint, so this package ships the schema as SDL, scraped
-from the [published schema reference](https://developer.shiphero.com/schema/) and validated with
-`graphql`. It covers all 413 object types, 162 inputs, 27 enums, 70 queries and 122 mutations.
-
-Point graphql-codegen at it:
+Despite the docs not advertising it, ShipHero's endpoint supports standard GraphQL introspection
+once you're authenticated — the [Getting Started](https://developer.shiphero.com/getting-started/)
+and [GraphQL Primer](https://developer.shiphero.com/graphql-primer/) pages both point third-party
+tooling (sgqlc, Altair, GraphQL Playground) at `https://public-api.shiphero.com/graphql` with a
+bearer token to fetch the schema. graphql-codegen can do the same thing directly, the same way
+this repo points codegen at Shopify's schema for the `shopify` module — no separate SDL file to
+ship or keep in sync.
 
 ```typescript
 // codegen.ts, in the connector project
 import type { CodegenConfig } from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
-  schema: require.resolve('@first-light-dev/easify/shiphero/schema.graphql'),
+  schema: [
+    {
+      'https://public-api.shiphero.com/graphql': {
+        headers: { Authorization: `Bearer ${process.env.SHIPHERO_ACCESS_TOKEN}` }
+      }
+    }
+  ],
   documents: ['src/**/*.graphql'],
   generates: {
     './src/generated/shiphero.ts': {
@@ -52,10 +60,22 @@ const config: CodegenConfig = {
 export default config;
 ```
 
-The path is also exported as a constant, which is easier inside a bundler:
+The token just needs to be valid, not privileged for anything in particular — any access token
+from the connector's own credentials works, and codegen only ever reads the schema with it. Run
+codegen with that token available (locally or as a CI secret) and rerun it whenever ShipHero ships
+a schema change you need.
+
+If you want a local `.graphql` copy of the schema to diff against or browse offline, add the
+`schema-ast` plugin as a second output — this is optional, and nothing in this package depends
+on it:
 
 ```typescript
-import { SHIPHERO_SCHEMA_PATH } from '@first-light-dev/easify/shiphero';
+generates: {
+  './src/generated/shiphero.ts': {
+    plugins: ['typescript', 'typescript-operations', 'typed-document-node']
+  },
+  './schema.graphql': { plugins: ['schema-ast'] }
+}
 ```
 
 Write a document:
@@ -197,27 +217,13 @@ runner can reschedule rather than fail.
 
 ## The schema
 
-`generated/schema.graphql` is the only generated artefact, and this package publishes no
-TypeScript types of its own. Types come from the codegen you run in your project, which is
-strictly better than anything shipped here could be: it describes the selection sets you
-actually use, rather than every field of every type in the schema.
+This package ships no schema and no generated TypeScript types of its own — both come from the
+codegen you run in your project, against ShipHero's live, authenticated endpoint. That's strictly
+better than anything shipped here could be: it's the server's actual schema rather than a copy,
+and the generated types describe the selection sets you actually use rather than every field of
+every type in the schema.
 
-Regenerate the SDL from the live docs with:
-
-```bash
-yarn codegen:shiphero --refresh
-```
-
-Pages are cached under `.cache/shiphero-schema`, so a run without `--refresh` is offline. The
-script fails the build if the emitted SDL no longer validates.
-
-## Known limitations
-
-- The schema is scraped from ShipHero's HTML reference, not from introspection, so it is only as
-  accurate as those pages. It validates as a schema and matches the docs field for field, but it
-  is not a byte-for-byte copy of the server's schema.
-- Argument default values are emitted only when the documented text parses as a GraphQL literal;
-  prose defaults are dropped. This affects nothing at runtime, and only means codegen may treat a
-  defaulted argument as nullable.
-- ShipHero declares only two interfaces (`Node` and `UserError`), both captured with their
-  implementors.
+One consequence worth knowing: codegen needs a real ShipHero access token to run, since the
+endpoint requires authentication even for introspection. That's rarely a problem in practice — a
+connector already has one — but it does mean codegen can't run fully offline or without
+credentials, unlike a schema shipped as a static file.
