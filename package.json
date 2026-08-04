@@ -23,6 +23,7 @@
     "cin7",
     "cin7-omni",
     "cin7-core",
+    "shiphero",
     "shopify",
     "unleashed"
   ],
@@ -42,6 +43,10 @@
     "./cin7-core": {
       "types": "./dist/cin7-core/index.d.ts",
       "default": "./dist/cin7-core/index.js"
+    },
+    "./shiphero": {
+      "types": "./dist/shiphero/index.d.ts",
+      "default": "./dist/shiphero/index.js"
     },
     "./logging": {
       "types": "./dist/logging/index.d.ts",
@@ -67,6 +72,9 @@
       "cin7-core": [
         "./dist/cin7-core/index.d.ts"
       ],
+      "shiphero": [
+        "./dist/shiphero/index.d.ts"
+      ],
       "unleashed": [
         "./dist/unleashed/index.d.ts"
       ],
@@ -86,14 +94,19 @@
     "@types/bunyan": "^1.8.8",
     "@types/node": "^22.14.1",
     "@types/prettier": "^2",
+    "graphql": "^16.10.0",
     "prettier": "^2.8.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "peerDependencies": {
+    "graphql": "^16.0.0",
     "puppeteer": "^24.7.1"
   },
   "peerDependenciesMeta": {
+    "graphql": {
+      "optional": true
+    },
     "puppeteer": {
       "optional": false
     }
