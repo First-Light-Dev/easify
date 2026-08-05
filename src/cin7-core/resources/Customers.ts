@@ -12,7 +12,7 @@ export default class Customers extends WritableResource<typeof CustomerSchema> {
   readonly credits: ReadableResource<typeof CustomerCreditsSchema>;
 
   constructor(axios: AxiosInstance, options: ResourceOptions = {}) {
-    super(axios, '/customer', CustomerSchema, 'CustomerList', options);
+    super(axios, '/customer', CustomerSchema, 'CustomerList', { ...options, sinceParam: 'ModifiedSince' });
     this.credits = new ReadableResource(
       axios,
       '/ref/customer/credits',

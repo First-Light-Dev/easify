@@ -57,7 +57,7 @@ export default class Reference {
       '/ref/carrier',
       CarrierSchema,
       'CarrierList',
-      options
+      { ...options, idParam: 'CarrierID' }
     );
     this.chartOfAccounts = new WritableResource(
       axios,

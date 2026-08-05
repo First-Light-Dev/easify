@@ -8,6 +8,180 @@ import { z } from 'zod';
  */
 
 /**
+ * Customer Credits
+ */
+export const CustomerCreditsSchema = z.looseObject({
+  /**
+   * Credit ID, identifier unique key.
+   */
+  CreditID: z.string().nullable().optional(),
+  /**
+   * Customer ID
+   */
+  CustomerID: z.string().nullable().optional(),
+  /**
+   * Customer name.
+   */
+  CustomerName: z.string().nullable().optional(),
+  /**
+   * Credit account.
+   */
+  Account: z.string().nullable().optional(),
+  /**
+   * Credit amount.
+   */
+  Amount: z.number().nullable().optional(),
+  /**
+   * Credit remaining amount.
+   */
+  RemainingAmount: z.number().nullable().optional(),
+  /**
+   * Credit currency name.
+   */
+  Currency: z.string().nullable().optional(),
+  /**
+   * Currency conversion rate.
+   */
+  ConvRate: z.number().nullable().optional(),
+  /**
+   * Date paid
+   */
+  Date: z.string().nullable().optional(),
+  /**
+   * Credit description
+   */
+  Description: z.string().nullable().optional()
+});
+
+export type CustomerCredits = z.infer<typeof CustomerCreditsSchema>;
+
+/**
+ * Customer Default Template
+ */
+export const CustomerDefaultTemplateSchema = z.looseObject({
+  /**
+   * Customer ID. Required (conditional).
+   */
+  CustomerID: z.string().nullable().optional(),
+  /**
+   * Template ID. Required (conditional).
+   */
+  TemplateID: z.string().nullable().optional()
+});
+
+export type CustomerDefaultTemplate = z.infer<typeof CustomerDefaultTemplateSchema>;
+
+/**
+ * Child Customer Model
+ */
+export const ChildCustomerSchema = z.looseObject({
+  /**
+   * Customer ID
+   */
+  CustomerID: z.string().nullable().optional(),
+  /**
+   * Customer name
+   */
+  CustomerName: z.string().nullable().optional()
+});
+
+export type ChildCustomer = z.infer<typeof ChildCustomerSchema>;
+
+/**
+ * Address Model
+ */
+export const AddressSchema = z.looseObject({
+  /**
+   * Address ID, optional, applicable for sales only, POST/PUT methods. If specified then
+   * existing address is taken by ID.
+   */
+  ID: z.string().nullable().optional(),
+  /**
+   * Address Line 1 as displayed on Sale form. = Line1 + Line2 Max length: 256.
+   */
+  DisplayAddressLine1: z.string().nullable().optional(),
+  /**
+   * Address Line 2 as displayed on Sale form. = City + State/Region + Zip/Postcode + Country
+   * Max length: 256.
+   */
+  DisplayAddressLine2: z.string().nullable().optional(),
+  /**
+   * Address Line 1 Max length: 256. Required.
+   */
+  Line1: z.string().nullable().optional(),
+  /**
+   * Address Line 2 Max length: 256.
+   */
+  Line2: z.string().nullable().optional(),
+  /**
+   * City Max length: 256.
+   */
+  City: z.string().nullable().optional(),
+  /**
+   * State Max length: 256.
+   */
+  State: z.string().nullable().optional(),
+  /**
+   * Post code Max length: 20.
+   */
+  Postcode: z.string().nullable().optional(),
+  /**
+   * Country Max length: 256. Required.
+   */
+  Country: z.string().nullable().optional()
+});
+
+export type Address = z.infer<typeof AddressSchema>;
+
+/**
+ * Additional Attribute Model
+ */
+export const AdditionalAttributeSchema = z.looseObject({
+  /**
+   * Additional Attribute 1 value Max length: 256.
+   */
+  AdditionalAttribute1: z.string().nullable().optional(),
+  /**
+   * Additional Attribute 2 value Max length: 256.
+   */
+  AdditionalAttribute2: z.string().nullable().optional(),
+  /**
+   * Additional Attribute 3 value Max length: 256.
+   */
+  AdditionalAttribute3: z.string().nullable().optional(),
+  /**
+   * Additional Attribute 4 value Max length: 256.
+   */
+  AdditionalAttribute4: z.string().nullable().optional(),
+  /**
+   * Additional Attribute 5 value Max length: 256.
+   */
+  AdditionalAttribute5: z.string().nullable().optional(),
+  /**
+   * Additional Attribute 6 value Max length: 256.
+   */
+  AdditionalAttribute6: z.string().nullable().optional(),
+  /**
+   * Additional Attribute 7 value Max length: 256.
+   */
+  AdditionalAttribute7: z.string().nullable().optional(),
+  /**
+   * Additional Attribute 8 value Max length: 256.
+   */
+  AdditionalAttribute8: z.string().nullable().optional(),
+  /**
+   * Additional Attribute 9 value Max length: 256.
+   */
+  AdditionalAttribute9: z.string().nullable().optional(),
+  /**
+   * Additional Attribute 10 value Max length: 256.
+   */
+  AdditionalAttribute10: z.string().nullable().optional()
+});
+
+export type AdditionalAttribute = z.infer<typeof AdditionalAttributeSchema>;
+
+/**
  * Customer
  */
 export const CustomerSchema = z.looseObject({
@@ -133,71 +307,7 @@ export const CustomerSchema = z.looseObject({
   /**
    * Customers’s child records (available only in the responses)
    */
-  ChildCustomers: z.array(z.unknown()).nullable().optional()
+  ChildCustomers: z.array(ChildCustomerSchema).nullable().optional()
 });
 
 export type Customer = z.infer<typeof CustomerSchema>;
-
-/**
- * Customer Credits
- */
-export const CustomerCreditsSchema = z.looseObject({
-  /**
-   * Credit ID, identifier unique key.
-   */
-  CreditID: z.string().nullable().optional(),
-  /**
-   * Customer ID
-   */
-  CustomerID: z.string().nullable().optional(),
-  /**
-   * Customer name.
-   */
-  CustomerName: z.string().nullable().optional(),
-  /**
-   * Credit account.
-   */
-  Account: z.string().nullable().optional(),
-  /**
-   * Credit amount.
-   */
-  Amount: z.number().nullable().optional(),
-  /**
-   * Credit remaining amount.
-   */
-  RemainingAmount: z.number().nullable().optional(),
-  /**
-   * Credit currency name.
-   */
-  Currency: z.string().nullable().optional(),
-  /**
-   * Currency conversion rate.
-   */
-  ConvRate: z.number().nullable().optional(),
-  /**
-   * Date paid
-   */
-  Date: z.string().nullable().optional(),
-  /**
-   * Credit description
-   */
-  Description: z.string().nullable().optional()
-});
-
-export type CustomerCredits = z.infer<typeof CustomerCreditsSchema>;
-
-/**
- * Customer Default Template
- */
-export const CustomerDefaultTemplateSchema = z.looseObject({
-  /**
-   * Customer ID. Required (conditional).
-   */
-  CustomerID: z.string().nullable().optional(),
-  /**
-   * Template ID. Required (conditional).
-   */
-  TemplateID: z.string().nullable().optional()
-});
-
-export type CustomerDefaultTemplate = z.infer<typeof CustomerDefaultTemplateSchema>;

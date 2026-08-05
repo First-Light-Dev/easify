@@ -139,108 +139,214 @@ export const PurchaseListSchema = z.looseObject({
 export type PurchaseList = z.infer<typeof PurchaseListSchema>;
 
 /**
- * Purchase Order
+ * Purchase Order Line Model
  */
-export const PurchaseOrderSchema = z.looseObject({
+export const PurchaseOrderLineSchema = z.looseObject({
   /**
-   * Unique Cin7 Core Purchase Task ID Required.
+   * Product identifier referenced by this Line. Required If CombineAdditionalCharges param
+   * exist for this endpoint and it have values = `false` Required (conditional).
    */
-  TaskID: z.string().nullable().optional(),
+  ProductID: z.string().nullable().optional(),
   /**
-   * if `true` then `additional charges` lines displayed in `Lines` array Required.
+   * Product SKU referenced by this Line. Required If CombineAdditionalCharges param exist
+   * for this endpoint and it have values = `false` Max length: 50. Required (conditional).
    */
-  CombineAdditionalCharges: z.boolean().nullable().optional(),
+  SKU: z.string().nullable().optional(),
   /**
-   * Additional information for Order Max length: 1024. Required.
+   * Product Name referenced by this Line Max length: 1024. Required.
    */
-  Memo: z.string().nullable().optional(),
+  Name: z.string().nullable().optional(),
   /**
-   * Purchase Order Status. Possible Values are `NOT
-   * AVAILABLE`,`DRAFT`,`AUTHORISED`,`VOIDED`. For POST only `DRAFT` and `AUTHORISED` values
-   * accepted Required.
+   * Product or service quantity. Minimal value is 1. Required.
    */
-  Status: z.string().nullable().optional(),
+  Quantity: z.number().nullable().optional(),
   /**
-   * Required.
+   * Price per unit in Customer currency Required.
    */
-  Lines: z.array(z.unknown()).nullable().optional(),
-  AdditionalCharges: z.array(z.unknown()).nullable().optional(),
+  Price: z.number().nullable().optional(),
   /**
-   * Sum of order lines and additional charges without taxes. Not required for POST.
-   * Required.
+   * Discount. Value between 0 and 100. For free items discount is 100. Default value is 0
    */
-  TotalBeforeTax: z.number().nullable().optional(),
+  Discount: z.number().nullable().optional(),
   /**
-   * Sum of order lines and additional charges taxes. Not required for POST. Required.
+   * Tax Required.
    */
   Tax: z.number().nullable().optional(),
   /**
-   * Sum of order lines and additional charges with taxes. Not required for POST. Required.
+   * Line Tax Rule name. Max length: 50. Required.
+   */
+  TaxRule: z.string().nullable().optional(),
+  /**
+   * Supplier SKU referenced by this line. Max length: 50.
+   */
+  SupplierSKU: z.string().nullable().optional(),
+  /**
+   * Comment for this line Max length: 256.
+   */
+  Comment: z.string().nullable().optional(),
+  /**
+   * Line Total. For validation Required.
    */
   Total: z.number().nullable().optional()
 });
 
-export type PurchaseOrder = z.infer<typeof PurchaseOrderSchema>;
+export type PurchaseOrderLine = z.infer<typeof PurchaseOrderLineSchema>;
 
 /**
- * Purchase Invoice
+ * Purchase Stock Line Model
  */
-export const PurchaseInvoiceSchema = z.looseObject({
+export const PurchaseStockLineSchema = z.looseObject({
   /**
-   * Unique Cin7 Core Purchase Task ID Required.
+   * Date when items were received Required.
    */
-  TaskID: z.string().nullable().optional(),
+  Date: z.string().nullable().optional(),
   /**
-   * if `true` then `additional charges` lines displayed in `Lines` array Required.
+   * Product or service quantity. Minimal value is 1. Required.
    */
-  CombineAdditionalCharges: z.boolean().nullable().optional(),
+  Quantity: z.number().nullable().optional(),
   /**
-   * Date when invoice created. Default value is current date, used if not specified.
-   * Required.
+   * Product identifier referenced by this Line. Required (conditional).
    */
-  InvoiceDate: z.string().nullable().optional(),
+  ProductID: z.string().nullable().optional(),
   /**
-   * Date until invoice is valid. If not specified, used default value from Terms. Required.
+   * Product SKU referenced by this Line Max length: 50. Required (conditional).
    */
-  InvoiceDueDate: z.string().nullable().optional(),
+  SKU: z.string().nullable().optional(),
   /**
-   * Invoice Number (auto-generated)
+   * Read-only. Product name referenced by this Line Max length: 1024.
    */
-  InvoiceNumber: z.string().nullable().optional(),
+  Name: z.string().nullable().optional(),
   /**
-   * Purchase Invoice Status. Possible Values are `NOT
-   * AVAILABLE`,`DRAFT`,`AUTHORISED`,`VOIDED`, `PAID`. For POST only `DRAFT` and `AUTHORISED`
-   * values accepted Required.
+   * Location where the product would be stock to/from. Required if LocationID is empty. Max
+   * length: 256. Required (conditional).
    */
-  Status: z.string().nullable().optional(),
+  Location: z.string().nullable().optional(),
   /**
-   * Required.
+   * LocationID where the product would be stock to/from. Required if Location is empty.
+   * Required (conditional).
    */
-  Lines: z.array(z.unknown()).nullable().optional(),
-  AdditionalCharges: z.array(z.unknown()).nullable().optional(),
+  LocationID: z.string().nullable().optional(),
   /**
-   * Sum of order lines and additional charges without taxes. Not required for POST.
+   * Flag, which indicates if items were received. Read-only.
    */
-  TotalBeforeTax: z.number().nullable().optional(),
+  Received: z.boolean().nullable().optional(),
   /**
-   * Sum of order lines and additional charges taxes. Not required for POST.
+   * Batch Serial Number Max length: 50.
+   */
+  BatchSN: z.string().nullable().optional(),
+  /**
+   * Supplier SKU referenced by this line. Max length: 50.
+   */
+  SupplierSKU: z.string().nullable().optional(),
+  /**
+   * Date when selected Batch expires
+   */
+  ExpiryDate: z.string().nullable().optional(),
+  /**
+   * Stock Batch ID
+   */
+  CardID: z.string().nullable().optional()
+});
+
+export type PurchaseStockLine = z.infer<typeof PurchaseStockLineSchema>;
+
+/**
+ * Purchase Invoice Line Model
+ */
+export const PurchaseInvoiceLineSchema = z.looseObject({
+  /**
+   * Product identifier referenced by this Line. Required If CombineAdditionalCharges param
+   * exist for this endpoint and it have values = `false` Required (conditional).
+   */
+  ProductID: z.string().nullable().optional(),
+  /**
+   * Product SKU referenced by this Line. Required If CombineAdditionalCharges param exist
+   * for this endpoint and it have values = `false` Max length: 50. Required (conditional).
+   */
+  SKU: z.string().nullable().optional(),
+  /**
+   * Product Name referenced by this Line Max length: 1024. Required.
+   */
+  Name: z.string().nullable().optional(),
+  /**
+   * Product or service quantity. Minimal value is 1. Required.
+   */
+  Quantity: z.number().nullable().optional(),
+  /**
+   * Price per unit in Customer currency Required.
+   */
+  Price: z.number().nullable().optional(),
+  /**
+   * Discount. Value between 0 and 100. For free items discount is 100. Default value is 0
+   */
+  Discount: z.number().nullable().optional(),
+  /**
+   * Tax Required.
    */
   Tax: z.number().nullable().optional(),
   /**
-   * Sum of order lines and additional charges with taxes. Not required for POST.
+   * Line Tax Rule name. Max length: 50. Required.
    */
-  Total: z.number().nullable().optional(),
+  TaxRule: z.string().nullable().optional(),
   /**
-   * Not required for POST.
+   * Revenue account Max length: 50. Required.
    */
-  InvoiceTotalAmount: z.number().nullable().optional(),
+  Account: z.string().nullable().optional(),
   /**
-   * Not required for POST.
+   * Comment for this line Max length: 256.
    */
-  InvoiceTotalTaxAmount: z.number().nullable().optional()
+  Comment: z.string().nullable().optional(),
+  /**
+   * Line Total. For validation Required.
+   */
+  Total: z.number().nullable().optional()
 });
 
-export type PurchaseInvoice = z.infer<typeof PurchaseInvoiceSchema>;
+export type PurchaseInvoiceLine = z.infer<typeof PurchaseInvoiceLineSchema>;
+
+/**
+ * Purchase Invoice Additional Charge Model
+ */
+export const PurchaseInvoiceAdditionalChargeSchema = z.looseObject({
+  /**
+   * Name of Service Product referenced by this Line Max length: 256. Required.
+   */
+  Description: z.string().nullable().optional(),
+  /**
+   * Comment for this Line Max length: 256.
+   */
+  Reference: z.string().nullable().optional(),
+  /**
+   * Product or service quantity. Minimal value is 1. Required.
+   */
+  Quantity: z.number().nullable().optional(),
+  /**
+   * Price per unit in Customer currency Required.
+   */
+  Price: z.number().nullable().optional(),
+  /**
+   * Discount. Value between 0 and 100. For free items discount is 100. Default value is 0
+   */
+  Discount: z.number().nullable().optional(),
+  /**
+   * Tax Required.
+   */
+  Tax: z.number().nullable().optional(),
+  /**
+   * Line Tax Rule name. Max length: 50. Required.
+   */
+  TaxRule: z.string().nullable().optional(),
+  /**
+   * Revenue account Max length: 50. Required.
+   */
+  Account: z.string().nullable().optional(),
+  /**
+   * Line Total. For validation
+   */
+  Total: z.number().nullable().optional()
+});
+
+export type PurchaseInvoiceAdditionalCharge = z.infer<typeof PurchaseInvoiceAdditionalChargeSchema>;
 
 /**
  * Purchase Credit Note
@@ -271,8 +377,8 @@ export const PurchaseCreditNoteSchema = z.looseObject({
   /**
    * Required.
    */
-  Lines: z.array(z.unknown()).nullable().optional(),
-  AdditionalCharges: z.array(z.unknown()).nullable().optional(),
+  Lines: z.array(PurchaseInvoiceLineSchema).nullable().optional(),
+  AdditionalCharges: z.array(PurchaseInvoiceAdditionalChargeSchema).nullable().optional(),
   /**
    * Required.
    */
@@ -477,6 +583,308 @@ export const PurchasePaymentsSchema = z.looseObject({
 export type PurchasePayments = z.infer<typeof PurchasePaymentsSchema>;
 
 /**
+ * Purchase Payment Line Model
+ */
+export const PurchasePaymentLineSchema = z.looseObject({
+  /**
+   * Identifier of Master Purchase Task
+   */
+  PurchaseID: z.string().nullable().optional(),
+  /**
+   * Identifier of Purchase Task
+   */
+  TaskID: z.string().nullable().optional(),
+  /**
+   * Identifier of payment
+   */
+  ID: z.string().nullable().optional(),
+  /**
+   * Payment reference number
+   */
+  Reference: z.string().nullable().optional(),
+  /**
+   * Payment amount in customer currency
+   */
+  Amount: z.number().nullable().optional(),
+  /**
+   * Date when payment has been made
+   */
+  DatePaid: z.string().nullable().optional(),
+  /**
+   * Account Code of the bank/payment account from Chart of accounts
+   */
+  Account: z.string().nullable().optional(),
+  /**
+   * Currency Conversion rate expressed as number of Base currency units for one Customer
+   * currency unit.
+   */
+  CurrencyRate: z.number().nullable().optional(),
+  /**
+   * Date of creation payment record.
+   */
+  DateCreated: z.string().nullable().optional()
+});
+
+export type PurchasePaymentLine = z.infer<typeof PurchasePaymentLineSchema>;
+
+/**
+ * Purchase Additional Charge Model
+ */
+export const PurchaseAdditionalChargeSchema = z.looseObject({
+  /**
+   * Name of Service Product referenced by this Line Max length: 256. Required.
+   */
+  Description: z.string().nullable().optional(),
+  /**
+   * Comment for this Line Max length: 256.
+   */
+  Reference: z.string().nullable().optional(),
+  /**
+   * Price per unit in Customer currency Required.
+   */
+  Price: z.number().nullable().optional(),
+  /**
+   * Product or service quantity. Minimal value is 1. Required.
+   */
+  Quantity: z.number().nullable().optional(),
+  /**
+   * Discount. Value between 0 and 100. For free items discount is 100. Default value is 0
+   */
+  Discount: z.number().nullable().optional(),
+  /**
+   * Tax Required.
+   */
+  Tax: z.number().nullable().optional(),
+  /**
+   * Line Total. For validation Required.
+   */
+  Total: z.number().nullable().optional(),
+  /**
+   * Line Tax Rule name. Max length: 50. Required.
+   */
+  TaxRule: z.string().nullable().optional()
+});
+
+export type PurchaseAdditionalCharge = z.infer<typeof PurchaseAdditionalChargeSchema>;
+
+/**
+ * Purchase Manual Journal Line Model
+ */
+export const PurchaseManualJournalLineSchema = z.looseObject({
+  /**
+   * Reference Service Object
+   */
+  Reference: z.string().nullable().optional(),
+  /**
+   * Amount in base currency for manual journal Required.
+   */
+  Amount: z.number().nullable().optional(),
+  /**
+   * Effective date of manual journal Required.
+   */
+  Date: z.string().nullable().optional(),
+  /**
+   * Debit Account Required.
+   */
+  Debit: z.string().nullable().optional(),
+  /**
+   * Credit Account Required.
+   */
+  Credit: z.string().nullable().optional(),
+  /**
+   * Read only. rows with `true` value cannot be deleted or modified.
+   */
+  IsSystem: z.boolean().nullable().optional()
+});
+
+export type PurchaseManualJournalLine = z.infer<typeof PurchaseManualJournalLineSchema>;
+
+/**
+ * Purchase Shipping Address Model
+ */
+export const PurchaseShippingAddressSchema = z.looseObject({
+  /**
+   * Address Line 1 as displayed on Sale form. = Line1 + Line2 Max length: 256.
+   */
+  DisplayAddressLine1: z.string().nullable().optional(),
+  /**
+   * Address Line 2 as displayed on Sale form. = City + State/Region + Zip/Postcode + Country
+   * Max length: 256.
+   */
+  DisplayAddressLine2: z.string().nullable().optional(),
+  /**
+   * Address Line 1 Max length: 256. Required.
+   */
+  Line1: z.string().nullable().optional(),
+  /**
+   * Address Line 2 Max length: 256.
+   */
+  Line2: z.string().nullable().optional(),
+  /**
+   * City Max length: 256.
+   */
+  City: z.string().nullable().optional(),
+  /**
+   * State Max length: 256.
+   */
+  State: z.string().nullable().optional(),
+  /**
+   * Post code Max length: 20.
+   */
+  Postcode: z.string().nullable().optional(),
+  /**
+   * Country Max length: 256. Required.
+   */
+  Country: z.string().nullable().optional(),
+  /**
+   * Ship to different company
+   */
+  ShipToOther: z.boolean().nullable().optional(),
+  /**
+   * Company name when ShipToOther is set to True Max length: 128.
+   */
+  Company: z.string().nullable().optional()
+});
+
+export type PurchaseShippingAddress = z.infer<typeof PurchaseShippingAddressSchema>;
+
+/**
+ * Purchase Order
+ */
+export const PurchaseOrderSchema = z.looseObject({
+  /**
+   * Unique Cin7 Core Purchase Task ID Required.
+   */
+  TaskID: z.string().nullable().optional(),
+  /**
+   * if `true` then `additional charges` lines displayed in `Lines` array Required.
+   */
+  CombineAdditionalCharges: z.boolean().nullable().optional(),
+  /**
+   * Additional information for Order Max length: 1024. Required.
+   */
+  Memo: z.string().nullable().optional(),
+  /**
+   * Purchase Order Status. Possible Values are `NOT
+   * AVAILABLE`,`DRAFT`,`AUTHORISED`,`VOIDED`. For POST only `DRAFT` and `AUTHORISED` values
+   * accepted Required.
+   */
+  Status: z.string().nullable().optional(),
+  /**
+   * Required.
+   */
+  Lines: z.array(PurchaseOrderLineSchema).nullable().optional(),
+  AdditionalCharges: z.array(PurchaseAdditionalChargeSchema).nullable().optional(),
+  /**
+   * Sum of order lines and additional charges without taxes. Not required for POST.
+   * Required.
+   */
+  TotalBeforeTax: z.number().nullable().optional(),
+  /**
+   * Sum of order lines and additional charges taxes. Not required for POST. Required.
+   */
+  Tax: z.number().nullable().optional(),
+  /**
+   * Sum of order lines and additional charges with taxes. Not required for POST. Required.
+   */
+  Total: z.number().nullable().optional()
+});
+
+export type PurchaseOrder = z.infer<typeof PurchaseOrderSchema>;
+
+/**
+ * Purchase Stock Model
+ */
+export const PurchaseStockSchema = z.looseObject({
+  /**
+   * Purchase Stock Received Status. Possible Values are `NOT
+   * AVAILABLE`,`DRAFT`,`AUTHORISED`,`VOIDED`. For POST only `DRAFT` and `AUTHORISED` values
+   * accepted Required.
+   */
+  Status: z.string().nullable().optional(),
+  /**
+   * Required.
+   */
+  Lines: z.array(PurchaseStockLineSchema).nullable().optional()
+});
+
+export type PurchaseStock = z.infer<typeof PurchaseStockSchema>;
+
+/**
+ * Purchase Invoice
+ */
+export const PurchaseInvoiceSchema = z.looseObject({
+  /**
+   * Unique Cin7 Core Purchase Task ID Required.
+   */
+  TaskID: z.string().nullable().optional(),
+  /**
+   * if `true` then `additional charges` lines displayed in `Lines` array Required.
+   */
+  CombineAdditionalCharges: z.boolean().nullable().optional(),
+  /**
+   * Date when invoice created. Default value is current date, used if not specified.
+   * Required.
+   */
+  InvoiceDate: z.string().nullable().optional(),
+  /**
+   * Date until invoice is valid. If not specified, used default value from Terms. Required.
+   */
+  InvoiceDueDate: z.string().nullable().optional(),
+  /**
+   * Invoice Number (auto-generated)
+   */
+  InvoiceNumber: z.string().nullable().optional(),
+  /**
+   * Purchase Invoice Status. Possible Values are `NOT
+   * AVAILABLE`,`DRAFT`,`AUTHORISED`,`VOIDED`, `PAID`. For POST only `DRAFT` and `AUTHORISED`
+   * values accepted Required.
+   */
+  Status: z.string().nullable().optional(),
+  /**
+   * Required.
+   */
+  Lines: z.array(PurchaseInvoiceLineSchema).nullable().optional(),
+  AdditionalCharges: z.array(PurchaseInvoiceAdditionalChargeSchema).nullable().optional(),
+  /**
+   * Sum of order lines and additional charges without taxes. Not required for POST.
+   */
+  TotalBeforeTax: z.number().nullable().optional(),
+  /**
+   * Sum of order lines and additional charges taxes. Not required for POST.
+   */
+  Tax: z.number().nullable().optional(),
+  /**
+   * Sum of order lines and additional charges with taxes. Not required for POST.
+   */
+  Total: z.number().nullable().optional(),
+  /**
+   * Not required for POST.
+   */
+  InvoiceTotalAmount: z.number().nullable().optional(),
+  /**
+   * Not required for POST.
+   */
+  InvoiceTotalTaxAmount: z.number().nullable().optional()
+});
+
+export type PurchaseInvoice = z.infer<typeof PurchaseInvoiceSchema>;
+
+/**
+ * Purchase Manual Journal Model
+ */
+export const PurchaseManualJournalSchema = z.looseObject({
+  /**
+   * Manual Journal Status. Available values are `NOT AVAILABLE`, `DRAFT`, `AUTHORISED`.
+   * Available values for POST are `DRAFT`, `AUTHORISED` Required.
+   */
+  Status: z.string().nullable().optional(),
+  Lines: z.array(PurchaseManualJournalLineSchema).nullable().optional()
+});
+
+export type PurchaseManualJournal = z.infer<typeof PurchaseManualJournalSchema>;
+
+/**
  * Purchase
  */
 export const PurchaseSchema = z.looseObject({
@@ -521,7 +929,7 @@ export const PurchaseSchema = z.looseObject({
   /**
    * Purchase Shipping address
    */
-  ShippingAddress: z.unknown().nullable().optional(),
+  ShippingAddress: PurchaseShippingAddressSchema.nullable().optional(),
   /**
    * 3 character currency code of Base Currency defined in General Settings on the moment
    * when Purchase was created. Max length: 3.

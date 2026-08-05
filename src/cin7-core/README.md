@@ -129,6 +129,7 @@ existing document so the rest of the transfer is preserved.
 
 ```typescript
 await core.stock.createAdjustment({
+  Status: 'DRAFT',
   Reference: 'ShipHero write-off 12345',
   Comment: 'Damaged in warehouse',
   Account: '403',
@@ -136,6 +137,9 @@ await core.stock.createAdjustment({
   Lines: [{ SKU: 'GB3-White', Quantity: -2, Location: 'US 3PL Warehouse' }]
 });
 ```
+
+`Status` is required: `DRAFT` leaves the adjustment for someone to review and authorise
+in Cin7, `COMPLETED` moves stock the moment it posts. `EffectiveDate` defaults to now.
 
 ## Types and validation
 

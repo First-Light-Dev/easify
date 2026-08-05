@@ -18,7 +18,7 @@ export default class Products extends WritableResource<typeof ProductSchema> {
   readonly families: WritableResource<typeof ProductFamilySchema>;
 
   constructor(axios: AxiosInstance, options: ResourceOptions = {}) {
-    super(axios, '/product', ProductSchema, 'Products', options);
+    super(axios, '/product', ProductSchema, 'Products', { ...options, sinceParam: 'ModifiedSince' });
 
     this.availability = new ReadableResource(
       axios,
@@ -39,7 +39,7 @@ export default class Products extends WritableResource<typeof ProductSchema> {
       '/productFamily',
       ProductFamilySchema,
       'ProductFamilyList',
-      options
+      { ...options, sinceParam: 'ModifiedSince' }
     );
   }
 

@@ -35,7 +35,7 @@ export default class Production {
       '/production/order',
       ProductionOrderSchema,
       'ProductionOrderList',
-      options
+      { ...options, idParam: 'ProductionOrderID' }
     );
     this.orderList = new ReadableResource(
       axios,
@@ -49,16 +49,22 @@ export default class Production {
       '/finishedGoods',
       FinishedGoodsSchema,
       'FinishedGoodsList',
-      options
+      { ...options, idParam: 'TaskID' }
     );
     this.disassemblies = new WritableResource(
       axios,
       '/disassembly',
       DisassemblySchema,
       'DisassemblyList',
-      options
+      { ...options, idParam: 'TaskID' }
     );
-    this.journals = new WritableResource(axios, '/journal', JournalSchema, 'JournalList', options);
+    this.journals = new WritableResource(
+      axios,
+      '/journal',
+      JournalSchema,
+      'JournalList',
+      { ...options, idParam: 'TaskID' }
+    );
   }
 
   listOrders(params: QueryOptions = {}) {

@@ -502,149 +502,6 @@ export const ProductionOrderListItemSchema = z.looseObject({
 export type ProductionOrderListItem = z.infer<typeof ProductionOrderListItemSchema>;
 
 /**
- * Finished Goods
- */
-export const FinishedGoodsSchema = z.looseObject({
-  /**
-   * Unique ID.
-   */
-  TaskID: z.string().nullable().optional(),
-  /**
-   * Assembly Number
-   */
-  AssemblyNumber: z.string().nullable().optional(),
-  /**
-   * Finished Goods Task Status. Available values are `DRAFT`,`AUTHORISED`,`IN
-   * PROGRESS`,`COMPLETED`,`VOIDED`
-   */
-  Status: z.string().nullable().optional(),
-  /**
-   * Product ID
-   */
-  ProductID: z.string().nullable().optional(),
-  /**
-   * Product Code
-   */
-  ProductCode: z.string().nullable().optional(),
-  /**
-   * Product Name
-   */
-  ProductName: z.string().nullable().optional(),
-  /**
-   * Location ID
-   */
-  LocationID: z.string().nullable().optional(),
-  /**
-   * Location Name
-   */
-  Location: z.string().nullable().optional(),
-  /**
-   * Bin ID
-   */
-  BinID: z.string().nullable().optional(),
-  /**
-   * Bin Name
-   */
-  Bin: z.number().nullable().optional(),
-  /**
-   * Work in Progress Account
-   */
-  WIPAccount: z.string().nullable().optional(),
-  /**
-   * Work in Progress Date
-   */
-  WIPDate: z.string().nullable().optional(),
-  /**
-   * Finished Goods Account
-   */
-  Account: z.string().nullable().optional(),
-  /**
-   * Quantity
-   */
-  Quantity: z.number().nullable().optional(),
-  /**
-   * Assembly Instruction URL
-   */
-  AssemblyInstructionURL: z.string().nullable().optional(),
-  /**
-   * Completion Date
-   */
-  CompletionDate: z.string().nullable().optional(),
-  /**
-   * Batch serial number
-   */
-  BatchSN: z.string().nullable().optional(),
-  /**
-   * Batch Expiry Date
-   */
-  ExpiryDate: z.string().nullable().optional(),
-  /**
-   * Notes
-   */
-  Notes: z.string().nullable().optional(),
-  OrderLines: z.array(z.unknown()).nullable().optional(),
-  PickLines: z.array(z.unknown()).nullable().optional(),
-  Transactions: z.array(z.unknown()).nullable().optional(),
-  /**
-   * If While processing `POST` method, some errors occurred, but task was created, this
-   * property will contain array of error messages.
-   */
-  Errors: z.array(z.unknown()).nullable().optional(),
-  /**
-   * Value of Finished Goods additional attribute 1 Date format: Use `yyyy-mm-dd` Numeric
-   * format: Enter a number with max 4 decimal palces
-   */
-  CustomField1: z.string().nullable().optional(),
-  /**
-   * Value of Finished Goods additional attribute 2 Date format: Use `yyyy-mm-dd` Numeric
-   * format: Enter a number with max 4 decimal palces
-   */
-  CustomField2: z.string().nullable().optional(),
-  /**
-   * Value of Finished Goods additional attribute 3 Date format: Use `yyyy-mm-dd` Numeric
-   * format: Enter a number with max 4 decimal palces
-   */
-  CustomField3: z.string().nullable().optional(),
-  /**
-   * Value of Finished Goods additional attribute 4 Date format: Use `yyyy-mm-dd` Numeric
-   * format: Enter a number with max 4 decimal palces
-   */
-  CustomField4: z.string().nullable().optional(),
-  /**
-   * Value of Finished Goods additional attribute 5 Date format: Use `yyyy-mm-dd` Numeric
-   * format: Enter a number with max 4 decimal palces
-   */
-  CustomField5: z.string().nullable().optional(),
-  /**
-   * Value of Finished Goods additional attribute 6 Date format: Use `yyyy-mm-dd` Numeric
-   * format: Enter a number with max 4 decimal palces
-   */
-  CustomField6: z.string().nullable().optional(),
-  /**
-   * Value of Finished Goods additional attribute 7 Date format: Use `yyyy-mm-dd` Numeric
-   * format: Enter a number with max 4 decimal palces
-   */
-  CustomField7: z.string().nullable().optional(),
-  /**
-   * Value of Finished Goods additional attribute 8 Date format: Use `yyyy-mm-dd` Numeric
-   * format: Enter a number with max 4 decimal palces
-   */
-  CustomField8: z.string().nullable().optional(),
-  /**
-   * Value of Finished Goods additional attribute 9 Date format: Use `yyyy-mm-dd` Numeric
-   * format: Enter a number with max 4 decimal palces
-   */
-  CustomField9: z.string().nullable().optional(),
-  /**
-   * Value of Finished Goods additional attribute 10 Date format: Use `yyyy-mm-dd` Numeric
-   * format: Enter a number with max 4 decimal palces
-   */
-  CustomField10: z.string().nullable().optional()
-});
-
-export type FinishedGoods = z.infer<typeof FinishedGoodsSchema>;
-
-/**
  * Finished Goods List
  */
 export const FinishedGoodsListSchema = z.looseObject({
@@ -760,68 +617,6 @@ export const FinishedGoodsListSchema = z.looseObject({
 export type FinishedGoodsList = z.infer<typeof FinishedGoodsListSchema>;
 
 /**
- * Disassembly
- */
-export const DisassemblySchema = z.looseObject({
-  /**
-   * Unique ID.
-   */
-  TaskID: z.string().nullable().optional(),
-  /**
-   * Disassembly Number
-   */
-  DisassemblyNumber: z.string().nullable().optional(),
-  /**
-   * Disassembly Task Status. Available values are `DRAFT`,`WORK IN
-   * PROGRESS`,`COMPLETED`,`VOIDED`
-   */
-  Status: z.string().nullable().optional(),
-  /**
-   * Product ID
-   */
-  ProductID: z.string().nullable().optional(),
-  /**
-   * Product Code
-   */
-  ProductCode: z.string().nullable().optional(),
-  /**
-   * Product Name
-   */
-  ProductName: z.string().nullable().optional(),
-  /**
-   * Location ID
-   */
-  LocationID: z.string().nullable().optional(),
-  /**
-   * Location Name
-   */
-  Location: z.string().nullable().optional(),
-  /**
-   * Work in Progress Account
-   */
-  WIPAccount: z.string().nullable().optional(),
-  /**
-   * Quantity
-   */
-  Quantity: z.number().nullable().optional(),
-  /**
-   * Assembly Instruction URL
-   */
-  AssemblyInstructionURL: z.string().nullable().optional(),
-  PickLines: z.array(z.unknown()).nullable().optional(),
-  OrderLines: z.array(z.unknown()).nullable().optional(),
-  OrderServiceLines: z.array(z.unknown()).nullable().optional(),
-  Transactions: z.array(z.unknown()).nullable().optional(),
-  /**
-   * If While processing `POST` method, some errors occurred, but task was created, this
-   * property will contain array of error messages.
-   */
-  Errors: z.array(z.unknown()).nullable().optional()
-});
-
-export type Disassembly = z.infer<typeof DisassemblySchema>;
-
-/**
  * Disassembly List
  */
 export const DisassemblyListSchema = z.looseObject({
@@ -871,6 +666,34 @@ export const DisassemblyListSchema = z.looseObject({
 export type DisassemblyList = z.infer<typeof DisassemblyListSchema>;
 
 /**
+ * Journal Line Model
+ */
+export const JournalLineSchema = z.looseObject({
+  /**
+   * Debit Account Required.
+   */
+  Debit: z.string().nullable().optional(),
+  /**
+   * Credit Account Required.
+   */
+  Credit: z.string().nullable().optional(),
+  /**
+   * Custom Reference
+   */
+  Reference: z.string().nullable().optional(),
+  /**
+   * Amount in selected currency. Required.
+   */
+  Amount: z.number().nullable().optional(),
+  /**
+   * Amount in base currency. Required.
+   */
+  BaseAmount: z.number().nullable().optional()
+});
+
+export type JournalLine = z.infer<typeof JournalLineSchema>;
+
+/**
  * Journal
  */
 export const JournalSchema = z.looseObject({
@@ -906,7 +729,7 @@ export const JournalSchema = z.looseObject({
    * Notes
    */
   Notes: z.string().nullable().optional(),
-  Lines: z.array(z.unknown()).nullable().optional(),
+  Lines: z.array(JournalLineSchema).nullable().optional(),
   Attachments: z.array(z.unknown()).nullable().optional()
 });
 
@@ -968,6 +791,229 @@ export const ProductionOrderOperationNoteSchema = z.looseObject({
 });
 
 export type ProductionOrderOperationNote = z.infer<typeof ProductionOrderOperationNoteSchema>;
+
+/**
+ * Finished Goods Order Line Model
+ */
+export const FinishedGoodsOrderLineSchema = z.looseObject({
+  /**
+   * ID of product. Required if ProductCode is empty Required (conditional).
+   */
+  ProductID: z.string().nullable().optional(),
+  /**
+   * SKU of product. Required if ProductID is empty Max length: 256. Required (conditional).
+   */
+  ProductCode: z.string().nullable().optional(),
+  /**
+   * Name of product. Read-only. Max length: 256.
+   */
+  Name: z.string().nullable().optional(),
+  /**
+   * Required if product type is `Service` Required (conditional).
+   */
+  ExpenseAccount: z.string().nullable().optional(),
+  /**
+   * Quantity Required.
+   */
+  Quantity: z.number().nullable().optional(),
+  /**
+   * Unit of measure. Read-only.
+   */
+  Unit: z.string().nullable().optional(),
+  /**
+   * `WastagePercent` and `WastageQuantity` are mutually exclusive.
+   */
+  WastagePercent: z.number().nullable().optional(),
+  /**
+   * `WastagePercent` and `WastageQuantity` are mutually exclusive.
+   */
+  WastageQuantity: z.number().nullable().optional(),
+  /**
+   * Prorated cost distribution of a product that has been disassembled to current component.
+   * Read-only.
+   */
+  TotalQuantity: z.number().nullable().optional(),
+  /**
+   * Total cost. For products with type = Stock this parameter is auto-calculated, for other
+   * type’s its required. Required (conditional).
+   */
+  TotalCost: z.number().nullable().optional()
+});
+
+export type FinishedGoodsOrderLine = z.infer<typeof FinishedGoodsOrderLineSchema>;
+
+/**
+ * Finished Goods Pick Line Model
+ */
+export const FinishedGoodsPickLineSchema = z.looseObject({
+  /**
+   * ID of product. Required if ProductCode is empty Required (conditional).
+   */
+  ProductID: z.string().nullable().optional(),
+  /**
+   * SKU of product. Required if ProductID is empty Max length: 256. Required (conditional).
+   */
+  ProductCode: z.string().nullable().optional(),
+  /**
+   * Name of product. Read-only. Max length: 256.
+   */
+  Name: z.string().nullable().optional(),
+  /**
+   * ID of Bin.
+   */
+  BinID: z.string().nullable().optional(),
+  /**
+   * Name of Bin. Max length: 256.
+   */
+  Bin: z.string().nullable().optional(),
+  /**
+   * Batch serial number
+   */
+  BatchSN: z.string().nullable().optional(),
+  /**
+   * Batch Expiry Date
+   */
+  ExpiryDate: z.string().nullable().optional(),
+  /**
+   * Quantity Required.
+   */
+  Quantity: z.number().nullable().optional(),
+  /**
+   * Unit of measure. Read-only.
+   */
+  Unit: z.string().nullable().optional(),
+  /**
+   * Cost. Read-only.
+   */
+  Cost: z.number().nullable().optional()
+});
+
+export type FinishedGoodsPickLine = z.infer<typeof FinishedGoodsPickLineSchema>;
+
+/**
+ * Disassembly Pick Line Model
+ */
+export const DisassemblyPickLineSchema = z.looseObject({
+  /**
+   * ID of Bin.
+   */
+  BinID: z.string().nullable().optional(),
+  /**
+   * Name of Bin Max length: 256.
+   */
+  Bin: z.string().nullable().optional(),
+  /**
+   * Date Received
+   */
+  Date: z.string().nullable().optional(),
+  /**
+   * Batch serial number
+   */
+  BatchSN: z.string().nullable().optional(),
+  /**
+   * Batch Expiry Date
+   */
+  ExpiryDate: z.string().nullable().optional(),
+  /**
+   * Available Quantity.
+   */
+  Available: z.number().nullable().optional(),
+  /**
+   * Cost.
+   */
+  UnitCost: z.number().nullable().optional(),
+  /**
+   * Picked Quantity.
+   */
+  Quantity: z.number().nullable().optional(),
+  /**
+   * Total Line Cost.
+   */
+  TotalCost: z.number().nullable().optional()
+});
+
+export type DisassemblyPickLine = z.infer<typeof DisassemblyPickLineSchema>;
+
+/**
+ * Disassembly Order Line Model
+ */
+export const DisassemblyOrderLineSchema = z.looseObject({
+  /**
+   * ID of product. Required if ProductCode is empty Required (conditional).
+   */
+  ProductID: z.string().nullable().optional(),
+  /**
+   * SKU of product. Required if ProductID is empty Max length: 256. Required (conditional).
+   */
+  ProductCode: z.string().nullable().optional(),
+  /**
+   * Name of product. Read-only. Max length: 256.
+   */
+  Name: z.string().nullable().optional(),
+  /**
+   * ID of Bin.
+   */
+  BinID: z.string().nullable().optional(),
+  /**
+   * Name of Bin. Max length: 256.
+   */
+  Bin: z.string().nullable().optional(),
+  /**
+   * Unit of measure. Read-only.
+   */
+  Unit: z.string().nullable().optional(),
+  /**
+   * Batch serial number
+   */
+  BatchSN: z.string().nullable().optional(),
+  /**
+   * Batch Expiry Date
+   */
+  ExpiryDate: z.string().nullable().optional(),
+  /**
+   * Inventory Account
+   */
+  Account: z.string().nullable().optional(),
+  /**
+   * Quantity Required.
+   */
+  Quantity: z.number().nullable().optional(),
+  /**
+   * Cost. Required.
+   */
+  Cost: z.number().nullable().optional()
+});
+
+export type DisassemblyOrderLine = z.infer<typeof DisassemblyOrderLineSchema>;
+
+/**
+ * Disassembly Order Service Line Model
+ */
+export const DisassemblyOrderServiceLineSchema = z.looseObject({
+  /**
+   * ID of product. Required if Name is empty Required (conditional).
+   */
+  ProductID: z.string().nullable().optional(),
+  /**
+   * Name of service product. Required if ProductID is empty Max length: 256. Required
+   * (conditional).
+   */
+  Name: z.string().nullable().optional(),
+  /**
+   * Expense Account Required.
+   */
+  Account: z.string().nullable().optional(),
+  /**
+   * Comment to line.
+   */
+  Comments: z.string().nullable().optional(),
+  /**
+   * Amount. Required.
+   */
+  Amount: z.number().nullable().optional()
+});
+
+export type DisassemblyOrderServiceLine = z.infer<typeof DisassemblyOrderServiceLineSchema>;
 
 /**
  * Production BOM Attachment
@@ -1112,6 +1158,211 @@ export const ProductionOrderOperationSchema = z.looseObject({
 });
 
 export type ProductionOrderOperation = z.infer<typeof ProductionOrderOperationSchema>;
+
+/**
+ * Finished Goods
+ */
+export const FinishedGoodsSchema = z.looseObject({
+  /**
+   * Unique ID.
+   */
+  TaskID: z.string().nullable().optional(),
+  /**
+   * Assembly Number
+   */
+  AssemblyNumber: z.string().nullable().optional(),
+  /**
+   * Finished Goods Task Status. Available values are `DRAFT`,`AUTHORISED`,`IN
+   * PROGRESS`,`COMPLETED`,`VOIDED`
+   */
+  Status: z.string().nullable().optional(),
+  /**
+   * Product ID
+   */
+  ProductID: z.string().nullable().optional(),
+  /**
+   * Product Code
+   */
+  ProductCode: z.string().nullable().optional(),
+  /**
+   * Product Name
+   */
+  ProductName: z.string().nullable().optional(),
+  /**
+   * Location ID
+   */
+  LocationID: z.string().nullable().optional(),
+  /**
+   * Location Name
+   */
+  Location: z.string().nullable().optional(),
+  /**
+   * Bin ID
+   */
+  BinID: z.string().nullable().optional(),
+  /**
+   * Bin Name
+   */
+  Bin: z.number().nullable().optional(),
+  /**
+   * Work in Progress Account
+   */
+  WIPAccount: z.string().nullable().optional(),
+  /**
+   * Work in Progress Date
+   */
+  WIPDate: z.string().nullable().optional(),
+  /**
+   * Finished Goods Account
+   */
+  Account: z.string().nullable().optional(),
+  /**
+   * Quantity
+   */
+  Quantity: z.number().nullable().optional(),
+  /**
+   * Assembly Instruction URL
+   */
+  AssemblyInstructionURL: z.string().nullable().optional(),
+  /**
+   * Completion Date
+   */
+  CompletionDate: z.string().nullable().optional(),
+  /**
+   * Batch serial number
+   */
+  BatchSN: z.string().nullable().optional(),
+  /**
+   * Batch Expiry Date
+   */
+  ExpiryDate: z.string().nullable().optional(),
+  /**
+   * Notes
+   */
+  Notes: z.string().nullable().optional(),
+  OrderLines: z.array(FinishedGoodsOrderLineSchema).nullable().optional(),
+  PickLines: z.array(FinishedGoodsPickLineSchema).nullable().optional(),
+  Transactions: z.array(z.unknown()).nullable().optional(),
+  /**
+   * If While processing `POST` method, some errors occurred, but task was created, this
+   * property will contain array of error messages.
+   */
+  Errors: z.array(z.unknown()).nullable().optional(),
+  /**
+   * Value of Finished Goods additional attribute 1 Date format: Use `yyyy-mm-dd` Numeric
+   * format: Enter a number with max 4 decimal palces
+   */
+  CustomField1: z.string().nullable().optional(),
+  /**
+   * Value of Finished Goods additional attribute 2 Date format: Use `yyyy-mm-dd` Numeric
+   * format: Enter a number with max 4 decimal palces
+   */
+  CustomField2: z.string().nullable().optional(),
+  /**
+   * Value of Finished Goods additional attribute 3 Date format: Use `yyyy-mm-dd` Numeric
+   * format: Enter a number with max 4 decimal palces
+   */
+  CustomField3: z.string().nullable().optional(),
+  /**
+   * Value of Finished Goods additional attribute 4 Date format: Use `yyyy-mm-dd` Numeric
+   * format: Enter a number with max 4 decimal palces
+   */
+  CustomField4: z.string().nullable().optional(),
+  /**
+   * Value of Finished Goods additional attribute 5 Date format: Use `yyyy-mm-dd` Numeric
+   * format: Enter a number with max 4 decimal palces
+   */
+  CustomField5: z.string().nullable().optional(),
+  /**
+   * Value of Finished Goods additional attribute 6 Date format: Use `yyyy-mm-dd` Numeric
+   * format: Enter a number with max 4 decimal palces
+   */
+  CustomField6: z.string().nullable().optional(),
+  /**
+   * Value of Finished Goods additional attribute 7 Date format: Use `yyyy-mm-dd` Numeric
+   * format: Enter a number with max 4 decimal palces
+   */
+  CustomField7: z.string().nullable().optional(),
+  /**
+   * Value of Finished Goods additional attribute 8 Date format: Use `yyyy-mm-dd` Numeric
+   * format: Enter a number with max 4 decimal palces
+   */
+  CustomField8: z.string().nullable().optional(),
+  /**
+   * Value of Finished Goods additional attribute 9 Date format: Use `yyyy-mm-dd` Numeric
+   * format: Enter a number with max 4 decimal palces
+   */
+  CustomField9: z.string().nullable().optional(),
+  /**
+   * Value of Finished Goods additional attribute 10 Date format: Use `yyyy-mm-dd` Numeric
+   * format: Enter a number with max 4 decimal palces
+   */
+  CustomField10: z.string().nullable().optional()
+});
+
+export type FinishedGoods = z.infer<typeof FinishedGoodsSchema>;
+
+/**
+ * Disassembly
+ */
+export const DisassemblySchema = z.looseObject({
+  /**
+   * Unique ID.
+   */
+  TaskID: z.string().nullable().optional(),
+  /**
+   * Disassembly Number
+   */
+  DisassemblyNumber: z.string().nullable().optional(),
+  /**
+   * Disassembly Task Status. Available values are `DRAFT`,`WORK IN
+   * PROGRESS`,`COMPLETED`,`VOIDED`
+   */
+  Status: z.string().nullable().optional(),
+  /**
+   * Product ID
+   */
+  ProductID: z.string().nullable().optional(),
+  /**
+   * Product Code
+   */
+  ProductCode: z.string().nullable().optional(),
+  /**
+   * Product Name
+   */
+  ProductName: z.string().nullable().optional(),
+  /**
+   * Location ID
+   */
+  LocationID: z.string().nullable().optional(),
+  /**
+   * Location Name
+   */
+  Location: z.string().nullable().optional(),
+  /**
+   * Work in Progress Account
+   */
+  WIPAccount: z.string().nullable().optional(),
+  /**
+   * Quantity
+   */
+  Quantity: z.number().nullable().optional(),
+  /**
+   * Assembly Instruction URL
+   */
+  AssemblyInstructionURL: z.string().nullable().optional(),
+  PickLines: z.array(DisassemblyPickLineSchema).nullable().optional(),
+  OrderLines: z.array(DisassemblyOrderLineSchema).nullable().optional(),
+  OrderServiceLines: z.array(DisassemblyOrderServiceLineSchema).nullable().optional(),
+  Transactions: z.array(z.unknown()).nullable().optional(),
+  /**
+   * If While processing `POST` method, some errors occurred, but task was created, this
+   * property will contain array of error messages.
+   */
+  Errors: z.array(z.unknown()).nullable().optional()
+});
+
+export type Disassembly = z.infer<typeof DisassemblySchema>;
 
 /**
  * Production BOM Operation

@@ -8,13 +8,13 @@ export default class Crm {
   readonly opportunities: WritableResource<typeof OpportunitySchema>;
 
   constructor(axios: AxiosInstance, options: ResourceOptions = {}) {
-    this.leads = new WritableResource(axios, '/crm/lead', LeadSchema, 'LeadList', options);
+    this.leads = new WritableResource(axios, '/crm/lead', LeadSchema, 'LeadList', { ...options, sinceParam: 'ModifiedSince' });
     this.opportunities = new WritableResource(
       axios,
       '/crm/opportunity',
       OpportunitySchema,
       'opportunityList',
-      options
+      { ...options, sinceParam: 'ModifiedSince' }
     );
   }
 
