@@ -171,4 +171,5 @@ export * from './resources/types';
  * without reaching past the package's `exports` map — which is not permitted.
  */
 export type { StockAdjustmentUpsert, StockTransferStatus } from './resources/Stock';
+export { WebhookSchema } from './resources/Account';
 export type { Webhook } from './resources/Account';

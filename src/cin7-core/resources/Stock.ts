@@ -54,7 +54,9 @@ export default class Stock {
       axios,
       '/stockTakeList',
       StockTakeListSchema,
-      'StockTakeList',
+      // Verified against the live v2 API 2026-08-10: the blueprint's name is not what the
+      // endpoint returns, and the old value made this list silently yield zero rows.
+      'StockAdjustmentList',
       options
     );
     this.transfers = new WritableResource(
@@ -82,7 +84,9 @@ export default class Stock {
       axios,
       '/inventoryWriteOffList',
       InventoryWriteOffListSchema,
-      'InventoryWriteOffList',
+      // Verified against the live v2 API 2026-08-10: the blueprint's name is not what the
+      // endpoint returns, and the old value made this list silently yield zero rows.
+      'InventoryWriteOffs',
       options
     );
   }

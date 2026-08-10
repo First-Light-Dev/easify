@@ -98,8 +98,40 @@ export abstract class BaseResource<TSchema extends z.ZodType> {
     return payload.map((item) => this.parse(item));
   }
 
+  /**
+   * Turns Cin7's `{ Total, Page, XxxList }` into `{ Total, Page, Items }`.
+   *
+   * Throws when `listKey` is absent from the response. Cin7 always sends the key — an empty
+   * page carries `[]`, verified against `/ref/account` past the last page — so its absence
+   * means the key this resource was constructed with is wrong: a typo, or Cin7 renaming it.
+   *
+   * That case used to return `Items: []` while `Total` still came from the envelope, producing
+   * a page claiming 230 records and carrying none. Every caller read it as "no records": a
+   * poller would find no variances, a backfill no transfers, and nothing anywhere would error.
+   * Silently returning zero rows is worse than failing, because zero is a plausible answer.
+   */
   protected unwrapPage(payload: unknown, listKey: string): PageResult<z.infer<TSchema>> {
     const data = (payload ?? {}) as Record<string, unknown>;
+
+    if (typeof data !== 'object' || Array.isArray(data)) {
+      throw new Cin7CoreError(
+        `${this.path} returned ${Array.isArray(data) ? 'an array' : typeof data}, not the ` +
+          `expected { Total, Page, ${listKey} } envelope.`,
+        undefined,
+        payload
+      );
+    }
+
+    if (!(listKey in data)) {
+      throw new Cin7CoreError(
+        `${this.path} returned no "${listKey}" property, so this resource is reading the wrong ` +
+          `envelope key and would report zero records for a page of ${String(data.Total ?? '?')}. ` +
+          `Keys present: ${Object.keys(data).join(', ') || '(none)'}.`,
+        undefined,
+        payload
+      );
+    }
+
     const items = this.parseMany(data[listKey]);
     return {
       Total: typeof data.Total === 'number' ? data.Total : items.length,

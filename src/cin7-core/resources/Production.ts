@@ -41,7 +41,9 @@ export default class Production {
       axios,
       '/production/orderList',
       ProductionOrderListSchema,
-      'ProductionOrderList',
+      // Verified against the live v2 API 2026-08-10: the blueprint's name is not what the
+      // endpoint returns, and the old value made this list silently yield zero rows.
+      'ProductionOrderListItems',
       options
     );
     this.finishedGoods = new WritableResource(
@@ -62,7 +64,9 @@ export default class Production {
       axios,
       '/journal',
       JournalSchema,
-      'JournalList',
+      // Verified against the live v2 API 2026-08-10: the blueprint's name is not what the
+      // endpoint returns, and the old value made this list silently yield zero rows.
+      'Journals',
       { ...options, idParam: 'TaskID' }
     );
   }

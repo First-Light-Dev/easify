@@ -17,7 +17,9 @@ export default class Customers extends WritableResource<typeof CustomerSchema> {
       axios,
       '/ref/customer/credits',
       CustomerCreditsSchema,
-      'CustomerCreditsList',
+      // Verified against the live v2 API 2026-08-10: the blueprint's name is not what the
+      // endpoint returns, and the old value made this list silently yield zero rows.
+      'CustomerCredits',
       options
     );
   }

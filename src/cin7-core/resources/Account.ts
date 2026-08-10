@@ -17,7 +17,7 @@ import {
   TransactionsSchema
 } from './types/Account';
 
-const WebhookSchema = z.looseObject({
+export const WebhookSchema = z.looseObject({
   /** Unique ID. Required for PUT. */
   ID: z.string().nullable().optional(),
   /** See https://dearinventory.docs.apiary.io/#reference/webhooks for the value list. */
@@ -80,7 +80,8 @@ export default class Account {
       axios,
       '/webhooks',
       WebhookSchema,
-      'WebhookList',
+      // Verified live 2026-08-10: /webhooks returns "Webhooks", not the blueprint's name.
+      'Webhooks',
       options
     );
     this.transactions = new ReadableResource(

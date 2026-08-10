@@ -58,7 +58,9 @@ export default class Purchases extends WritableResource<typeof PurchaseSchema> {
       axios,
       '/purchaseCreditNoteList',
       PurchaseCreditNoteListSchema,
-      'PurchaseCreditNoteList',
+      // Verified against the live v2 API 2026-08-10: the blueprint's name is not what the
+      // endpoint returns, and the old value made this list silently yield zero rows.
+      'PurchaseList',
       { ...options, sinceParam: 'UpdatedSince' }
     );
     this.order = new NestedDocumentResource(

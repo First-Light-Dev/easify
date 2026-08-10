@@ -48,7 +48,9 @@ export default class Sales extends WritableResource<typeof SaleSchema> {
       axios,
       '/saleCreditNoteList',
       SaleCreditNoteListSchema,
-      'SaleCreditNoteList',
+      // Verified against the live v2 API 2026-08-10: the blueprint's name is not what the
+      // endpoint returns, and the old value made this list silently yield zero rows.
+      'SaleList',
       { ...options, sinceParam: 'UpdatedSince' }
     );
     this.quote = new NestedDocumentResource(axios, '/sale/quote', SaleQuoteSchema, 'SaleID', options);

@@ -1023,6 +1023,13 @@ export const ProductSchema = z.looseObject({
    * Customer specific Product Prices.
    */
   CustomPrices: z.array(z.unknown()).nullable().optional()
+,
+  /** Verified against the live v2 API 2026-08-10. */
+  AlwaysShowQuantity: z.boolean().nullable().optional(),
+  /** Verified against the live v2 API 2026-08-10. */
+  WarrantyName: z.string().nullable().optional(),
+  /** Verified against the live v2 API 2026-08-10. */
+  CreatedDate: z.string().nullable().optional()
 });
 
 export type Product = z.infer<typeof ProductSchema>;

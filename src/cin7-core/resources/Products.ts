@@ -38,7 +38,9 @@ export default class Products extends WritableResource<typeof ProductSchema> {
       axios,
       '/productFamily',
       ProductFamilySchema,
-      'ProductFamilyList',
+      // Verified against the live v2 API 2026-08-10: the blueprint's name is not what the
+      // endpoint returns, and the old value made this list silently yield zero rows.
+      'ProductFamilies',
       { ...options, sinceParam: 'ModifiedSince' }
     );
   }

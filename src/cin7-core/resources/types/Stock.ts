@@ -585,6 +585,8 @@ export const StockTransferSchema = z.looseObject({
   /**
    * Date of last modification. UTC Time. Read-only.
    */
+  /** Verified against the live v2 API 2026-08-10. */
+  ManualJournals: z.array(z.unknown()).nullable().optional(),
   LastModifiedOn: z.string().nullable().optional()
 });
 
@@ -950,6 +952,12 @@ export const StockAdjustmentSchema = z.looseObject({
   /**
    * Changes in non-zero stock
    */
+  /** Verified against the live v2 API 2026-08-10. */
+  LocationID: z.string().nullable().optional(),
+  /** Verified against the live v2 API 2026-08-10. */
+  Location: z.string().nullable().optional(),
+  /** Verified against the live v2 API 2026-08-10. */
+  Comment: z.string().nullable().optional(),
   ExistingStockLines: z.array(ExistingStockLineSchema).nullable().optional(),
   /**
    * Changes in zero stock

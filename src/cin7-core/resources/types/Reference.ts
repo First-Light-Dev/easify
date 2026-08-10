@@ -155,9 +155,20 @@ export const ChartOfAccountsSchema = z.looseObject({
    */
   SystemAccountCode: z.string().nullable().optional(),
   /**
-   * Account status
+   * Whether the account may be used for payments.
+   *
+   * Accepts boolean OR string, because the two sources of truth disagree. The blueprint types
+   * this `String` and describes it as "Account status" — but a live v2 `/ref/account` read
+   * returns a JSON boolean (`"ForPayments": false`), and the generated string type rejected
+   * every chart-of-accounts response with a ZodError. Verified against the API on 2026-08-10.
+   *
+   * A union rather than a flat `boolean` so the schema survives Cin7 aligning the API to its
+   * own documentation. Nothing in this package reads the field, so permissiveness costs
+   * nothing and a wrong guess would break an unrelated call.
+   *
+   * Regenerating this file will reintroduce `z.string()` — treat it as hand-written.
    */
-  ForPayments: z.string().nullable().optional(),
+  ForPayments: z.union([z.boolean(), z.string()]).nullable().optional(),
   /**
    * Account display name. Read-only.
    */
@@ -262,7 +273,9 @@ export const LocationSchema = z.looseObject({
   /**
    * Points that location is deprecated
    */
-  Deprecated: z.boolean().nullable().optional(),
+  /** `IsDeprecated` on the wire — the generated name `Deprecated` never matched, so reading
+   *  it always yielded undefined while the API had sent a value. Verified 2026-08-10. */
+  IsDeprecated: z.boolean().nullable().optional(),
   /**
    * Array (ID, Name) with related Bins
    */
@@ -310,7 +323,8 @@ export const LocationSchema = z.looseObject({
   /**
    * Points that location is shopfloor
    */
-  IsShopfloor: z.boolean().nullable().optional(),
+  /** Capital F on the wire: `IsShopFloor`. Verified 2026-08-10. */
+  IsShopFloor: z.boolean().nullable().optional(),
   /**
    * Points that location is location of co-manufacturer
    */
