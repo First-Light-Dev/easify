@@ -56,6 +56,10 @@
       "types": "./dist/unleashed/index.d.ts",
       "default": "./dist/unleashed/index.js"
     },
+    "./finale": {
+      "types": "./dist/finale/index.d.ts",
+      "default": "./dist/finale/index.js"
+    },
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
