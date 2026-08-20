@@ -163,3 +163,13 @@ export {
 
 export * from './resources/base/Resource';
 export * from './resources/types';
+
+/**
+ * Types declared on the resource modules rather than generated from the
+ * blueprint. `export *` above only covers the generated types and the resource
+ * base, so without these a consumer cannot name a transfer status or a webhook
+ * without reaching past the package's `exports` map — which is not permitted.
+ */
+export type { StockAdjustmentUpsert, StockTransferStatus } from './resources/Stock';
+export { WebhookSchema } from './resources/Account';
+export type { Webhook } from './resources/Account';

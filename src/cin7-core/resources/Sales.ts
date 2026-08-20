@@ -41,15 +41,17 @@ export default class Sales extends WritableResource<typeof SaleSchema> {
 
   constructor(axios: AxiosInstance, options: ResourceOptions = {}) {
     // `/sale` is a detail/create/update endpoint; listing goes through `/saleList`.
-    super(axios, '/sale', SaleSchema, 'SaleList', options);
+    super(axios, '/sale', SaleSchema, 'SaleList', { ...options, sinceParam: 'UpdatedSince' });
 
-    this.listView = new ReadableResource(axios, '/saleList', SaleListSchema, 'SaleList', options);
+    this.listView = new ReadableResource(axios, '/saleList', SaleListSchema, 'SaleList', { ...options, sinceParam: 'UpdatedSince' });
     this.creditNoteList = new ReadableResource(
       axios,
       '/saleCreditNoteList',
       SaleCreditNoteListSchema,
-      'SaleCreditNoteList',
-      options
+      // Verified against the live v2 API 2026-08-10: the blueprint's name is not what the
+      // endpoint returns, and the old value made this list silently yield zero rows.
+      'SaleList',
+      { ...options, sinceParam: 'UpdatedSince' }
     );
     this.quote = new NestedDocumentResource(axios, '/sale/quote', SaleQuoteSchema, 'SaleID', options);
     this.order = new NestedDocumentResource(axios, '/sale/order', SaleOrderSchema, 'SaleID', options);

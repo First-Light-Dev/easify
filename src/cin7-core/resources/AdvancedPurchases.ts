@@ -1,8 +1,10 @@
 import { AxiosInstance } from 'axios';
 import { NestedDocumentResource, QueryOptions, ResourceOptions } from './base/Resource';
 import {
+  AdvancedPurchase,
   AdvancedPurchaseCreditNote,
   AdvancedPurchaseCreditNoteSchema,
+  AdvancedPurchaseSchema,
   AdvancedPurchaseInvoice,
   AdvancedPurchaseInvoiceSchema,
   AdvancedPurchaseManualJournal,
@@ -81,6 +83,36 @@ export default class AdvancedPurchases {
     );
   }
 
+  /**
+   * Fetches a purchase by id (`GET /advanced-purchase?ID=`).
+   *
+   * This is the non-deprecated read: Cin7 marks `/purchase` and every
+   * `/purchase/*` sub-document deprecated in favour of the advanced endpoints, so
+   * prefer this over `purchases.getById()` for new code.
+   *
+   * Unlike POST/PUT here, a GET does **not** convert a simple purchase into an
+   * advanced one — it returns either kind, with `Type` saying which.
+   *
+   * @param combineAdditionalCharges Folds additional charges into `Lines`.
+   */
+  async get(
+    id: string,
+    options: { combineAdditionalCharges?: boolean } = {},
+    params: QueryOptions = {}
+  ): Promise<AdvancedPurchase> {
+    const response = await this.axios.get('/advanced-purchase', {
+      params: {
+        ...params,
+        ID: id,
+        ...(options.combineAdditionalCharges === undefined
+          ? {}
+          : { CombineAdditionalCharges: options.combineAdditionalCharges })
+      }
+    });
+    if (this.options.validate === false) return response.data as AdvancedPurchase;
+    return AdvancedPurchaseSchema.parse(response.data);
+  }
+
   /** Creates an advanced purchase (or converts a simple one). */
   async create(body: unknown, params: QueryOptions = {}): Promise<unknown> {
     const response = await this.axios.post('/advanced-purchase', body, { params });
@@ -150,6 +182,7 @@ export default class AdvancedPurchases {
 }
 
 export type {
+  AdvancedPurchase,
   AdvancedPurchaseStock,
   AdvancedPurchaseStockTask,
   AdvancedPurchaseStockLine,

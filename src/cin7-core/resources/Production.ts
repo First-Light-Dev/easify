@@ -35,13 +35,15 @@ export default class Production {
       '/production/order',
       ProductionOrderSchema,
       'ProductionOrderList',
-      options
+      { ...options, idParam: 'ProductionOrderID' }
     );
     this.orderList = new ReadableResource(
       axios,
       '/production/orderList',
       ProductionOrderListSchema,
-      'ProductionOrderList',
+      // Verified against the live v2 API 2026-08-10: the blueprint's name is not what the
+      // endpoint returns, and the old value made this list silently yield zero rows.
+      'ProductionOrderListItems',
       options
     );
     this.finishedGoods = new WritableResource(
@@ -49,16 +51,24 @@ export default class Production {
       '/finishedGoods',
       FinishedGoodsSchema,
       'FinishedGoodsList',
-      options
+      { ...options, idParam: 'TaskID' }
     );
     this.disassemblies = new WritableResource(
       axios,
       '/disassembly',
       DisassemblySchema,
       'DisassemblyList',
-      options
+      { ...options, idParam: 'TaskID' }
     );
-    this.journals = new WritableResource(axios, '/journal', JournalSchema, 'JournalList', options);
+    this.journals = new WritableResource(
+      axios,
+      '/journal',
+      JournalSchema,
+      // Verified against the live v2 API 2026-08-10: the blueprint's name is not what the
+      // endpoint returns, and the old value made this list silently yield zero rows.
+      'Journals',
+      { ...options, idParam: 'TaskID' }
+    );
   }
 
   listOrders(params: QueryOptions = {}) {

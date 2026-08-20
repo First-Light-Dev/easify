@@ -115,7 +115,18 @@ function parseModels(text: string): Map<string, ModelDef> {
     const available = line.match(/^### Available [Ff]ields(?: for)?\s*(.*)$/);
     // Some sections flip the wording, e.g. "### Invoice Available Fields".
     const availableAlt = line.match(/^### (.+?) Available [Ff]ields\s*$/);
-    const partialModel = line.match(/^### (.+ Model)\s*$/);
+    /**
+     * The blueprint's shared model appendix uses `##` headings with a trailing anchor tag —
+     * `## Stock Transfer Line Model <a name="StockTransferLineModel" />` — while the
+     * endpoint sections use `###`. Matching only `###` skipped every one of those ~35 line
+     * models, so each field referencing one (every `Lines` on every document) fell back to
+     * `z.array(z.unknown())`. Headings carrying a `[/path]` are endpoint sections, not models.
+     */
+    const modelHeading = line.match(/^#{2,3}\s+(.*)$/)?.[1];
+    const partialModel =
+      modelHeading && !modelHeading.includes('[/')
+        ? cleanText(modelHeading).match(/^(.+ Model)$/)
+        : null;
     if (!available && !availableAlt && !partialModel) {
       i++;
       continue;
@@ -806,7 +817,21 @@ async function main(): Promise<void> {
   console.log('  wrote Common.ts');
 
   const written: string[] = ['Common'];
-  const claimed = new Set<string>();
+
+  /**
+   * Names already owned by a file this generator does not produce: the hand-written
+   * Common.ts envelopes, and every `HAND_WRITTEN_TYPE_FILES` model. They have to be
+   * claimed up front — otherwise the nested-dependency pull-in in `generateModelFile`
+   * re-emits them into a domain file and `index.ts` exports the same symbol twice
+   * (TS2308). Reading the hand-written files keeps this list from going stale.
+   */
+  const claimed = new Set<string>(['PageEnvelope', 'Error']);
+  for (const file of HAND_WRITTEN_TYPE_FILES) {
+    const handWritten = fs.readFileSync(path.join(OUT_DIR, `${file}.ts`), 'utf8');
+    for (const match of handWritten.matchAll(/export const (\w+)Schema =/g)) {
+      claimed.add(match[1]);
+    }
+  }
   for (const group of FILE_GROUPS) {
     if (group.file === 'Common') continue;
     const uniqueModels = group.models.filter((name) => !claimed.has(name));

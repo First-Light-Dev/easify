@@ -8,50 +8,6 @@ import { z } from 'zod';
  */
 
 /**
- * Stock Adjustment
- */
-export const StockAdjustmentSchema = z.looseObject({
-  /**
-   * Unique Cin7 Core Stock Adjustment ID
-   */
-  TaskID: z.string().nullable().optional(),
-  /**
-   * Date of transaction
-   */
-  EffectiveDate: z.string().nullable().optional(),
-  /**
-   * Stock Take/Adjustment Number
-   */
-  StocktakeNumber: z.string().nullable().optional(),
-  /**
-   * Status of stock adjustment. Available values are `DRAFT`,`COMPLETED`,`VOIDED`.
-   */
-  Status: z.string().nullable().optional(),
-  /**
-   * Expense account for inventory adjustment
-   */
-  Account: z.string().nullable().optional(),
-  /**
-   * Custom reference
-   */
-  Reference: z.string().nullable().optional(),
-  /**
-   * Changes in non-zero stock
-   */
-  ExistingStockLines: z.array(z.unknown()).nullable().optional(),
-  /**
-   * Changes in zero stock
-   */
-  NewStockLines: z.array(z.unknown()).nullable().optional(),
-  /**
-   * Created transactions due to stock changes.
-   */
-  Transactions: z.array(z.unknown()).nullable().optional()
-});
-
-export type StockAdjustment = z.infer<typeof StockAdjustmentSchema>;
-
-/**
  * Stock Adjustment List
  */
 export const StockAdjustmentListSchema = z.looseObject({
@@ -86,95 +42,6 @@ export const StockAdjustmentListSchema = z.looseObject({
 });
 
 export type StockAdjustmentList = z.infer<typeof StockAdjustmentListSchema>;
-
-/**
- * Stock Take
- */
-export const StockTakeSchema = z.looseObject({
-  /**
-   * Unique Cin7 Core Stock Take ID. Required for PUT Required (conditional).
-   */
-  TaskID: z.string().nullable().optional(),
-  /**
-   * Date of transaction Required.
-   */
-  EffectiveDate: z.string().nullable().optional(),
-  /**
-   * Stock Take Number (auto-generated).
-   */
-  StocktakeNumber: z.string().nullable().optional(),
-  /**
-   * Status of stocktake. Available values are `DRAFT`, `IN PROGRESS`, `COMPLETED`, `VOIDED`.
-   * Required for PUT Required (conditional).
-   */
-  Status: z.string().nullable().optional(),
-  /**
-   * Expense account for inventory adjustment Required.
-   */
-  Account: z.string().nullable().optional(),
-  /**
-   * Location ID. Required if `Location` is empty Required (conditional).
-   */
-  LocationID: z.string().nullable().optional(),
-  /**
-   * Required (conditional).
-   */
-  Location: z.string().nullable().optional(),
-  /**
-   * Tags used for additional product filtration. Can be used to filter
-   * NonZeroStockOnHandProducts
-   */
-  Tags: z.array(z.string()).nullable().optional(),
-  /**
-   * Pick Zones used for additional product filtration. Can be used to filter
-   * NonZeroStockOnHandProducts
-   */
-  PickZones: z.array(z.string()).nullable().optional(),
-  /**
-   * Stock Locators used for additional product filtration. Can be used to filter
-   * NonZeroStockOnHandProducts
-   */
-  StockLocators: z.array(z.string()).nullable().optional(),
-  /**
-   * Categories used for additional product filtration. Can be used to filter
-   * NonZeroStockOnHandProducts
-   */
-  Categories: z.array(z.unknown()).nullable().optional(),
-  /**
-   * Brands used for additional product filtration. Can be used to filter
-   * NonZeroStockOnHandProducts
-   */
-  Brands: z.array(z.unknown()).nullable().optional(),
-  /**
-   * Bins used for additional product filtration. Can be used to filter
-   * NonZeroStockOnHandProducts
-   */
-  Bins: z.array(z.unknown()).nullable().optional(),
-  /**
-   * Custom reference
-   */
-  Reference: z.string().nullable().optional(),
-  /**
-   * Lines will be automaticaly filled with filtered products which have non empty stock.(in
-   * POST method or in PUT method if status is changing from `DRAFT` to `IN PROGRESS`. If
-   * current `Status` is `IN PROGRESS`, lines can be passed to PUT method (line entry will be
-   * found by product, location, batchSN and expiryDate and passed `Adjustment` will be set
-   * as new `Adjustment`)
-   */
-  NonZeroStockOnHandProducts: z.array(z.unknown()).nullable().optional(),
-  ZeroStockOnHandProducts: z.array(z.unknown()).nullable().optional(),
-  /**
-   * Created transactions due to stock changes.
-   */
-  Transactions: z.array(z.unknown()).nullable().optional(),
-  /**
-   * Indicates whether zero-stock products should be included in the stocktake. true –
-   * includes products with zero stock false – excludes products with zero stock
-   */
-  UseRelativeQuantity: z.boolean().nullable().optional()
-});
-
-export type StockTake = z.infer<typeof StockTakeSchema>;
 
 /**
  * Stock Take List
@@ -315,76 +182,219 @@ export const StockTransferListSchema = z.looseObject({
 export type StockTransferList = z.infer<typeof StockTransferListSchema>;
 
 /**
- * Stock Transfer Order
+ * Stock Transfer Order Line Model
  */
-export const StockTransferOrderSchema = z.looseObject({
+export const StockTransferOrderLineSchema = z.looseObject({
   /**
-   * Unique Cin7 Core Stock Transfer ID Required.
+   * Product identifier referenced by this Line. Required if `SKU` is empty. Required
+   * (conditional).
    */
-  TaskID: z.string().nullable().optional(),
+  ProductID: z.string().nullable().optional(),
   /**
-   * Status of stock transfer order. Available values are `DRAFT`, `AUTHORISED`, `NOT
-   * AVAILABLE`. Required.
+   * Product SKU referenced by this Line. Required if `ProductID` is empty. Max length: 50.
+   * Required (conditional).
    */
-  Status: z.string().nullable().optional(),
+  SKU: z.string().nullable().optional(),
   /**
-   * Required.
+   * Product Name referenced by this Line Max length: 1024.
    */
-  Lines: z.array(z.unknown()).nullable().optional(),
+  ProductName: z.string().nullable().optional(),
   /**
-   * Date of last modification. UTC Time. Read-only.
+   * Quantity of Stock ‘‘On Hand’’
    */
-  LastModifiedOn: z.string().nullable().optional()
+  QuantityOnHand: z.number().nullable().optional(),
+  /**
+   * Available quantity of stock
+   */
+  QuantityAvailable: z.number().nullable().optional(),
+  /**
+   * Quantity to transfer from one location to another. Required.
+   */
+  TransferQuantity: z.number().nullable().optional(),
+  /**
+   * Comment Max length: 256.
+   */
+  Comments: z.string().nullable().optional(),
+  /**
+   * Length of product. Read-only.
+   */
+  ProductLength: z.number().nullable().optional(),
+  /**
+   * Width of product. Read-only.
+   */
+  ProductWidth: z.number().nullable().optional(),
+  /**
+   * Height of product. Read-only.
+   */
+  ProductHeight: z.number().nullable().optional(),
+  /**
+   * Weight of product. Read-only.
+   */
+  ProductWeight: z.number().nullable().optional(),
+  /**
+   * Unit of measure for unit weight. Available Values are values Max length: 10.
+   */
+  WeightUnits: z.string().nullable().optional(),
+  /**
+   * Unit of measure for unit length/width/height. Available Values are values Max length:
+   * 10.
+   */
+  DimensionsUnits: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 1. Read-only.
+   */
+  ProductCustomField1: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 2. Read-only.
+   */
+  ProductCustomField2: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 3. Read-only.
+   */
+  ProductCustomField3: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 4. Read-only.
+   */
+  ProductCustomField4: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 5. Read-only.
+   */
+  ProductCustomField5: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 6. Read-only.
+   */
+  ProductCustomField6: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 7. Read-only.
+   */
+  ProductCustomField7: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 8. Read-only.
+   */
+  ProductCustomField8: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 9. Read-only.
+   */
+  ProductCustomField9: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 10. Read-only.
+   */
+  ProductCustomField10: z.string().nullable().optional()
 });
 
-export type StockTransferOrder = z.infer<typeof StockTransferOrderSchema>;
+export type StockTransferOrderLine = z.infer<typeof StockTransferOrderLineSchema>;
 
 /**
- * Inventory Write-Off
+ * Stock Transfer Line Model
  */
-export const InventoryWriteOffSchema = z.looseObject({
+export const StockTransferLineSchema = z.looseObject({
   /**
-   * Unique ID.
+   * Product identifier referenced by this Line. Required if `SKU` is empty. Required
+   * (conditional).
    */
-  TaskID: z.string().nullable().optional(),
+  ProductID: z.string().nullable().optional(),
   /**
-   * Inventory Write-Off Number
+   * Product SKU referenced by this Line. Required if `ProductID` is empty. Max length: 50.
+   * Required (conditional).
    */
-  InventoryWriteOffNumber: z.string().nullable().optional(),
+  SKU: z.string().nullable().optional(),
   /**
-   * Inventory Write-Off Task Status. Available values are `DRAFT`, `COMPLETED`, `VOIDED`
+   * Product Name referenced by this Line Max length: 1024.
    */
-  Status: z.string().nullable().optional(),
+  ProductName: z.string().nullable().optional(),
   /**
-   * Location ID
+   * Quantity of Stock ‘‘On Hand’’
    */
-  LocationID: z.string().nullable().optional(),
+  QuantityOnHand: z.number().nullable().optional(),
   /**
-   * Location Name
+   * Available quantity of stock
    */
-  Location: z.string().nullable().optional(),
+  QuantityAvailable: z.number().nullable().optional(),
   /**
-   * Expense Account
+   * Quantity to transfer from one location to another. Required.
    */
-  Account: z.string().nullable().optional(),
+  TransferQuantity: z.number().nullable().optional(),
   /**
-   * Effective Date
+   * Batch Serial Number. Required if Product's Costing Method is not `FIFO`. Max length: 50.
+   * Required (conditional).
    */
-  EffectiveDate: z.string().nullable().optional(),
+  BatchSN: z.string().nullable().optional(),
   /**
-   * Notes
+   * Date when Batch expires. Required if Product's Costing Method is `FESN`
    */
-  Notes: z.string().nullable().optional(),
-  Lines: z.array(z.unknown()).nullable().optional(),
-  Transactions: z.array(z.unknown()).nullable().optional(),
+  ExpiryDate: z.string().nullable().optional(),
   /**
-   * If While processing `POST` or `PUT` method, some errors occurred, but task was created,
-   * this property will contain array of error messages.
+   * Comment Max length: 256.
    */
-  Errors: z.array(z.unknown()).nullable().optional()
+  Comments: z.string().nullable().optional(),
+  /**
+   * Length of product. Read-only.
+   */
+  ProductLength: z.number().nullable().optional(),
+  /**
+   * Width of product. Read-only.
+   */
+  ProductWidth: z.number().nullable().optional(),
+  /**
+   * Height of product. Read-only.
+   */
+  ProductHeight: z.number().nullable().optional(),
+  /**
+   * Weight of product. Read-only.
+   */
+  ProductWeight: z.number().nullable().optional(),
+  /**
+   * Unit of measure for unit weight. Available Values are values Max length: 10.
+   */
+  WeightUnits: z.string().nullable().optional(),
+  /**
+   * Unit of measure for unit length/width/height. Available Values are values Max length:
+   * 10.
+   */
+  DimensionsUnits: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 1. Read-only.
+   */
+  ProductCustomField1: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 2. Read-only.
+   */
+  ProductCustomField2: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 3. Read-only.
+   */
+  ProductCustomField3: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 4. Read-only.
+   */
+  ProductCustomField4: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 5. Read-only.
+   */
+  ProductCustomField5: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 6. Read-only.
+   */
+  ProductCustomField6: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 7. Read-only.
+   */
+  ProductCustomField7: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 8. Read-only.
+   */
+  ProductCustomField8: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 9. Read-only.
+   */
+  ProductCustomField9: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 10. Read-only.
+   */
+  ProductCustomField10: z.string().nullable().optional()
 });
 
-export type InventoryWriteOff = z.infer<typeof InventoryWriteOffSchema>;
+export type StockTransferLine = z.infer<typeof StockTransferLineSchema>;
 
 /**
  * Inventory Write-Off List
@@ -421,6 +431,83 @@ export const InventoryWriteOffListSchema = z.looseObject({
 });
 
 export type InventoryWriteOffList = z.infer<typeof InventoryWriteOffListSchema>;
+
+/**
+ * Inventory Write-Off Line Model
+ */
+export const InventoryWriteOffLineSchema = z.looseObject({
+  /**
+   * ID of product. Required if ProductCode is empty Required (conditional).
+   */
+  ProductID: z.string().nullable().optional(),
+  /**
+   * SKU of product. Required if ProductID is empty Max length: 256. Required (conditional).
+   */
+  ProductCode: z.string().nullable().optional(),
+  /**
+   * Name of product. Read-only. Max length: 256.
+   */
+  Name: z.string().nullable().optional(),
+  /**
+   * ID of Bin.
+   */
+  BinID: z.string().nullable().optional(),
+  /**
+   * Name of Bin. Max length: 256.
+   */
+  Bin: z.string().nullable().optional(),
+  /**
+   * Batch serial number
+   */
+  BatchSN: z.string().nullable().optional(),
+  /**
+   * Batch Expiry Date
+   */
+  ExpiryDate: z.string().nullable().optional(),
+  /**
+   * Required if product type is `Service` Required (conditional).
+   */
+  ExpenseAccount: z.string().nullable().optional(),
+  /**
+   * Quantity Required.
+   */
+  Quantity: z.number().nullable().optional(),
+  /**
+   * Cost. Required if product type is `Service`. Default value = 0. Required (conditional).
+   */
+  Cost: z.number().nullable().optional(),
+  /**
+   * `Cost` * `Quantity`. Read-only.
+   */
+  TotalCost: z.number().nullable().optional()
+});
+
+export type InventoryWriteOffLine = z.infer<typeof InventoryWriteOffLineSchema>;
+
+/**
+ * Stock Transfer Order
+ */
+export const StockTransferOrderSchema = z.looseObject({
+  /**
+   * Unique Cin7 Core Stock Transfer ID Required.
+   */
+  TaskID: z.string().nullable().optional(),
+  /**
+   * Status of stock transfer order. Available values are `DRAFT`, `AUTHORISED`, `NOT
+   * AVAILABLE`. Required.
+   */
+  Status: z.string().nullable().optional(),
+  /**
+   * Required.
+   */
+  Lines: z.array(StockTransferOrderLineSchema).nullable().optional(),
+  /**
+   * Date of last modification. UTC Time. Read-only.
+   */
+  LastModifiedOn: z.string().nullable().optional()
+});
+
+export type StockTransferOrder = z.infer<typeof StockTransferOrderSchema>;
 
 /**
  * Stock Transfer
@@ -493,12 +580,529 @@ export const StockTransferSchema = z.looseObject({
   /**
    * Required.
    */
-  Lines: z.array(z.unknown()).nullable().optional(),
+  Lines: z.array(StockTransferLineSchema).nullable().optional(),
   Order: StockTransferOrderSchema.nullable().optional(),
   /**
    * Date of last modification. UTC Time. Read-only.
    */
+  /** Verified against the live v2 API 2026-08-10. */
+  ManualJournals: z.array(z.unknown()).nullable().optional(),
   LastModifiedOn: z.string().nullable().optional()
 });
 
 export type StockTransfer = z.infer<typeof StockTransferSchema>;
+
+/**
+ * Existing Stock Line Model
+ */
+export const ExistingStockLineSchema = z.looseObject({
+  /**
+   * Product identifier referenced by this Line
+   */
+  ProductID: z.string().nullable().optional(),
+  /**
+   * Product SKU referenced by this Line. Max length: 50.
+   */
+  SKU: z.string().nullable().optional(),
+  /**
+   * Product Name referenced by this Line Max length: 1024.
+   */
+  ProductName: z.string().nullable().optional(),
+  /**
+   * Quantity of Stock ‘‘On Hand’’
+   */
+  QuantityOnHand: z.number().nullable().optional(),
+  /**
+   * Available quantity of stock
+   */
+  Available: z.number().nullable().optional(),
+  /**
+   * New value for QuantityOnHand
+   */
+  Adjustment: z.number().nullable().optional(),
+  /**
+   * Id of location where stock changes will be done
+   */
+  LocationID: z.string().nullable().optional(),
+  /**
+   * Name of location where stock changes will be done Max length: 256.
+   */
+  Location: z.string().nullable().optional(),
+  /**
+   * Batch Serial Number Max length: 50.
+   */
+  BatchSN: z.string().nullable().optional(),
+  /**
+   * Date when Batch expires
+   */
+  ExpiryDate: z.string().nullable().optional(),
+  /**
+   * Comment Max length: 256.
+   */
+  Comments: z.string().nullable().optional(),
+  /**
+   * Length of product. Read-only.
+   */
+  ProductLength: z.number().nullable().optional(),
+  /**
+   * Width of product. Read-only.
+   */
+  ProductWidth: z.number().nullable().optional(),
+  /**
+   * Height of product. Read-only.
+   */
+  ProductHeight: z.number().nullable().optional(),
+  /**
+   * Weight of product. Read-only.
+   */
+  ProductWeight: z.number().nullable().optional(),
+  /**
+   * Unit of measure for unit weight. Available Values are values Max length: 10.
+   */
+  WeightUnits: z.string().nullable().optional(),
+  /**
+   * Unit of measure for unit length/width/height. Available Values are values Max length:
+   * 10.
+   */
+  DimensionsUnits: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 1. Read-only.
+   */
+  ProductCustomField1: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 2. Read-only.
+   */
+  ProductCustomField2: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 3. Read-only.
+   */
+  ProductCustomField3: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 4. Read-only.
+   */
+  ProductCustomField4: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 5. Read-only.
+   */
+  ProductCustomField5: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 6. Read-only.
+   */
+  ProductCustomField6: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 7. Read-only.
+   */
+  ProductCustomField7: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 8. Read-only.
+   */
+  ProductCustomField8: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 9. Read-only.
+   */
+  ProductCustomField9: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 10. Read-only.
+   */
+  ProductCustomField10: z.string().nullable().optional(),
+  /**
+   * Product Image. Read-only. this field is available for stock take
+   */
+  Image: z.unknown().nullable().optional(),
+  /**
+   * Value of Product's Barcode. Read-only.this field is available for stock take
+   */
+  Barcode: z.string().nullable().optional(),
+  /**
+   * Value of Product's StockLocator. Read-only.this field is available for stock take
+   */
+  StockLocator: z.string().nullable().optional(),
+  /**
+   * Value of Product's Default Unit of Measure. Read-only.this field is available for stock
+   * take
+   */
+  Unit: z.string().nullable().optional(),
+  /**
+   * Value of Product's Costing method. Read-only.this field is available for stock take.
+   * Valid values: `FIFO`, `Special - Batch`, `Special - Serial Number`, `FIFO - Serial
+   * Number`, `FIFO - Batch`, `FEFO - Batch`, `FEFO - Serial Number`
+   */
+  CostingMethod: z.string().nullable().optional()
+});
+
+export type ExistingStockLine = z.infer<typeof ExistingStockLineSchema>;
+
+/**
+ * New Stock Line Model
+ */
+export const NewStockLineSchema = z.looseObject({
+  /**
+   * Product identifier referenced by this Line. Required if `SKU` is empty. Required
+   * (conditional).
+   */
+  ProductID: z.string().nullable().optional(),
+  /**
+   * Product SKU referenced by this Line. Required if `ProductID` is empty. Max length: 50.
+   * Required (conditional).
+   */
+  SKU: z.string().nullable().optional(),
+  /**
+   * Product Name referenced by this Line Max length: 1024.
+   */
+  ProductName: z.string().nullable().optional(),
+  /**
+   * New value for QuantityOnHand Required.
+   */
+  Quantity: z.number().nullable().optional(),
+  /**
+   * Cost of 1 product unit. Required.
+   */
+  UnitCost: z.number().nullable().optional(),
+  /**
+   * Id of location on which stock changes will be done. Required if `Location` is empty.
+   * Required (conditional).
+   */
+  LocationID: z.string().nullable().optional(),
+  /**
+   * Name of location on which stock changes will be done. Required if `LocationID` is empty.
+   * Max length: 256. Required (conditional).
+   */
+  Location: z.string().nullable().optional(),
+  /**
+   * Batch Serial Number. Required if Product's Costing Method is not `FIFO`. Max length: 50.
+   * Required (conditional).
+   */
+  BatchSN: z.string().nullable().optional(),
+  /**
+   * Date when Batch expires. Required if Product's Costing Method is `FESN`
+   */
+  ExpiryDate: z.string().nullable().optional(),
+  /**
+   * Date when new stock is received
+   */
+  ReceivedDate: z.string().nullable().optional(),
+  /**
+   * Comment Max length: 256.
+   */
+  Comments: z.string().nullable().optional(),
+  /**
+   * Length of product. Read-only.
+   */
+  ProductLength: z.number().nullable().optional(),
+  /**
+   * Width of product. Read-only.
+   */
+  ProductWidth: z.number().nullable().optional(),
+  /**
+   * Height of product. Read-only.
+   */
+  ProductHeight: z.number().nullable().optional(),
+  /**
+   * Weight of product. Read-only.
+   */
+  ProductWeight: z.number().nullable().optional(),
+  /**
+   * Unit of measure for unit weight. Available Values are values Max length: 10.
+   */
+  WeightUnits: z.string().nullable().optional(),
+  /**
+   * Unit of measure for unit length/width/height. Available Values are values Max length:
+   * 10.
+   */
+  DimensionsUnits: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 1. Read-only.
+   */
+  ProductCustomField1: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 2. Read-only.
+   */
+  ProductCustomField2: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 3. Read-only.
+   */
+  ProductCustomField3: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 4. Read-only.
+   */
+  ProductCustomField4: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 5. Read-only.
+   */
+  ProductCustomField5: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 6. Read-only.
+   */
+  ProductCustomField6: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 7. Read-only.
+   */
+  ProductCustomField7: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 8. Read-only.
+   */
+  ProductCustomField8: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 9. Read-only.
+   */
+  ProductCustomField9: z.string().nullable().optional(),
+  /**
+   * Value of Product's additional attribute 10. Read-only.
+   */
+  ProductCustomField10: z.string().nullable().optional(),
+  /**
+   * Product Image. Read-only. this field is available for stock take
+   */
+  Image: z.unknown().nullable().optional(),
+  /**
+   * Value of Product's Barcode. Read-only.this field is available for stock take
+   */
+  Barcode: z.string().nullable().optional(),
+  /**
+   * Value of Product's StockLocator. Read-only.this field is available for stock take
+   */
+  StockLocator: z.string().nullable().optional(),
+  /**
+   * Value of Product's Default Unit of Measure. Read-only.this field is available for stock
+   * take
+   */
+  Unit: z.string().nullable().optional(),
+  /**
+   * Value of Product's Costing method. Read-only.this field is available for stock take.
+   * Valid values: `FIFO`, `Special - Batch`, `Special - Serial Number`, `FIFO - Serial
+   * Number`, `FIFO - Batch`, `FEFO - Batch`, `FEFO - Serial Number`
+   */
+  CostingMethod: z.string().nullable().optional()
+});
+
+export type NewStockLine = z.infer<typeof NewStockLineSchema>;
+
+/**
+ * Transaction Stock Line Model
+ */
+export const TransactionStockLineSchema = z.looseObject({
+  /**
+   * ID of transaction.
+   */
+  ID: z.string().nullable().optional(),
+  /**
+   * Debit Account.
+   */
+  Debit: z.string().nullable().optional(),
+  /**
+   * Credit Account.
+   */
+  Credit: z.string().nullable().optional(),
+  /**
+   * Amount on which products quantity changed.
+   */
+  Amount: z.number().nullable().optional(),
+  /**
+   * Transaction Date
+   */
+  EffectiveDate: z.string().nullable().optional()
+});
+
+export type TransactionStockLine = z.infer<typeof TransactionStockLineSchema>;
+
+/**
+ * IDName Model
+ */
+export const IDNameSchema = z.looseObject({
+  /**
+   * Identifier
+   */
+  ID: z.string().nullable().optional(),
+  /**
+   * Name
+   */
+  Name: z.string().nullable().optional()
+});
+
+export type IDName = z.infer<typeof IDNameSchema>;
+
+/**
+ * Stock Adjustment
+ */
+export const StockAdjustmentSchema = z.looseObject({
+  /**
+   * Unique Cin7 Core Stock Adjustment ID
+   */
+  TaskID: z.string().nullable().optional(),
+  /**
+   * Date of transaction
+   */
+  EffectiveDate: z.string().nullable().optional(),
+  /**
+   * Stock Take/Adjustment Number
+   */
+  StocktakeNumber: z.string().nullable().optional(),
+  /**
+   * Status of stock adjustment. Available values are `DRAFT`,`COMPLETED`,`VOIDED`.
+   */
+  Status: z.string().nullable().optional(),
+  /**
+   * Expense account for inventory adjustment
+   */
+  Account: z.string().nullable().optional(),
+  /**
+   * Custom reference
+   */
+  Reference: z.string().nullable().optional(),
+  /**
+   * Changes in non-zero stock
+   */
+  /** Verified against the live v2 API 2026-08-10. */
+  LocationID: z.string().nullable().optional(),
+  /** Verified against the live v2 API 2026-08-10. */
+  Location: z.string().nullable().optional(),
+  /** Verified against the live v2 API 2026-08-10. */
+  Comment: z.string().nullable().optional(),
+  ExistingStockLines: z.array(ExistingStockLineSchema).nullable().optional(),
+  /**
+   * Changes in zero stock
+   */
+  NewStockLines: z.array(NewStockLineSchema).nullable().optional(),
+  /**
+   * Created transactions due to stock changes.
+   */
+  Transactions: z.array(TransactionStockLineSchema).nullable().optional()
+});
+
+export type StockAdjustment = z.infer<typeof StockAdjustmentSchema>;
+
+/**
+ * Stock Take
+ */
+export const StockTakeSchema = z.looseObject({
+  /**
+   * Unique Cin7 Core Stock Take ID. Required for PUT Required (conditional).
+   */
+  TaskID: z.string().nullable().optional(),
+  /**
+   * Date of transaction Required.
+   */
+  EffectiveDate: z.string().nullable().optional(),
+  /**
+   * Stock Take Number (auto-generated).
+   */
+  StocktakeNumber: z.string().nullable().optional(),
+  /**
+   * Status of stocktake. Available values are `DRAFT`, `IN PROGRESS`, `COMPLETED`, `VOIDED`.
+   * Required for PUT Required (conditional).
+   */
+  Status: z.string().nullable().optional(),
+  /**
+   * Expense account for inventory adjustment Required.
+   */
+  Account: z.string().nullable().optional(),
+  /**
+   * Location ID. Required if `Location` is empty Required (conditional).
+   */
+  LocationID: z.string().nullable().optional(),
+  /**
+   * Required (conditional).
+   */
+  Location: z.string().nullable().optional(),
+  /**
+   * Tags used for additional product filtration. Can be used to filter
+   * NonZeroStockOnHandProducts
+   */
+  Tags: z.array(z.string()).nullable().optional(),
+  /**
+   * Pick Zones used for additional product filtration. Can be used to filter
+   * NonZeroStockOnHandProducts
+   */
+  PickZones: z.array(z.string()).nullable().optional(),
+  /**
+   * Stock Locators used for additional product filtration. Can be used to filter
+   * NonZeroStockOnHandProducts
+   */
+  StockLocators: z.array(z.string()).nullable().optional(),
+  /**
+   * Categories used for additional product filtration. Can be used to filter
+   * NonZeroStockOnHandProducts
+   */
+  Categories: z.array(IDNameSchema).nullable().optional(),
+  /**
+   * Brands used for additional product filtration. Can be used to filter
+   * NonZeroStockOnHandProducts
+   */
+  Brands: z.array(IDNameSchema).nullable().optional(),
+  /**
+   * Bins used for additional product filtration. Can be used to filter
+   * NonZeroStockOnHandProducts
+   */
+  Bins: z.array(IDNameSchema).nullable().optional(),
+  /**
+   * Custom reference
+   */
+  Reference: z.string().nullable().optional(),
+  /**
+   * Lines will be automaticaly filled with filtered products which have non empty stock.(in
+   * POST method or in PUT method if status is changing from `DRAFT` to `IN PROGRESS`. If
+   * current `Status` is `IN PROGRESS`, lines can be passed to PUT method (line entry will be
+   * found by product, location, batchSN and expiryDate and passed `Adjustment` will be set
+   * as new `Adjustment`)
+   */
+  NonZeroStockOnHandProducts: z.array(ExistingStockLineSchema).nullable().optional(),
+  ZeroStockOnHandProducts: z.array(NewStockLineSchema).nullable().optional(),
+  /**
+   * Created transactions due to stock changes.
+   */
+  Transactions: z.array(TransactionStockLineSchema).nullable().optional(),
+  /**
+   * Indicates whether zero-stock products should be included in the stocktake. true –
+   * includes products with zero stock false – excludes products with zero stock
+   */
+  UseRelativeQuantity: z.boolean().nullable().optional()
+});
+
+export type StockTake = z.infer<typeof StockTakeSchema>;
+
+/**
+ * Inventory Write-Off
+ */
+export const InventoryWriteOffSchema = z.looseObject({
+  /**
+   * Unique ID.
+   */
+  TaskID: z.string().nullable().optional(),
+  /**
+   * Inventory Write-Off Number
+   */
+  InventoryWriteOffNumber: z.string().nullable().optional(),
+  /**
+   * Inventory Write-Off Task Status. Available values are `DRAFT`, `COMPLETED`, `VOIDED`
+   */
+  Status: z.string().nullable().optional(),
+  /**
+   * Location ID
+   */
+  LocationID: z.string().nullable().optional(),
+  /**
+   * Location Name
+   */
+  Location: z.string().nullable().optional(),
+  /**
+   * Expense Account
+   */
+  Account: z.string().nullable().optional(),
+  /**
+   * Effective Date
+   */
+  EffectiveDate: z.string().nullable().optional(),
+  /**
+   * Notes
+   */
+  Notes: z.string().nullable().optional(),
+  Lines: z.array(InventoryWriteOffLineSchema).nullable().optional(),
+  Transactions: z.array(TransactionStockLineSchema).nullable().optional(),
+  /**
+   * If While processing `POST` or `PUT` method, some errors occurred, but task was created,
+   * this property will contain array of error messages.
+   */
+  Errors: z.array(z.unknown()).nullable().optional()
+});
+
+export type InventoryWriteOff = z.infer<typeof InventoryWriteOffSchema>;

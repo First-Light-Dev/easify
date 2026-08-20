@@ -17,14 +17,34 @@ import {
   TransactionsSchema
 } from './types/Account';
 
-const WebhookSchema = z.looseObject({
+export const WebhookSchema = z.looseObject({
+  /** Unique ID. Required for PUT. */
   ID: z.string().nullable().optional(),
+  /** See https://dearinventory.docs.apiary.io/#reference/webhooks for the value list. */
   Type: z.string().nullable().optional(),
+  /** Friendly name. Read-only. */
+  Name: z.string().nullable().optional(),
   IsActive: z.boolean().nullable().optional(),
+  /** Callback URL Cin7 posts to. */
   ExternalURL: z.string().nullable().optional(),
+  /** `noauth`, `basicauth` or `bearerauth`. */
   ExternalAuthorizationType: z.string().nullable().optional(),
+  /** Required when `ExternalAuthorizationType` is `basicauth`. */
   ExternalUserName: z.string().nullable().optional(),
-  ExternalPassword: z.string().nullable().optional()
+  /** Required when `ExternalAuthorizationType` is `basicauth`. */
+  ExternalPassword: z.string().nullable().optional(),
+  /** Required when `ExternalAuthorizationType` is `bearerauth`. */
+  ExternalBearerToken: z.string().nullable().optional(),
+  /** Additional request headers Cin7 will send. */
+  ExternalHeaders: z
+    .array(
+      z.looseObject({
+        Key: z.string().nullable().optional(),
+        Value: z.string().nullable().optional()
+      })
+    )
+    .nullable()
+    .optional()
 });
 
 type Webhook = z.infer<typeof WebhookSchema>;
@@ -60,7 +80,8 @@ export default class Account {
       axios,
       '/webhooks',
       WebhookSchema,
-      'WebhookList',
+      // Verified live 2026-08-10: /webhooks returns "Webhooks", not the blueprint's name.
+      'Webhooks',
       options
     );
     this.transactions = new ReadableResource(

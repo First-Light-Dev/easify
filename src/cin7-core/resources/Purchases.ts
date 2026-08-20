@@ -45,21 +45,23 @@ export default class Purchases extends WritableResource<typeof PurchaseSchema> {
   readonly payment: NestedDocumentResource<typeof PurchasePaymentsSchema>;
 
   constructor(axios: AxiosInstance, options: ResourceOptions = {}) {
-    super(axios, '/purchase', PurchaseSchema, 'PurchaseList', options);
+    super(axios, '/purchase', PurchaseSchema, 'PurchaseList', { ...options, sinceParam: 'UpdatedSince' });
 
     this.listView = new ReadableResource(
       axios,
       '/purchaseList',
       PurchaseListSchema,
       'PurchaseList',
-      options
+      { ...options, sinceParam: 'UpdatedSince' }
     );
     this.creditNoteList = new ReadableResource(
       axios,
       '/purchaseCreditNoteList',
       PurchaseCreditNoteListSchema,
-      'PurchaseCreditNoteList',
-      options
+      // Verified against the live v2 API 2026-08-10: the blueprint's name is not what the
+      // endpoint returns, and the old value made this list silently yield zero rows.
+      'PurchaseList',
+      { ...options, sinceParam: 'UpdatedSince' }
     );
     this.order = new NestedDocumentResource(
       axios,

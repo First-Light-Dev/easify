@@ -8,6 +8,663 @@ import { z } from 'zod';
  */
 
 /**
+ * Product Availability
+ */
+export const ProductAvailabilitySchema = z.looseObject({
+  /**
+   * Product ID.
+   */
+  ID: z.string().nullable().optional(),
+  /**
+   * SKU of Product. Max length: 50.
+   */
+  SKU: z.string().nullable().optional(),
+  /**
+   * Name of Product. Max length: 256.
+   */
+  Name: z.string().nullable().optional(),
+  /**
+   * Barcode of Product. Max length: 256.
+   */
+  Barcode: z.string().nullable().optional(),
+  /**
+   * Name of product location. Max length: 256.
+   */
+  Location: z.string().nullable().optional(),
+  /**
+   * Binof product location. Max length: 50.
+   */
+  Bin: z.string().nullable().optional(),
+  /**
+   * Batch.
+   */
+  Batch: z.string().nullable().optional(),
+  /**
+   * Expiry Date.
+   */
+  ExpiryDate: z.string().nullable().optional(),
+  /**
+   * On Hand.
+   */
+  OnHand: z.number().nullable().optional(),
+  /**
+   * Allocated.
+   */
+  Allocated: z.number().nullable().optional(),
+  /**
+   * Available.
+   */
+  Available: z.number().nullable().optional(),
+  /**
+   * OnOrder.
+   */
+  OnOrder: z.number().nullable().optional(),
+  /**
+   * StockOnHand.
+   */
+  StockOnHand: z.number().nullable().optional(),
+  /**
+   * In Transit.
+   */
+  InTransit: z.number().nullable().optional(),
+  /**
+   * Next delivery date.
+   */
+  NextDeliveryDate: z.string().nullable().optional()
+});
+
+export type ProductAvailability = z.infer<typeof ProductAvailabilitySchema>;
+
+/**
+ * Available Fields for ProductCategory
+ */
+export const ProductCategorySchema = z.looseObject({
+  /**
+   * Required for PUT, Ignored for POST operations
+   */
+  ID: z.string().nullable().optional(),
+  /**
+   * Category name for product Max length: 50. Required.
+   */
+  Name: z.string().nullable().optional()
+});
+
+export type ProductCategory = z.infer<typeof ProductCategorySchema>;
+
+/**
+ * Product Family Product Line Model
+ */
+export const ProductFamilyProductLineSchema = z.looseObject({
+  /**
+   * Unique Product ID Required.
+   */
+  ID: z.string().nullable().optional(),
+  /**
+   * Must be unique across all products. Ignored in POST and PUT Max length: 50.
+   */
+  SKU: z.string().nullable().optional(),
+  /**
+   * Product variation name. Ignored in POST and PUT Max length: 256.
+   */
+  Name: z.string().nullable().optional(),
+  /**
+   * The value that corresponds to the Option 1. Should be included in Option1Values. Max
+   * length: 256. Required.
+   */
+  Option1: z.string().nullable().optional(),
+  /**
+   * The value that corresponds to the Option 2. Should be included in Option2Values. Should
+   * be empty if Option 2 wasn’t set. Max length: 256.
+   */
+  Option2: z.string().nullable().optional(),
+  /**
+   * The value that corresponds to the Option 2. Should be included in Option3Values. Should
+   * be empty if Option 3 wasn’t set. Max length: 256.
+   */
+  Option3: z.string().nullable().optional()
+});
+
+export type ProductFamilyProductLine = z.infer<typeof ProductFamilyProductLineSchema>;
+
+/**
+ * Product Movement Model
+ */
+export const ProductMovementSchema = z.looseObject({
+  /**
+   * Movement task ID
+   */
+  TaskID: z.string().nullable().optional(),
+  /**
+   * Movement type. Possible values are Values Max length: 256.
+   */
+  Type: z.string().nullable().optional(),
+  /**
+   * Movement date
+   */
+  Date: z.string().nullable().optional(),
+  /**
+   * Task Number
+   */
+  Number: z.string().nullable().optional(),
+  /**
+   * Task Status
+   */
+  Status: z.number().nullable().optional(),
+  /**
+   * Quantity of goods reallocated
+   */
+  Quantity: z.number().nullable().optional(),
+  /**
+   * Cost of the reallocated goods
+   */
+  Amount: z.number().nullable().optional(),
+  /**
+   * Location name
+   */
+  Location: z.string().nullable().optional(),
+  /**
+   * Batch #
+   */
+  BatchSN: z.number().nullable().optional(),
+  /**
+   * Expiry Date
+   */
+  ExpiryDate: z.string().nullable().optional(),
+  /**
+   * Supplier/CustomerName
+   */
+  FromTo: z.string().nullable().optional()
+});
+
+export type ProductMovement = z.infer<typeof ProductMovementSchema>;
+
+/**
+ * Reorder Level Model
+ */
+export const ReorderLevelSchema = z.looseObject({
+  /**
+   * ID of location. Required if LocationName is empty Required (conditional).
+   */
+  LocationID: z.string().nullable().optional(),
+  /**
+   * Name of Location. Required if LocationID is empty Max length: 256. Required
+   * (conditional).
+   */
+  LocationName: z.string().nullable().optional(),
+  /**
+   * Minimum available product quantity for this product to appear on Reorder report/forms.
+   * Defaults to 0
+   */
+  MinimumBeforeReorder: z.number().nullable().optional(),
+  /**
+   * Default quantity to put into purchase order when reordering this product. Not applicable
+   * to reorder backordered form. Defaults to 0
+   */
+  ReorderQuantity: z.number().nullable().optional(),
+  /**
+   * Location of this product in your warehouse Max length: 256.
+   */
+  StockLocator: z.string().nullable().optional(),
+  /**
+   * Comma delimited list of pick zones Max length: 512. Required.
+   */
+  PickZones: z.string().nullable().optional()
+});
+
+export type ReorderLevel = z.infer<typeof ReorderLevelSchema>;
+
+/**
+ * Bill Of Material Product Model
+ */
+export const BillOfMaterialProductSchema = z.looseObject({
+  /**
+   * ID of product. Required if ProductCode is empty Required (conditional).
+   */
+  ComponentProductID: z.string().nullable().optional(),
+  /**
+   * SKU of product. Required if ComponentProductID is empty Max length: 256. Required
+   * (conditional).
+   */
+  ProductCode: z.string().nullable().optional(),
+  /**
+   * Name of product. Read-only. Max length: 256.
+   */
+  Name: z.string().nullable().optional(),
+  /**
+   * Quantity Required.
+   */
+  Quantity: z.number().nullable().optional(),
+  /**
+   * `WastagePercent` and `WastageQuantity` are mutually exclusive.
+   */
+  WastagePercent: z.number().nullable().optional(),
+  /**
+   * `WastagePercent` and `WastageQuantity` are mutually exclusive.
+   */
+  WastageQuantity: z.number().nullable().optional(),
+  /**
+   * Prorated cost distribution of a product that has been disassembled to current component.
+   * If left as zero equal distribution will be used between components.
+   */
+  CostPercentage: z.number().nullable().optional()
+});
+
+export type BillOfMaterialProduct = z.infer<typeof BillOfMaterialProductSchema>;
+
+/**
+ * Bill Of Material Service Model
+ */
+export const BillOfMaterialServiceSchema = z.looseObject({
+  /**
+   * ID of service product. Required if Name is empty Required (conditional).
+   */
+  ComponentProductID: z.string().nullable().optional(),
+  /**
+   * Name of service product. Required if ComponentProductID is empty Max length: 256.
+   * Required (conditional).
+   */
+  Name: z.string().nullable().optional(),
+  /**
+   * Quantity Required.
+   */
+  Quantity: z.number().nullable().optional(),
+  /**
+   * Expense Account
+   */
+  ExpenseAccount: z.string().nullable().optional(),
+  /**
+   * Price Tier Number
+   */
+  PriceTier: z.number().nullable().optional()
+});
+
+export type BillOfMaterialService = z.infer<typeof BillOfMaterialServiceSchema>;
+
+/**
+ * Attachment Line Model
+ */
+export const AttachmentLineSchema = z.looseObject({
+  /**
+   * Attached file ID
+   */
+  ID: z.string().nullable().optional(),
+  /**
+   * Attached file content type
+   */
+  ContentType: z.string().nullable().optional(),
+  /**
+   * Is this attachment will be used as default product image. Is visible only for product
+   * Attachment Endpoint.
+   */
+  IsDefault: z.boolean().nullable().optional(),
+  /**
+   * Attached file name
+   */
+  FileName: z.string().nullable().optional(),
+  /**
+   * Url to download attached File
+   */
+  DownloadUrl: z.string().nullable().optional()
+});
+
+export type AttachmentLine = z.infer<typeof AttachmentLineSchema>;
+
+/**
+ * Product Family
+ */
+export const ProductFamilySchema = z.looseObject({
+  /**
+   * List of Products included in the Family.
+   */
+  Products: z.array(ProductFamilyProductLineSchema).nullable().optional(),
+  /**
+   * Unique ID. Ignored by POST action. Required for PUT action
+   */
+  ID: z.string().nullable().optional(),
+  /**
+   * Must be unique. Product Family SKU, used to generate Product SKUs Max length: 45.
+   * Required.
+   */
+  SKU: z.string().nullable().optional(),
+  /**
+   * Product Family name, used to generate Product names Max length: 256. Required.
+   */
+  Name: z.string().nullable().optional(),
+  /**
+   * Category name Max length: 256. Required.
+   */
+  Category: z.string().nullable().optional(),
+  /**
+   * Brand name Max length: 256.
+   */
+  Brand: z.string().nullable().optional(),
+  /**
+   * Valid values: `FIFO`, `Special - Batch`, `Special - Serial Number`, `FIFO - Serial
+   * Number`, `FIFO - Batch`, `FEFO - Batch`, `FEFO - Serial Number` Required.
+   */
+  CostingMethod: z.string().nullable().optional(),
+  /**
+   * Name of the default Location for product family. (Location with this name must exist in
+   * Reference Books>Locations and Bins) Max length: 256. Required.
+   */
+  DefaultLocation: z.string().nullable().optional(),
+  /**
+   * Unit of Measure (Unit of measure with this name must exist in Reference Books > Units of
+   * Measure) Max length: 0. Required.
+   */
+  UOM: z.string().nullable().optional(),
+  /**
+   * Minimum available product quantity for this product to appear on Reorder report/forms.
+   * Defaults to 0
+   */
+  MinimumBeforeReorder: z.number().nullable().optional(),
+  /**
+   * Default quantity to put into purchase order when reordering this product. Not applicable
+   * to reorder backordered form. Defaults to 0
+   */
+  ReorderQuantity: z.number().nullable().optional(),
+  /**
+   * Product Sale Price used when Price Tier 1 is selected in Sale Task. Up to 4 decimal
+   * places
+   */
+  PriceTier1: z.number().nullable().optional(),
+  /**
+   * Product Sale Price used when Price Tier 2 is selected in Sale Task. Up to 4 decimal
+   * places
+   */
+  PriceTier2: z.number().nullable().optional(),
+  /**
+   * Product Sale Price used when Price Tier 3 is selected in Sale Task. Up to 4 decimal
+   * places
+   */
+  PriceTier3: z.number().nullable().optional(),
+  /**
+   * Product Sale Price used when Price Tier 4 is selected in Sale Task. Up to 4 decimal
+   * places
+   */
+  PriceTier4: z.number().nullable().optional(),
+  /**
+   * Product Sale Price used when Price Tier 5 is selected in Sale Task. Up to 4 decimal
+   * places
+   */
+  PriceTier5: z.number().nullable().optional(),
+  /**
+   * Product Sale Price used when Price Tier 6 is selected in Sale Task. Up to 4 decimal
+   * places
+   */
+  PriceTier6: z.number().nullable().optional(),
+  /**
+   * Product Sale Price used when Price Tier 7 is selected in Sale Task. Up to 4 decimal
+   * places
+   */
+  PriceTier7: z.number().nullable().optional(),
+  /**
+   * Product Sale Price used when Price Tier 8 is selected in Sale Task. Up to 4 decimal
+   * places
+   */
+  PriceTier8: z.number().nullable().optional(),
+  /**
+   * Product Sale Price used when Price Tier 9 is selected in Sale Task. Up to 4 decimal
+   * places
+   */
+  PriceTier9: z.number().nullable().optional(),
+  /**
+   * Product Sale Price used when Price Tier 10 is selected in Sale Task. Up to 4 decimal
+   * places
+   */
+  PriceTier10: z.number().nullable().optional(),
+  /**
+   * Multiline short description of the product Max length: 500.
+   */
+  ShortDescription: z.string().nullable().optional(),
+  /**
+   * Multiline description of the product family
+   */
+  Description: z.string().nullable().optional(),
+  /**
+   * Name of the product’s additional attribute set. Max length: 50.
+   */
+  AttributeSet: z.string().nullable().optional(),
+  /**
+   * Valid discount name (discount with this name must exist in Product Discounts reference
+   * book and should be active) Max length: 128.
+   */
+  DiscountRule: z.string().nullable().optional(),
+  /**
+   * Comma delimited list of custom tags Max length: 256.
+   */
+  Tags: z.string().nullable().optional(),
+  /**
+   * Account code of an active EXPENSE class account from Chart Of Accounts. Max length: 50.
+   */
+  COGSAccount: z.string().nullable().optional(),
+  /**
+   * Account code of an active REVENUE class account from Chart Of Accounts. Max length: 50.
+   */
+  RevenueAccount: z.string().nullable().optional(),
+  /**
+   * Account code of an active ASSET class account from Chart Of Accounts with Type not equal
+   * to FIXED or BANK. Max length: 50.
+   */
+  InventoryAccount: z.string().nullable().optional(),
+  /**
+   * Tax rule used for this product in Purchases. Tax Rule with this name must exist in
+   * Reference Books> Taxation Rules and should be Active. Purchases flag needs to be set to
+   * true in API. Max length: 50.
+   */
+  PurchaseTaxRule: z.string().nullable().optional(),
+  /**
+   * Tax rule used for this product in Sales. Tax Rule with this name must exist in Reference
+   * Books > Taxation Rules and should be Active. Sales flag needs to be set to true in API.
+   * Max length: 50.
+   */
+  SaleTaxRule: z.string().nullable().optional(),
+  /**
+   * One of these values: `No Drop Ship`, `Optional Drop Ship`, `Always Drop Ship`. Default
+   * value is `No Drop Ship`.
+   */
+  DropShipMode: z.string().nullable().optional(),
+  /**
+   * Family Option 1 name. I.e. Size, Colour, etc. Defaults to Option 1 Max length: 50.
+   * Required.
+   */
+  Option1Name: z.string().nullable().optional(),
+  /**
+   * Family Option 2 name. I.e. Size, Colour, etc. Defaults to Option 1 Max length: 50.
+   */
+  Option2Name: z.string().nullable().optional(),
+  /**
+   * Family Option 3 name. I.e. Size, Colour, etc. Defaults to Option 1 Max length: 50.
+   */
+  Option3Name: z.string().nullable().optional(),
+  /**
+   * Comma-delimited list of all possible values for Option 1. Combination of unique values
+   * of Option 1 Value for product family products. Read-only.
+   */
+  Option1Values: z.string().nullable().optional(),
+  /**
+   * Comma-delimited list of all possible values for Option 2. Combination of unique values
+   * of Option 1 Value for product family products. Read-only.
+   */
+  Option2Values: z.string().nullable().optional(),
+  /**
+   * Comma-delimited list of all possible values for Option 3. Combination of unique values
+   * of Option 1 Value for product family products. Read-only.
+   */
+  Option3Values: z.string().nullable().optional(),
+  /**
+   * UTC Time
+   */
+  LastModifiedOn: z.string().nullable().optional(),
+  Attachments: z.array(AttachmentLineSchema).nullable().optional(),
+  /**
+   * Specifies the HS Codes used in the process of product export. It is a numeric value of
+   * minimum 6 digits. Max length: 200.
+   */
+  HSCode: z.string().nullable().optional(),
+  /**
+   * Specifies the country of manufacture, production, design, or brand origin where a
+   * product comes from.
+   */
+  CountryOfOrigin: z.string().nullable().optional(),
+  /**
+   * Specifies the country code of manufacture, production, design, or brand origin where a
+   * product comes from.
+   */
+  CountryOfOriginCode: z.string().nullable().optional()
+});
+
+export type ProductFamily = z.infer<typeof ProductFamilySchema>;
+
+/**
+ * Product Supplier Options Interval Model
+ */
+export const ProductSupplierOptionsIntervalSchema = z.looseObject({
+  /**
+   * ID of product supplier option Interval settings set. Required (conditional).
+   */
+  ID: z.string().nullable().optional(),
+  /**
+   * Delivery method: can be 'Fixed' and 'Interval' Max length: 256. Required (conditional).
+   */
+  DeliveryMethod: z.string().nullable().optional(),
+  /**
+   * Interval Days, required when DeliveryMethod = Interval
+   */
+  IntervalDays: z.number().nullable().optional(),
+  /**
+   * Interval Start Date, required when DeliveryMethod = Interval
+   */
+  IntervalStartDate: z.string().nullable().optional(),
+  /**
+   * Required when DeliveryMethod = Fixed.
+   */
+  IsMonday: z.boolean().nullable().optional(),
+  /**
+   * Required when DeliveryMethod = Fixed.
+   */
+  IsTuesday: z.boolean().nullable().optional(),
+  /**
+   * Required when DeliveryMethod = Fixed.
+   */
+  IsWednesday: z.boolean().nullable().optional(),
+  /**
+   * Required when DeliveryMethod = Fixed.
+   */
+  IsThursday: z.boolean().nullable().optional(),
+  /**
+   * Required when DeliveryMethod = Fixed.
+   */
+  IsFriday: z.boolean().nullable().optional(),
+  /**
+   * Required when DeliveryMethod = Fixed.
+   */
+  IsSaturday: z.boolean().nullable().optional(),
+  /**
+   * Required when DeliveryMethod = Fixed.
+   */
+  IsSunday: z.boolean().nullable().optional()
+});
+
+export type ProductSupplierOptionsInterval = z.infer<typeof ProductSupplierOptionsIntervalSchema>;
+
+/**
+ * Product Supplier Options Model
+ */
+export const ProductSupplierOptionsSchema = z.looseObject({
+  /**
+   * ID of product supplier option set. Required (conditional).
+   */
+  ID: z.string().nullable().optional(),
+  /**
+   * ID of location. Required if LocationName is empty Required (conditional).
+   */
+  LocationID: z.string().nullable().optional(),
+  /**
+   * Name of Location. Required if LocationID is empty Max length: 256. Required
+   * (conditional).
+   */
+  LocationName: z.string().nullable().optional(),
+  /**
+   * Reorder Quantity
+   */
+  ReorderQuantity: z.number().nullable().optional(),
+  /**
+   * Lead
+   */
+  Lead: z.number().nullable().optional(),
+  /**
+   * Safety.
+   */
+  Safety: z.number().nullable().optional(),
+  MinimumToReorder: z.number().nullable().optional(),
+  SupplyIntervals: z.array(ProductSupplierOptionsIntervalSchema).nullable().optional()
+});
+
+export type ProductSupplierOptions = z.infer<typeof ProductSupplierOptionsSchema>;
+
+/**
+ * Product Supplier Model
+ */
+export const ProductSupplierSchema = z.looseObject({
+  /**
+   * ID of supplier. Required if SupplierName is empty Required (conditional).
+   */
+  SupplierID: z.string().nullable().optional(),
+  /**
+   * Name of supplier. Required if SupplierID is empty Max length: 256. Required
+   * (conditional).
+   */
+  SupplierName: z.string().nullable().optional(),
+  /**
+   * ID of product. Required when not nested within the Product and ProductSKU is empty
+   * Required (conditional).
+   */
+  ProductID: z.string().nullable().optional(),
+  /**
+   * SKU of product. Required when not nested within the Product and ProductID is empty Max
+   * length: 256. Required (conditional).
+   */
+  ProductSKU: z.string().nullable().optional(),
+  /**
+   * ID of ProductSupplier record.
+   */
+  ProductSupplierID: z.string().nullable().optional(),
+  /**
+   * Supplier Product SKU Max length: 256.
+   */
+  SupplierInventoryCode: z.string().nullable().optional(),
+  /**
+   * Supplier Product Name Max length: 256.
+   */
+  SupplierProductName: z.string().nullable().optional(),
+  /**
+   * Latest purchase cost
+   */
+  Cost: z.number().nullable().optional(),
+  /**
+   * Fixed Cost
+   */
+  FixedCost: z.number().nullable().optional(),
+  /**
+   * Supplier currency. Read-only.
+   */
+  Currency: z.string().nullable().optional(),
+  DropShip: z.boolean().nullable().optional(),
+  /**
+   * Link to supplier product specification. Max length: 256.
+   */
+  SupplierProductURL: z.string().nullable().optional(),
+  /**
+   * The latest supplied date of a product.
+   */
+  LastSupplied: z.string().nullable().optional(),
+  ProductSupplierOptions: z.array(ProductSupplierOptionsSchema).nullable().optional()
+});
+
+export type ProductSupplier = z.infer<typeof ProductSupplierSchema>;
+
+/**
  * Product
  */
 export const ProductSchema = z.looseObject({
@@ -356,307 +1013,23 @@ export const ProductSchema = z.looseObject({
    * product comes from.
    */
   CountryOfOriginCode: z.string().nullable().optional(),
-  Suppliers: z.array(z.unknown()).nullable().optional(),
-  ReorderLevels: z.array(z.unknown()).nullable().optional(),
-  BillOfMaterialsProducts: z.array(z.unknown()).nullable().optional(),
-  BillOfMaterialsServices: z.array(z.unknown()).nullable().optional(),
-  Movements: z.array(z.unknown()).nullable().optional(),
-  Attachments: z.array(z.unknown()).nullable().optional(),
+  Suppliers: z.array(ProductSupplierSchema).nullable().optional(),
+  ReorderLevels: z.array(ReorderLevelSchema).nullable().optional(),
+  BillOfMaterialsProducts: z.array(BillOfMaterialProductSchema).nullable().optional(),
+  BillOfMaterialsServices: z.array(BillOfMaterialServiceSchema).nullable().optional(),
+  Movements: z.array(ProductMovementSchema).nullable().optional(),
+  Attachments: z.array(AttachmentLineSchema).nullable().optional(),
   /**
    * Customer specific Product Prices.
    */
   CustomPrices: z.array(z.unknown()).nullable().optional()
+,
+  /** Verified against the live v2 API 2026-08-10. */
+  AlwaysShowQuantity: z.boolean().nullable().optional(),
+  /** Verified against the live v2 API 2026-08-10. */
+  WarrantyName: z.string().nullable().optional(),
+  /** Verified against the live v2 API 2026-08-10. */
+  CreatedDate: z.string().nullable().optional()
 });
 
 export type Product = z.infer<typeof ProductSchema>;
-
-/**
- * Product Availability
- */
-export const ProductAvailabilitySchema = z.looseObject({
-  /**
-   * Product ID.
-   */
-  ID: z.string().nullable().optional(),
-  /**
-   * SKU of Product. Max length: 50.
-   */
-  SKU: z.string().nullable().optional(),
-  /**
-   * Name of Product. Max length: 256.
-   */
-  Name: z.string().nullable().optional(),
-  /**
-   * Barcode of Product. Max length: 256.
-   */
-  Barcode: z.string().nullable().optional(),
-  /**
-   * Name of product location. Max length: 256.
-   */
-  Location: z.string().nullable().optional(),
-  /**
-   * Binof product location. Max length: 50.
-   */
-  Bin: z.string().nullable().optional(),
-  /**
-   * Batch.
-   */
-  Batch: z.string().nullable().optional(),
-  /**
-   * Expiry Date.
-   */
-  ExpiryDate: z.string().nullable().optional(),
-  /**
-   * On Hand.
-   */
-  OnHand: z.number().nullable().optional(),
-  /**
-   * Allocated.
-   */
-  Allocated: z.number().nullable().optional(),
-  /**
-   * Available.
-   */
-  Available: z.number().nullable().optional(),
-  /**
-   * OnOrder.
-   */
-  OnOrder: z.number().nullable().optional(),
-  /**
-   * StockOnHand.
-   */
-  StockOnHand: z.number().nullable().optional(),
-  /**
-   * In Transit.
-   */
-  InTransit: z.number().nullable().optional(),
-  /**
-   * Next delivery date.
-   */
-  NextDeliveryDate: z.string().nullable().optional()
-});
-
-export type ProductAvailability = z.infer<typeof ProductAvailabilitySchema>;
-
-/**
- * Available Fields for ProductCategory
- */
-export const ProductCategorySchema = z.looseObject({
-  /**
-   * Required for PUT, Ignored for POST operations
-   */
-  ID: z.string().nullable().optional(),
-  /**
-   * Category name for product Max length: 50. Required.
-   */
-  Name: z.string().nullable().optional()
-});
-
-export type ProductCategory = z.infer<typeof ProductCategorySchema>;
-
-/**
- * Product Family
- */
-export const ProductFamilySchema = z.looseObject({
-  /**
-   * List of Products included in the Family.
-   */
-  Products: z.array(z.unknown()).nullable().optional(),
-  /**
-   * Unique ID. Ignored by POST action. Required for PUT action
-   */
-  ID: z.string().nullable().optional(),
-  /**
-   * Must be unique. Product Family SKU, used to generate Product SKUs Max length: 45.
-   * Required.
-   */
-  SKU: z.string().nullable().optional(),
-  /**
-   * Product Family name, used to generate Product names Max length: 256. Required.
-   */
-  Name: z.string().nullable().optional(),
-  /**
-   * Category name Max length: 256. Required.
-   */
-  Category: z.string().nullable().optional(),
-  /**
-   * Brand name Max length: 256.
-   */
-  Brand: z.string().nullable().optional(),
-  /**
-   * Valid values: `FIFO`, `Special - Batch`, `Special - Serial Number`, `FIFO - Serial
-   * Number`, `FIFO - Batch`, `FEFO - Batch`, `FEFO - Serial Number` Required.
-   */
-  CostingMethod: z.string().nullable().optional(),
-  /**
-   * Name of the default Location for product family. (Location with this name must exist in
-   * Reference Books>Locations and Bins) Max length: 256. Required.
-   */
-  DefaultLocation: z.string().nullable().optional(),
-  /**
-   * Unit of Measure (Unit of measure with this name must exist in Reference Books > Units of
-   * Measure) Max length: 0. Required.
-   */
-  UOM: z.string().nullable().optional(),
-  /**
-   * Minimum available product quantity for this product to appear on Reorder report/forms.
-   * Defaults to 0
-   */
-  MinimumBeforeReorder: z.number().nullable().optional(),
-  /**
-   * Default quantity to put into purchase order when reordering this product. Not applicable
-   * to reorder backordered form. Defaults to 0
-   */
-  ReorderQuantity: z.number().nullable().optional(),
-  /**
-   * Product Sale Price used when Price Tier 1 is selected in Sale Task. Up to 4 decimal
-   * places
-   */
-  PriceTier1: z.number().nullable().optional(),
-  /**
-   * Product Sale Price used when Price Tier 2 is selected in Sale Task. Up to 4 decimal
-   * places
-   */
-  PriceTier2: z.number().nullable().optional(),
-  /**
-   * Product Sale Price used when Price Tier 3 is selected in Sale Task. Up to 4 decimal
-   * places
-   */
-  PriceTier3: z.number().nullable().optional(),
-  /**
-   * Product Sale Price used when Price Tier 4 is selected in Sale Task. Up to 4 decimal
-   * places
-   */
-  PriceTier4: z.number().nullable().optional(),
-  /**
-   * Product Sale Price used when Price Tier 5 is selected in Sale Task. Up to 4 decimal
-   * places
-   */
-  PriceTier5: z.number().nullable().optional(),
-  /**
-   * Product Sale Price used when Price Tier 6 is selected in Sale Task. Up to 4 decimal
-   * places
-   */
-  PriceTier6: z.number().nullable().optional(),
-  /**
-   * Product Sale Price used when Price Tier 7 is selected in Sale Task. Up to 4 decimal
-   * places
-   */
-  PriceTier7: z.number().nullable().optional(),
-  /**
-   * Product Sale Price used when Price Tier 8 is selected in Sale Task. Up to 4 decimal
-   * places
-   */
-  PriceTier8: z.number().nullable().optional(),
-  /**
-   * Product Sale Price used when Price Tier 9 is selected in Sale Task. Up to 4 decimal
-   * places
-   */
-  PriceTier9: z.number().nullable().optional(),
-  /**
-   * Product Sale Price used when Price Tier 10 is selected in Sale Task. Up to 4 decimal
-   * places
-   */
-  PriceTier10: z.number().nullable().optional(),
-  /**
-   * Multiline short description of the product Max length: 500.
-   */
-  ShortDescription: z.string().nullable().optional(),
-  /**
-   * Multiline description of the product family
-   */
-  Description: z.string().nullable().optional(),
-  /**
-   * Name of the product’s additional attribute set. Max length: 50.
-   */
-  AttributeSet: z.string().nullable().optional(),
-  /**
-   * Valid discount name (discount with this name must exist in Product Discounts reference
-   * book and should be active) Max length: 128.
-   */
-  DiscountRule: z.string().nullable().optional(),
-  /**
-   * Comma delimited list of custom tags Max length: 256.
-   */
-  Tags: z.string().nullable().optional(),
-  /**
-   * Account code of an active EXPENSE class account from Chart Of Accounts. Max length: 50.
-   */
-  COGSAccount: z.string().nullable().optional(),
-  /**
-   * Account code of an active REVENUE class account from Chart Of Accounts. Max length: 50.
-   */
-  RevenueAccount: z.string().nullable().optional(),
-  /**
-   * Account code of an active ASSET class account from Chart Of Accounts with Type not equal
-   * to FIXED or BANK. Max length: 50.
-   */
-  InventoryAccount: z.string().nullable().optional(),
-  /**
-   * Tax rule used for this product in Purchases. Tax Rule with this name must exist in
-   * Reference Books> Taxation Rules and should be Active. Purchases flag needs to be set to
-   * true in API. Max length: 50.
-   */
-  PurchaseTaxRule: z.string().nullable().optional(),
-  /**
-   * Tax rule used for this product in Sales. Tax Rule with this name must exist in Reference
-   * Books > Taxation Rules and should be Active. Sales flag needs to be set to true in API.
-   * Max length: 50.
-   */
-  SaleTaxRule: z.string().nullable().optional(),
-  /**
-   * One of these values: `No Drop Ship`, `Optional Drop Ship`, `Always Drop Ship`. Default
-   * value is `No Drop Ship`.
-   */
-  DropShipMode: z.string().nullable().optional(),
-  /**
-   * Family Option 1 name. I.e. Size, Colour, etc. Defaults to Option 1 Max length: 50.
-   * Required.
-   */
-  Option1Name: z.string().nullable().optional(),
-  /**
-   * Family Option 2 name. I.e. Size, Colour, etc. Defaults to Option 1 Max length: 50.
-   */
-  Option2Name: z.string().nullable().optional(),
-  /**
-   * Family Option 3 name. I.e. Size, Colour, etc. Defaults to Option 1 Max length: 50.
-   */
-  Option3Name: z.string().nullable().optional(),
-  /**
-   * Comma-delimited list of all possible values for Option 1. Combination of unique values
-   * of Option 1 Value for product family products. Read-only.
-   */
-  Option1Values: z.string().nullable().optional(),
-  /**
-   * Comma-delimited list of all possible values for Option 2. Combination of unique values
-   * of Option 1 Value for product family products. Read-only.
-   */
-  Option2Values: z.string().nullable().optional(),
-  /**
-   * Comma-delimited list of all possible values for Option 3. Combination of unique values
-   * of Option 1 Value for product family products. Read-only.
-   */
-  Option3Values: z.string().nullable().optional(),
-  /**
-   * UTC Time
-   */
-  LastModifiedOn: z.string().nullable().optional(),
-  Attachments: z.array(z.unknown()).nullable().optional(),
-  /**
-   * Specifies the HS Codes used in the process of product export. It is a numeric value of
-   * minimum 6 digits. Max length: 200.
-   */
-  HSCode: z.string().nullable().optional(),
-  /**
-   * Specifies the country of manufacture, production, design, or brand origin where a
-   * product comes from.
-   */
-  CountryOfOrigin: z.string().nullable().optional(),
-  /**
-   * Specifies the country code of manufacture, production, design, or brand origin where a
-   * product comes from.
-   */
-  CountryOfOriginCode: z.string().nullable().optional()
-});
-
-export type ProductFamily = z.infer<typeof ProductFamilySchema>;

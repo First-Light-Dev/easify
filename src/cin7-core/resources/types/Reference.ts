@@ -8,40 +8,25 @@ import { z } from 'zod';
  */
 
 /**
- * Attribute Set
+ * Attribute Set Line Model
  */
-export const AttributeSetSchema = z.looseObject({
+export const AttributeSetLineSchema = z.looseObject({
   /**
-   * Required for PUT and DELETE, Ignored for POST operations Required (conditional).
-   */
-  ID: z.string().nullable().optional(),
-  /**
-   * Max length: 50. Required.
+   * Attribute name
    */
   Name: z.string().nullable().optional(),
   /**
-   * Attribute Set attribute name. # - int(1-10). Attribute1Name is required for POST, PUT.
-   * Max length: 50. Required (conditional).
+   * Attribute type. Available values are `Not used`, `Text`, `Checkbox`, `List`, `Date`,
+   * `Numeric`.
    */
-  'Attribute#Name': z.string().nullable().optional(),
+  Type: z.string().nullable().optional(),
   /**
-   * Attribute Set attribute type. # - int(1-10). Attribute1Type is required for POST, PUT.
-   * Available values are `Not used`, `Text`, `Checkbox`, `List`, `Date`, `Numeric`. Max
-   * length: 50. Required (conditional).
+   * Attribute values
    */
-  'Attribute#Type': z.string().nullable().optional(),
-  /**
-   * Attribute Set attribute values. Delimiter ",". # - int(1-10). Attribute1Values is
-   * required for POST, PUT. Required (conditional).
-   */
-  'Attribute#Values': z.string().nullable().optional(),
-  /**
-   * Array with attributes. Read-only.
-   */
-  Attributes: z.array(z.unknown()).nullable().optional()
+  Values: z.string().nullable().optional()
 });
 
-export type AttributeSet = z.infer<typeof AttributeSetSchema>;
+export type AttributeSetLine = z.infer<typeof AttributeSetLineSchema>;
 
 /**
  * Bank Accounts
@@ -170,9 +155,20 @@ export const ChartOfAccountsSchema = z.looseObject({
    */
   SystemAccountCode: z.string().nullable().optional(),
   /**
-   * Account status
+   * Whether the account may be used for payments.
+   *
+   * Accepts boolean OR string, because the two sources of truth disagree. The blueprint types
+   * this `String` and describes it as "Account status" — but a live v2 `/ref/account` read
+   * returns a JSON boolean (`"ForPayments": false`), and the generated string type rejected
+   * every chart-of-accounts response with a ZodError. Verified against the API on 2026-08-10.
+   *
+   * A union rather than a flat `boolean` so the schema survives Cin7 aligning the API to its
+   * own documentation. Nothing in this package reads the field, so permissiveness costs
+   * nothing and a wrong guess would break an unrelated call.
+   *
+   * Regenerating this file will reintroduce `z.string()` — treat it as hand-written.
    */
-  ForPayments: z.string().nullable().optional(),
+  ForPayments: z.union([z.boolean(), z.string()]).nullable().optional(),
   /**
    * Account display name. Read-only.
    */
@@ -277,7 +273,9 @@ export const LocationSchema = z.looseObject({
   /**
    * Points that location is deprecated
    */
-  Deprecated: z.boolean().nullable().optional(),
+  /** `IsDeprecated` on the wire — the generated name `Deprecated` never matched, so reading
+   *  it always yielded undefined while the API had sent a value. Verified 2026-08-10. */
+  IsDeprecated: z.boolean().nullable().optional(),
   /**
    * Array (ID, Name) with related Bins
    */
@@ -325,7 +323,8 @@ export const LocationSchema = z.looseObject({
   /**
    * Points that location is shopfloor
    */
-  IsShopfloor: z.boolean().nullable().optional(),
+  /** Capital F on the wire: `IsShopFloor`. Verified 2026-08-10. */
+  IsShopFloor: z.boolean().nullable().optional(),
   /**
    * Points that location is location of co-manufacturer
    */
@@ -388,45 +387,28 @@ export const PriceTierSchema = z.looseObject({
 export type PriceTier = z.infer<typeof PriceTierSchema>;
 
 /**
- * Tax
+ * Tax Component Model
  */
-export const TaxSchema = z.looseObject({
+export const TaxComponentSchema = z.looseObject({
   /**
-   * Unique ID Max length: 50.
-   */
-  ID: z.string().nullable().optional(),
-  /**
-   * Tax name Max length: 50. Required.
+   * Name of product. Read-only. Max length: 50. Required.
    */
   Name: z.string().nullable().optional(),
   /**
+   * Cost. Required if product type is `Service`. Default value = 0. Required.
+   */
+  Percent: z.number().nullable().optional(),
+  /**
    * ChartOfAccount Code with Class == `LIABILITY` && Status == `ACTIVE` Required.
    */
-  Account: z.string().nullable().optional(),
+  AccountCode: z.string().nullable().optional(),
   /**
-   * Points that tax is Active Required.
+   * The order of sequence taxes components. Required.
    */
-  IsActive: z.boolean().nullable().optional(),
-  /**
-   * Points that tax is Inclusive Required.
-   */
-  TaxInclusive: z.boolean().nullable().optional(),
-  /**
-   * Tax percentage, should be between 0 and 100. Read-only
-   */
-  TaxPercent: z.number().nullable().optional(),
-  /**
-   * Points that tax is used for Sale
-   */
-  IsTaxForSale: z.boolean().nullable().optional(),
-  /**
-   * Points that tax is used for Purchase
-   */
-  IsTaxForPurchase: z.boolean().nullable().optional(),
-  Components: z.array(z.unknown()).nullable().optional()
+  ComponentOrder: z.number().nullable().optional()
 });
 
-export type Tax = z.infer<typeof TaxSchema>;
+export type TaxComponent = z.infer<typeof TaxComponentSchema>;
 
 /**
  * Available Fields for UnitOfMeasure
@@ -524,6 +506,114 @@ export const DiscountLineSchema = z.looseObject({
 });
 
 export type DiscountLine = z.infer<typeof DiscountLineSchema>;
+
+/**
+ * Markup Price Line Model
+ */
+export const MarkupPriceLineSchema = z.looseObject({
+  /**
+   * Price Tier index as it appears in Product management page. Valid values are from 1 up to
+   * 10 inclusively Required.
+   */
+  TierNumber: z.number().nullable().optional(),
+  /**
+   * Markup calculation type. Possible values are: `P` - new price will equal to start price
+   * increased by `MarkupValue` %, `A` - new price will be a sum of start price and
+   * `MarkupValue`, 'D' - if markup price not defined or should be deleted in PUT operation
+   * Required.
+   */
+  MarkupType: z.string().nullable().optional(),
+  /**
+   * Source type for start price. Possible values are: `A` - average cost for product, `F` -
+   * latest fixed supplier cost for product, `L` - latest supplier cost for product,`V` -
+   * `MarkupValue` field is used as calculated price as is Required.
+   */
+  UsePriceType: z.string().nullable().optional(),
+  /**
+   * Value is equal to or greater than 0. It is used in according with `MarkupType`. If
+   * UsePriceType is equal to `V`, it is used as calculated markup price Required.
+   */
+  MarkupValue: z.number().nullable().optional()
+});
+
+export type MarkupPriceLine = z.infer<typeof MarkupPriceLineSchema>;
+
+/**
+ * Attribute Set
+ */
+export const AttributeSetSchema = z.looseObject({
+  /**
+   * Required for PUT and DELETE, Ignored for POST operations Required (conditional).
+   */
+  ID: z.string().nullable().optional(),
+  /**
+   * Max length: 50. Required.
+   */
+  Name: z.string().nullable().optional(),
+  /**
+   * Attribute Set attribute name. # - int(1-10). Attribute1Name is required for POST, PUT.
+   * Max length: 50. Required (conditional).
+   */
+  'Attribute#Name': z.string().nullable().optional(),
+  /**
+   * Attribute Set attribute type. # - int(1-10). Attribute1Type is required for POST, PUT.
+   * Available values are `Not used`, `Text`, `Checkbox`, `List`, `Date`, `Numeric`. Max
+   * length: 50. Required (conditional).
+   */
+  'Attribute#Type': z.string().nullable().optional(),
+  /**
+   * Attribute Set attribute values. Delimiter ",". # - int(1-10). Attribute1Values is
+   * required for POST, PUT. Required (conditional).
+   */
+  'Attribute#Values': z.string().nullable().optional(),
+  /**
+   * Array with attributes. Read-only.
+   */
+  Attributes: z.array(AttributeSetLineSchema).nullable().optional()
+});
+
+export type AttributeSet = z.infer<typeof AttributeSetSchema>;
+
+/**
+ * Tax
+ */
+export const TaxSchema = z.looseObject({
+  /**
+   * Unique ID Max length: 50.
+   */
+  ID: z.string().nullable().optional(),
+  /**
+   * Tax name Max length: 50. Required.
+   */
+  Name: z.string().nullable().optional(),
+  /**
+   * ChartOfAccount Code with Class == `LIABILITY` && Status == `ACTIVE` Required.
+   */
+  Account: z.string().nullable().optional(),
+  /**
+   * Points that tax is Active Required.
+   */
+  IsActive: z.boolean().nullable().optional(),
+  /**
+   * Points that tax is Inclusive Required.
+   */
+  TaxInclusive: z.boolean().nullable().optional(),
+  /**
+   * Tax percentage, should be between 0 and 100. Read-only
+   */
+  TaxPercent: z.number().nullable().optional(),
+  /**
+   * Points that tax is used for Sale
+   */
+  IsTaxForSale: z.boolean().nullable().optional(),
+  /**
+   * Points that tax is used for Purchase
+   */
+  IsTaxForPurchase: z.boolean().nullable().optional(),
+  Components: z.array(TaxComponentSchema).nullable().optional()
+});
+
+export type Tax = z.infer<typeof TaxSchema>;
 
 /**
  * Product Discount Rule

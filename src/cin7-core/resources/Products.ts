@@ -18,7 +18,7 @@ export default class Products extends WritableResource<typeof ProductSchema> {
   readonly families: WritableResource<typeof ProductFamilySchema>;
 
   constructor(axios: AxiosInstance, options: ResourceOptions = {}) {
-    super(axios, '/product', ProductSchema, 'Products', options);
+    super(axios, '/product', ProductSchema, 'Products', { ...options, sinceParam: 'ModifiedSince' });
 
     this.availability = new ReadableResource(
       axios,
@@ -38,8 +38,10 @@ export default class Products extends WritableResource<typeof ProductSchema> {
       axios,
       '/productFamily',
       ProductFamilySchema,
-      'ProductFamilyList',
-      options
+      // Verified against the live v2 API 2026-08-10: the blueprint's name is not what the
+      // endpoint returns, and the old value made this list silently yield zero rows.
+      'ProductFamilies',
+      { ...options, sinceParam: 'ModifiedSince' }
     );
   }
 

@@ -4,6 +4,7 @@ import {
   InventoryWriteOff,
   InventoryWriteOffListSchema,
   InventoryWriteOffSchema,
+  NewStockLine,
   StockAdjustment,
   StockAdjustmentListSchema,
   StockAdjustmentSchema,
@@ -11,6 +12,7 @@ import {
   StockTakeListSchema,
   StockTakeSchema,
   StockTransfer,
+  StockTransferLine,
   StockTransferListSchema,
   StockTransferSchema
 } from './types/Stock';
@@ -32,7 +34,7 @@ export default class Stock {
       '/stockadjustment',
       StockAdjustmentSchema,
       'StockAdjustmentList',
-      options
+      { ...options, idParam: 'TaskID' }
     );
     this.adjustmentList = new ReadableResource(
       axios,
@@ -46,13 +48,15 @@ export default class Stock {
       '/stocktake',
       StockTakeSchema,
       'StockTakeList',
-      options
+      { ...options, idParam: 'TaskID' }
     );
     this.takeList = new ReadableResource(
       axios,
       '/stockTakeList',
       StockTakeListSchema,
-      'StockTakeList',
+      // Verified against the live v2 API 2026-08-10: the blueprint's name is not what the
+      // endpoint returns, and the old value made this list silently yield zero rows.
+      'StockAdjustmentList',
       options
     );
     this.transfers = new WritableResource(
@@ -60,7 +64,7 @@ export default class Stock {
       '/stockTransfer',
       StockTransferSchema,
       'StockTransferList',
-      options
+      { ...options, idParam: 'TaskID' }
     );
     this.transferList = new ReadableResource(
       axios,
@@ -74,13 +78,15 @@ export default class Stock {
       '/inventoryWriteOff',
       InventoryWriteOffSchema,
       'InventoryWriteOffList',
-      options
+      { ...options, idParam: 'TaskID' }
     );
     this.writeOffList = new ReadableResource(
       axios,
       '/inventoryWriteOffList',
       InventoryWriteOffListSchema,
-      'InventoryWriteOffList',
+      // Verified against the live v2 API 2026-08-10: the blueprint's name is not what the
+      // endpoint returns, and the old value made this list silently yield zero rows.
+      'InventoryWriteOffs',
       options
     );
   }
@@ -142,13 +148,14 @@ export default class Stock {
 
   /**
    * Creates a stock adjustment, e.g. to push a warehouse write-off back into Cin7.
+   * `Status` is deliberately required — `COMPLETED` moves stock the moment it posts,
+   * so that has to be asked for rather than inherited from a default.
    * `Lines` uses the New Stock Line shape (`SKU`/`ProductID`, `Quantity`, `Location`, …).
    */
   async createAdjustment(adjustment: StockAdjustmentUpsert): Promise<StockAdjustment> {
     return this.adjustments.create({
-      Status: 'COMPLETED',
-      EffectiveDate: new Date().toISOString(),
-      ...adjustment
+      ...adjustment,
+      EffectiveDate: adjustment.EffectiveDate ?? new Date().toISOString()
     } as StockAdjustment);
   }
 }
@@ -162,15 +169,29 @@ export interface StockAdjustmentUpsert {
   TaskID?: string;
   /** Date of the transaction. Defaults to now. */
   EffectiveDate?: string;
-  /** `DRAFT` or `COMPLETED`. Defaults to `COMPLETED`. */
-  Status?: 'DRAFT' | 'COMPLETED';
+  /**
+   * `DRAFT` leaves the adjustment in Cin7 for someone to review and authorise;
+   * `COMPLETED` moves stock immediately. Required — there is no safe default.
+   */
+  Status: 'DRAFT' | 'COMPLETED';
   /** Expense account for the adjustment. */
   Account?: string;
   Reference?: string;
   Comment?: string;
   /** Adjusts on-hand quantity when true, otherwise available quantity. */
   UpdateOnHand?: boolean;
-  Lines: Array<Record<string, unknown>>;
+  /**
+   * New Stock Line shape. `Quantity` is the new on-hand value and either `SKU` or
+   * `ProductID` is required, as is either `Location` or `LocationID`.
+   */
+  Lines: NewStockLine[];
 }
 
-export type { StockAdjustment, StockTake, StockTransfer, InventoryWriteOff };
+export type {
+  StockAdjustment,
+  StockTake,
+  StockTransfer,
+  InventoryWriteOff,
+  NewStockLine,
+  StockTransferLine
+};

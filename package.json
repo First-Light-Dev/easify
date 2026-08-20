@@ -1,6 +1,6 @@
 {
   "name": "@first-light-dev/easify",
-  "version": "2.2.0-0",
+  "version": "2.2.0-1",
   "description": "A TypeScript-based utility library providing commonly used APIs and integrations",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -25,7 +25,9 @@
     "cin7-core",
     "shiphero",
     "shopify",
-    "unleashed"
+    "unleashed",
+    "finale",
+    "shipstation"
   ],
   "exports": {
     "./shopify": {
@@ -55,6 +57,14 @@
     "./unleashed": {
       "types": "./dist/unleashed/index.d.ts",
       "default": "./dist/unleashed/index.js"
+    },
+    "./finale": {
+      "types": "./dist/finale/index.d.ts",
+      "default": "./dist/finale/index.js"
+    },
+    "./shipstation": {
+      "types": "./dist/shipstation/index.d.ts",
+      "default": "./dist/shipstation/index.js"
     },
     ".": {
       "types": "./dist/index.d.ts",
