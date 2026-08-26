@@ -36,6 +36,7 @@
 import { PipedriveHttpClient } from './client/http-client';
 import { PipedriveDeals } from './resources/deals';
 import { PipedriveFields } from './resources/fields';
+import { PipedriveNotes } from './resources/notes';
 import { PipedriveOrganizations } from './resources/organizations';
 import { PipedrivePersons } from './resources/persons';
 import { PipedriveProducts } from './resources/products';
@@ -56,6 +57,7 @@ export class Pipedrive {
   readonly persons: PipedrivePersons;
   readonly organizations: PipedriveOrganizations;
   readonly products: PipedriveProducts;
+  readonly notes: PipedriveNotes;
   readonly fields: PipedriveFields;
   readonly webhooks: PipedriveWebhooks;
 
@@ -67,6 +69,7 @@ export class Pipedrive {
     this.persons = new PipedrivePersons(this.http);
     this.organizations = new PipedriveOrganizations(this.http);
     this.products = new PipedriveProducts(this.http);
+    this.notes = new PipedriveNotes(this.http);
     this.fields = new PipedriveFields(this.http);
     this.webhooks = new PipedriveWebhooks(this.http);
   }
@@ -109,6 +112,7 @@ export { PipedrivePersons } from './resources/persons';
 export { PipedriveOrganizations } from './resources/organizations';
 export { PipedriveProducts } from './resources/products';
 export { PipedriveFields } from './resources/fields';
+export { PipedriveNotes, noteText, notesText } from './resources/notes';
 export { PipedriveWebhooks } from './resources/webhooks';
 export { PipedriveResource } from './resources/base';
 export type { PipedrivePage } from './resources/base';
@@ -163,6 +167,11 @@ export type {
   PipedriveFieldOption,
   PipedriveFieldType,
 } from './types/fields';
+export type {
+  PipedriveNote,
+  PipedriveNoteInput,
+  PipedriveNoteListOptions,
+} from './types/notes';
 export type {
   PipedriveWebhook,
   PipedriveWebhookInput,
