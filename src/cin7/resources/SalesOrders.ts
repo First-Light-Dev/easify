@@ -11,8 +11,18 @@ export default class SalesOrders {
         return response.data;
     }
 
+    /**
+     * The order carrying a reference, or undefined.
+     *
+     * The reference goes through `params` rather than the URL string. Cin7 references contain
+     * characters that are not URL-safe — `#1108` is a real one, and interpolated directly it
+     * truncates the query at the fragment marker and Cin7 answers 400. Apostrophes are doubled
+     * because the clause is quoted.
+     */
     async getByRef(ref: string): Promise<SalesOrder | undefined> {
-        const response = await this.axios.get(`/SalesOrders?where=Reference='${ref}'`);
+        const response = await this.axios.get(`/SalesOrders`, {
+            params: { where: `Reference='${ref.replace(/'/g, "''")}'` }
+        });
         const salesOrders = response.data as SalesOrder[];
 
         return salesOrders.find(so => so.reference === ref);
