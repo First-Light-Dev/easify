@@ -15,6 +15,16 @@ export interface SalesOrder {
     stage: string;
     memberId: number;
     memberEmail: string;
+
+    /**
+     * The Cin7 user credited with the sale.
+     *
+     * **`salesPersonEmail` is null in practice** — across 10,140 orders spanning three years on
+     * a live account, not one carried an email. So the id is the only link to a person, and
+     * resolving it needs either the Users endpoint or a supplied mapping.
+     */
+    salesPersonId: number;
+    salesPersonEmail: string;
     paymentTerms: string;
     branchId: number;
     distributionBranchId: number;
