@@ -40,8 +40,30 @@ export interface ProductProductOption {
     specialsStartDate: string;
     specialDays: number;
 
-    /** Additional named price tiers beyond the four above, positional. */
-    priceColumns: string[];
+    /**
+     * The real price list: one entry per named price column configured in Cin7, keyed by the
+     * column's own name — `retailIncNZD`, `wholesaleIncNZD`, `kingSeedsNZD`, `fSourceExclNZD`
+     * and so on. Values are prices; an unset column is `0` or `null`.
+     *
+     * **Prefer this over the four flat fields above.** Those are positional slots carrying
+     * generic labels that no longer describe their contents once a tenant arranges its own
+     * price columns. Verified against a live catalogue of 493 SKUs, where every SKU showed:
+     *
+     * | Flat field | Actually holds |
+     * |---|---|
+     * | `retailPrice` | `retailIncNZD` |
+     * | `wholesalePrice` | **`kingSeedsNZD`** — a reseller, not wholesale |
+     * | `vipPrice` | **`wholesaleIncNZD`** — the real wholesale price |
+     *
+     * Reading `wholesalePrice` expecting a wholesale price therefore returns a specific
+     * reseller's price, and nothing about the response says so.
+     *
+     * Note also that the column names encode their tax basis: `...IncNZD` includes GST,
+     * `...ExclNZD` excludes it. Mixing the two produces a silent 15% error.
+     *
+     * The published spec models this as an array of strings; the API returns an object.
+     */
+    priceColumns: Record<string, number | null>;
 
     stockAvailable: number;
     stockOnHand: number;
