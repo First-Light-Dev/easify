@@ -64,6 +64,25 @@ export interface SalesOrder {
     logisticsCarrier: string;
     estimatedDeliveryDate: string;
 
+    /**
+     * Document state — **read-only**, and documented as `Draft`, `Approved`, `Void`.
+     *
+     * Not a fulfilment signal: an order sits at `Approved` from creation and never changes to
+     * anything meaning "done". Use `stage` for workflow and `invoiceDate` for invoicing.
+     */
+    status: string;
+
+    /**
+     * Set, with `invoiceDate`, when the order is invoiced. Empty until then.
+     *
+     * Unique in practice — across 10,096 invoiced orders on a live account every one had a
+     * number and no two shared it, which makes it a sounder external key than `reference`.
+     */
+    invoiceNumber: number;
+
+    /** The sales channel, e.g. `Sale via AFC`, `WooCommerce Ocean Organics`. Often blank. */
+    projectName: string;
+
     // Money Related
     invoiceDate: string;
     discountTotal: number;
@@ -81,8 +100,17 @@ export interface SalesOrder {
     deliveryInstructions: string;
 
     logisticsStatus: number;
+
+    /**
+     * Accounting export state.
+     *
+     * `accountingImportStatus` is **nested here**, not a top-level field — reading
+     * `order.accountingImportStatus` silently yields undefined rather than failing, so a tally
+     * across 10,000 orders came back entirely blank before anyone noticed.
+     */
     accountingAttributes: {
-        accountingImportStatus: "DoNotImport" | "NotImported" | "Imported" | "Error";
+        importDate?: string;
+        accountingImportStatus?: "DoNotImport" | "NotImported" | "Imported" | "Error";
     }
 }
 
