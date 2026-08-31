@@ -1,11 +1,11 @@
 /**
  * A Cin7 branch — the stock location an order ships from.
  *
- * Cin7's `/Branches` payload is contact-shaped, so the branch's display name is not in a field
- * called `name`. Agrisea's branches are named after people and places ("Paeroa", "Nick
- * Wilkins"), and that label appears in `company`. `name` is declared as well because the
- * endpoint is undocumented on this point and the two are used interchangeably elsewhere in the
- * API; `branchName` on a sales order carries the same label.
+ * Cin7's `/Branches` payload is contact-shaped, so the branch's display name is **not** in a
+ * field called `name`. Verified against a live tenant (36 branches, 2026-08-31): the label sits
+ * in `company` and `name` is absent from the payload entirely. `name` is still declared, and
+ * read as a fallback, purely so a tenant that does return it is not mis-read — it costs one
+ * `||` and removes a silent failure mode.
  */
 export interface Branch {
     id: number;
