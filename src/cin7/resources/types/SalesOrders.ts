@@ -43,6 +43,15 @@ export interface SalesOrder {
     deliveryCountry: string;
     email: string;
     phone: string;
+    /**
+     * Contact details copied onto the order header from the member at creation.
+     *
+     * `fax` matters more than the name suggests on Agrisea's tenant: it is unused for faxes and
+     * carries the **Farm ID**, which is why it reaches the order screen the office team works
+     * from. Verified on order 132583, whose `fax` is identical to contact 5937's.
+     */
+    fax: string;
+    mobile: string;
     customerOrderNo: string;
 
     firstName: string;
