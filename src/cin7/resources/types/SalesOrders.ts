@@ -98,8 +98,22 @@ export interface SalesOrder {
      */
     invoiceNumber: number;
 
-    /** The sales channel, e.g. `Sale via AFC`, `WooCommerce Ocean Organics`. Often blank. */
+    /**
+     * The business-facing sales channel, e.g. `Sale via AFC`, `WooCommerce Ocean Organics`.
+     *
+     * **Blank on roughly half of all orders** — 49.7% of 10,053 invoiced orders on a live
+     * account — so it cannot be read alone. Pair it with `source`, which is always populated.
+     */
     projectName: string;
+
+    /**
+     * Where the order entered Cin7, e.g. `Backend`, `POS-Shop`, `WooCommerce Agrisea`.
+     *
+     * System-facing rather than business-facing, but always present: on the same 10,053 orders
+     * every one carried a value, and wherever `projectName` was blank this was `Backend` or
+     * `POS-Shop`. That makes the pair jointly exhaustive.
+     */
+    source: string;
 
     // Money Related
     invoiceDate: string;
