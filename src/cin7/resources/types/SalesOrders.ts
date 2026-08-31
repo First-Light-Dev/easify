@@ -56,6 +56,15 @@ export interface SalesOrder {
 
     firstName: string;
     lastName: string;
+    /**
+     * The **billed** party's company, copied from the member onto the order header.
+     *
+     * Distinct from `deliveryCompany`, and the distinction carries the reseller case: on a Farm
+     * Source order this is `Farm Source - <branch>` while `deliveryCompany` names the farm that
+     * received the goods. Verified over a year of orders — 225 such orders across 47 branches,
+     * every one of that form.
+     */
+    company: string;
 
     billingFirstName: string;
     billingLastName: string;
