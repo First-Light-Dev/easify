@@ -12,6 +12,7 @@ import StockLevels from "./resources/StockLevels";
 import Contacts from "./resources/Contacts";
 import Products from "./resources/Products";
 import Users from "./resources/Users";
+import Branches from "./resources/Branches";
 
 // Update the interface to extend InternalAxiosRequestConfig
 interface EasifyCin7AxiosRequestConfig extends InternalAxiosRequestConfig {
@@ -67,6 +68,7 @@ export class Cin7 {
     public contacts: Contacts;
     public products: Products;
     public users: Users;
+    public branches: Branches;
     
     constructor(config: Cin7Config) {
         this.config = config;
@@ -164,6 +166,7 @@ export class Cin7 {
         this.contacts = new Contacts(this.axios, this);
         this.products = new Products(this.axios, this);
         this.users = new Users(this.axios, this);
+        this.branches = new Branches(this.axios, this);
         this.isLoggedIn = false;
         this.page = null;
         this.browser = null;

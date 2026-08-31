@@ -20,3 +20,4 @@ export * from "./ProductOptions";
 export * from "./Contacts";
 export * from "./Products";
 export * from "./Users";
+export * from "./Branches";
