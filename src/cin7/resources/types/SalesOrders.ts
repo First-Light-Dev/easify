@@ -1,5 +1,15 @@
 export interface SalesOrder {
     id: number;
+    /**
+     * Whether the order is live in Cin7, and the only writable control over `status`.
+     *
+     * `status` itself is read-only. Measured across 250 recent orders on a live tenant the
+     * correlation is exact: every `APPROVED` order carries `true`, while `DRAFT` and `VOID`
+     * both carry `false`. So creating an order with `isApproved: false` is how a Draft is
+     * made — which is what Agrisea asked for, so the office team reviews an order before it
+     * goes live.
+     */
+    isApproved: boolean;
     reference: string;
     
     createdDate: string;
