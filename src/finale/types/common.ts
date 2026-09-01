@@ -135,7 +135,14 @@ export interface FinalePage<T> {
 export const MAX_FILTER_RANGE_DAYS = 30;
 
 export interface FinaleListOptions {
-  /** Rows per request. Finale applies it after filtering. Defaults to 100. */
+  /**
+   * Rows Finale SCANS, not rows returned.
+   *
+   * Finale applies this before filtering: it reads the first `limit` rows of the range —
+   * oldest first — and only then matches the filter. So a small limit over a dense range can
+   * return nothing while matching records sit further in. Raise it for a wide window; in
+   * steady state, where the range spans minutes, the default is ample.
+   */
   limit?: number;
   /**
    * Lower bound for `lastUpdatedDate`.

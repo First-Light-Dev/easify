@@ -134,24 +134,46 @@ export class FinaleOrders {
     const limit = options.limit ?? 100;
     const { from, to, clamped } = clampRange(options.changedSince, options.changedUntil);
 
-    const criteria: Record<string, unknown> = { lastUpdatedDate: [from, to] };
-    if (query.orderTypeId) criteria.orderTypeId = query.orderTypeId;
-    if (query.statusId) criteria.statusId = query.statusId;
-    if (query.referenceNumber) criteria.referenceNumber = query.referenceNumber;
-
-    const items = await this.http.getCollection<FinaleOrder>(
+    // ONLY the date range is sent to Finale. Everything else is matched here, on the rows
+    // that came back — and that is load-bearing, not a style choice.
+    //
+    // Finale applies `limit` as a SCAN WINDOW, before filtering: it reads the first `limit`
+    // rows of the range (oldest first) and *then* applies the filter. Verified against the
+    // live account on 2026-09-01, where a day held 756 orders with purchase orders sitting at
+    // scan positions 192, 193, 656, 677, 678 — so `limit=100` with `orderTypeId=PURCHASE_ORDER`
+    // returned nothing at all, while `limit=1000` returned all five.
+    //
+    // Filtering server-side made that unrecoverable. An empty page left `nextChangedSince`
+    // undefined, so the caller's watermark never moved, so the next tick re-read the same
+    // hundred rows — a permanent stall that reports success with `seen: 0` every time. The
+    // wide windows that trigger it are exactly the ones that matter: a first run (24h
+    // lookback), a restart after downtime, or a busy day at the 3PL.
+    //
+    // Scanning by date alone means the page always reflects what was actually read, so the
+    // watermark advances even when nothing matches, and the poller walks forward through the
+    // range. Same request count, same row cap — only the filtering moves.
+    const scanned = await this.http.getCollection<FinaleOrder>(
       'order',
-      { filter: encodeFilter(criteria), limit },
+      { filter: encodeFilter({ lastUpdatedDate: [from, to] }), limit },
       { operation: 'listFinaleOrders' }
+    );
+
+    const items = scanned.filter(
+      (order) =>
+        (!query.orderTypeId || order.orderTypeId === query.orderTypeId) &&
+        (!query.statusId || order.statusId === query.statusId) &&
+        (!query.referenceNumber || order.referenceNumber?.trim() === query.referenceNumber.trim())
     );
 
     return {
       items,
       limit,
-      // A clamped window means there is definitely more beyond it, even if this page was
-      // short — otherwise a caller would stop early and silently skip weeks of records.
-      hasMore: clamped || items.length >= limit,
-      nextChangedSince: newestTimestamp(items) ?? (clamped ? to : undefined),
+      // Both derived from what was SCANNED, never from what matched. A full scan window means
+      // there is more of the range to walk even if this page matched nothing, and a clamped
+      // window means there is more beyond it — otherwise a caller stops early and silently
+      // skips records.
+      hasMore: clamped || scanned.length >= limit,
+      nextChangedSince: newestTimestamp(scanned) ?? (clamped ? to : undefined),
     };
   }
 
