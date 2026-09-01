@@ -110,6 +110,16 @@ export interface FinaleOrderItem {
  * this integration depends on.
  */
 export interface FinaleOrder {
+  /**
+   * The sales channel the order arrived from — for an order pulled in by Finale's ShipStation
+   * connection, this is the ShipStation **store name**, not its numeric id.
+   *
+   * Load-bearing in a shared 3PL account: one Finale account can serve many clients, and this
+   * is the only field naming which one an order belongs to. It is a display name, so treat it
+   * as a guard rather than a correlation key — renaming the store in ShipStation changes it.
+   */
+  saleSourceId?: string;
+
   /** Full record URL — the id the host correlates by. Read-only. */
   orderUrl?: string;
   /** Max 20 ASCII chars, read-only after creation. */
