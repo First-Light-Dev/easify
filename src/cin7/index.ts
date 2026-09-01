@@ -40,6 +40,18 @@ export interface Cin7Config {
                 salesOrderAdmin: string;
             }
         }
+        /**
+         * Called once per outgoing request, before it is sent.
+         *
+         * Exists so a consumer can meter its own usage against Cin7's published limits — 3/sec,
+         * 60/min, 5000/day — which are account-wide and shared by every integration touching
+         * the tenant. `multiAPIKeyHandling.keyCounter` does not serve this: it counts only
+         * inside the 429 handler and only when key rotation is enabled, so it measures
+         * throttling rather than traffic.
+         *
+         * Must not throw and must not await anything slow — it runs on the request path.
+         */
+        onRequest?: (request: { method: string; url: string }) => void;
         multiAPIKeyHandling?: {
             enabled: boolean;
             additionalAPIKeys: string[];
@@ -88,6 +100,15 @@ export class Cin7 {
                 payload: config.data || null,
                 params: config.params || null
             });
+
+            try {
+                this.config.options?.onRequest?.({
+                    method: config.method?.toUpperCase() ?? "GET",
+                    url: config.url ?? "",
+                });
+            } catch {
+                // Metering must never break the request it is measuring.
+            }
 
             if (!this.config.options?.multiAPIKeyHandling?.enabled) {
                 return config;
