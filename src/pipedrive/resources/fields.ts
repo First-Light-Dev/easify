@@ -202,6 +202,34 @@ export class PipedriveFields {
 
     return option.id;
   }
+
+  /**
+   * The option **label** behind an enum/set field's stored value — the reverse of `optionId`.
+   *
+   * A deal's `custom_fields` carries the option id, not the text, so reading an enum and
+   * comparing it to a label silently never matches: every value looks like an unrecognised
+   * one. That is not a hypothetical — comparing a raw `Bill To` value against `"Direct"` sent
+   * every deal down the reseller path carrying the id `130` as if it were a branch name.
+   *
+   * Returns `undefined` when the field or option is unknown, so a caller can decide whether an
+   * unreadable value is fatal. The value is compared as a string because Pipedrive returns
+   * option ids as either a number or a numeric string depending on the endpoint.
+   */
+  async optionLabel(
+    entity: PipedriveFieldEntity,
+    label: string,
+    optionValue: unknown
+  ): Promise<string | undefined> {
+    if (optionValue === undefined || optionValue === null || optionValue === '') return undefined;
+
+    const code = await this.codeFor(entity, label);
+    const fields = await this.cached(entity);
+    const field = fields.find((candidate) => candidate.field_code === code);
+
+    const wanted = String(optionValue).trim();
+    const option = field?.options?.find((entry) => String(entry.id).trim() === wanted);
+    return option?.label;
+  }
 }
 
 function cap(value: string): string {
