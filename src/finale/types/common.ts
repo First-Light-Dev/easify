@@ -231,8 +231,32 @@ export function clampRange(
 
   const clamped = requestedTo > maxTo;
   return {
-    from: from.toISOString(),
-    to: (clamped ? maxTo : requestedTo).toISOString(),
+    from: toSecondPrecision(from),
+    to: toSecondPrecision(clamped ? maxTo : requestedTo),
     clamped,
   };
+}
+
+/**
+ * ISO-8601 truncated to whole seconds — `2026-09-08T17:16:25.000Z`, never `…25.287Z`.
+ *
+ * Finale's date filter **silently returns zero rows** when the lower bound carries non-zero
+ * fractional seconds. Not an error, not a 400 — an empty page, indistinguishable from "nothing
+ * changed". Verified against the live account on 2026-09-08: the same window returned 2 records
+ * with `.000Z` and 0 with `.287Z`, with only the milliseconds differing.
+ *
+ * The trap is that it is self-perpetuating. A poller with no watermark derives its lower bound
+ * from `new Date()`, which carries milliseconds, so it reads nothing — and because it read
+ * nothing it never records a watermark, so the next tick derives from `new Date()` again. It
+ * reports success forever while doing nothing. That is exactly how `finale_variances` sat idle
+ * while committed variances piled up in Finale.
+ *
+ * Pollers whose watermark came from Finale were unaffected, because Finale's own timestamps
+ * have no sub-second component — which is why the order pollers worked and this went unnoticed.
+ *
+ * Applied to both bounds: only the lower one is known to break, but Finale stores whole seconds,
+ * so sub-second precision conveys nothing either way.
+ */
+function toSecondPrecision(value: Date): string {
+  return `${value.toISOString().slice(0, 19)}.000Z`;
 }

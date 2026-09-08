@@ -27,6 +27,16 @@ export interface FinaleVarianceLine {
    */
   quantityOnHandVar?: number;
   facilityUrl?: string;
+  /**
+   * Why the stock changed — `VAR_DAMAGED`, `VAR_RTN_CUSTOMER`, or `##user_NNNNN` for a reason
+   * the account defined itself.
+   *
+   * On the LINE, not the variance header. The header carries `physicalInventoryTypeId`
+   * (`SINGLE` / `FACILITY`), which describes how the count was performed, not why stock moved —
+   * an easy and costly thing to confuse. Optional: verified against the live account on
+   * 2026-09-08, where 87 of 144 recent lines carried one.
+   */
+  varianceReasonId?: string;
   [key: string]: unknown;
 }
 
