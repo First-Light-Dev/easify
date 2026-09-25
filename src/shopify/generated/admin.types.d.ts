@@ -39,12 +39,12 @@ export type AbandonedCheckout = Navigable & Node & {
   abandonedCheckoutUrl: Scalars['URL']['output'];
   /**
    * The billing address provided by the buyer.
-   * Null if the user did not provide a billing address.
+   * Null if the user didn't provide a billing address.
    */
   billingAddress?: Maybe<MailingAddress>;
   /**
    * The date and time when the buyer completed the checkout.
-   * Null if the checkout has not been completed.
+   * Null if the checkout hasn't been completed.
    */
   completedAt?: Maybe<Scalars['DateTime']['output']>;
   /** The date and time when the checkout was created. */
@@ -75,7 +75,7 @@ export type AbandonedCheckout = Navigable & Node & {
   note: Scalars['String']['output'];
   /**
    * The shipping address to where the line items will be shipped.
-   * Null if the user did not provide a shipping address.
+   * Null if the user didn't provide a shipping address.
    */
   shippingAddress?: Maybe<MailingAddress>;
   /** The sum of all items in the checkout, including discounts but excluding shipping, taxes and tips. */
@@ -610,6 +610,8 @@ export type App = Node & {
   availableAccessScopes: Array<AccessScope>;
   /** Banner image for the app. */
   banner: Image;
+  /** The sales channels associated with this app. */
+  channels: ChannelConnection;
   /** Description of the app. */
   description?: Maybe<Scalars['String']['output']>;
   /** The name of the app developer. */
@@ -639,7 +641,7 @@ export type App = Node & {
   installUrl?: Maybe<Scalars['URL']['output']>;
   /**
    * Corresponding AppInstallation for this shop and App.
-   * Returns null if the App is not installed.
+   * Returns null if the App isn't installed.
    */
   installation?: Maybe<AppInstallation>;
   /** Whether the app is the [post purchase](https://shopify.dev/apps/checkout/post-purchase) app in use. */
@@ -690,11 +692,27 @@ export type App = Node & {
   webhookApiVersion: Scalars['String']['output'];
 };
 
+
+/**
+ * A Shopify application that extends store functionality. Apps integrate with Shopify through APIs to add features, automate workflows, or connect external services.
+ *
+ * Provides metadata about the app including its developer information and listing details in the Shopify App Store. Use the [`installation`](https://shopify.dev/docs/api/admin-graphql/latest/objects/App#field-App.fields.installation) field to determine if the app is currently installed on the shop and access installation-specific details like granted [`AccessScope`](https://shopify.dev/docs/api/admin-graphql/latest/objects/AccessScope) objects. Check [`failedRequirements`](https://shopify.dev/docs/api/admin-graphql/latest/objects/App#field-App.fields.failedRequirements) before installation to identify any prerequisites that must be met.
+ */
+export type AppChannelsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 /** A catalog that defines the publication associated with an app. */
 export type AppCatalog = Catalog & Node & {
   __typename?: 'AppCatalog';
   /** The apps associated with the catalog. */
   apps: AppConnection;
+  /** The channels associated with the catalog. */
+  channels: ChannelConnection;
   /** A globally-unique ID. */
   id: Scalars['ID']['output'];
   /** Most recent catalog operations. */
@@ -712,6 +730,16 @@ export type AppCatalog = Catalog & Node & {
 
 /** A catalog that defines the publication associated with an app. */
 export type AppCatalogAppsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/** A catalog that defines the publication associated with an app. */
+export type AppCatalogChannelsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -893,6 +921,8 @@ export type AppFeedback = {
   __typename?: 'AppFeedback';
   /** The application associated to the feedback. */
   app: App;
+  /** The channel this feedback is for. */
+  channel?: Maybe<Channel>;
   /** The date and time when the app feedback was generated. */
   feedbackGeneratedAt: Scalars['DateTime']['output'];
   /** A link to where merchants can resolve errors. */
@@ -920,7 +950,7 @@ export type AppInstallation = HasMetafields & Node & {
   app: App;
   /**
    * Channel associated with the installed application.
-   * @deprecated Use `publication` instead.
+   * @deprecated Use the root-level `channels` query instead.
    */
   channel?: Maybe<Channel>;
   /** Credits that can be used towards future app purchases. */
@@ -942,7 +972,10 @@ export type AppInstallation = HasMetafields & Node & {
   metafields: MetafieldConnection;
   /** One-time purchases to a shop. */
   oneTimePurchases: AppPurchaseOneTimeConnection;
-  /** The publication associated with the installed application. */
+  /**
+   * The publication associated with the installed application.
+   * @deprecated Use the root-level `publications` query instead.
+   */
   publication?: Maybe<Publication>;
   /** The records that track the externally-captured revenue for the app. The records are used for revenue attribution purposes. */
   revenueAttributionRecords: AppRevenueAttributionRecordConnection;
@@ -2364,10 +2397,23 @@ export enum AutomaticDiscountSortKeys {
 /** Represents an object containing all information for channels available to a shop. */
 export type AvailableChannelDefinitionsByChannel = {
   __typename?: 'AvailableChannelDefinitionsByChannel';
-  /** The channel definitions for channels installed on a shop. */
+  /**
+   * The channel definitions for channels installed on a shop.
+   * @deprecated Use [`QueryRoot.orderAttributionDefinitions`](https://shopify.dev/docs/api/admin-graphql/latest/queries/orderAttributionDefinitions) and select `id`, `handle`, `displayName`, and `icon` instead.
+   */
   channelDefinitions: Array<ChannelDefinition>;
-  /** The name of the channel. */
+  /**
+   * The name of the channel.
+   * @deprecated Use [`OrderAttributionDefinition.displayName`](https://shopify.dev/docs/api/admin-graphql/latest/objects/OrderAttributionDefinition#field-OrderAttributionDefinition.fields.displayName) instead.
+   */
   channelName: Scalars['String']['output'];
+};
+
+/** The entitlements for B2B. */
+export type B2BType = {
+  __typename?: 'B2BType';
+  /** Whether B2B is enabled. */
+  enabled: Scalars['Boolean']['output'];
 };
 
 /** The input fields for updating a backup region with exactly one required option. */
@@ -2423,6 +2469,37 @@ export enum BalanceTransactionSortKeys {
   ProcessedAt = 'PROCESSED_AT',
   /** Sort by the `transaction_type` value. */
   TransactionType = 'TRANSACTION_TYPE'
+}
+
+/** Represents a bank account payment instrument. */
+export type BankAccount = {
+  __typename?: 'BankAccount';
+  /** The type of account holder. */
+  accountHolderType: BankAccountHolderType;
+  /** The type of bank account. */
+  accountType: BankAccountType;
+  /** The name of the bank. */
+  bankName: Scalars['String']['output'];
+  /** The billing address associated with the bank account. */
+  billingAddress?: Maybe<CustomerPaymentInstrumentBillingAddress>;
+  /** The last four digits of the account number. */
+  lastDigits: Scalars['String']['output'];
+};
+
+/** The type of bank account holder. */
+export enum BankAccountHolderType {
+  /** A company account holder. */
+  Company = 'COMPANY',
+  /** An individual account holder. */
+  Individual = 'INDIVIDUAL'
+}
+
+/** The type of bank account. */
+export enum BankAccountType {
+  /** A checking account. */
+  Checking = 'CHECKING',
+  /** A savings account. */
+  Savings = 'SAVINGS'
 }
 
 /** The valid types of actions a user should be able to perform in an financial app. */
@@ -2565,7 +2642,7 @@ export enum BillingAttemptUserErrorCode {
   ContractPaused = 'CONTRACT_PAUSED',
   /** Subscription contract cannot be billed once terminated. */
   ContractTerminated = 'CONTRACT_TERMINATED',
-  /** Subscription contract is under review. */
+  /** Subscription contract is under review, origin order is high risk and unfulfilled. */
   ContractUnderReview = 'CONTRACT_UNDER_REVIEW',
   /** Billing cycle selector cannot select billing cycle outside of index range. */
   CycleIndexOutOfRange = 'CYCLE_INDEX_OUT_OF_RANGE',
@@ -2577,6 +2654,10 @@ export enum BillingAttemptUserErrorCode {
   OriginTimeBeforeContractCreation = 'ORIGIN_TIME_BEFORE_CONTRACT_CREATION',
   /** Origin time needs to be within the selected billing cycle's start and end at date. */
   OriginTimeOutOfRange = 'ORIGIN_TIME_OUT_OF_RANGE',
+  /** Failed to process the billing attempt. */
+  ProcessingFailed = 'PROCESSING_FAILED',
+  /** Billing attempt rate limit exceeded - try later. */
+  Throttled = 'THROTTLED',
   /** Billing cycle selector cannot select upcoming billing cycle past limit. */
   UpcomingCycleLimitExceeded = 'UPCOMING_CYCLE_LIMIT_EXCEEDED'
 }
@@ -3015,6 +3096,26 @@ export type BulkOperationCancelPayload = {
   userErrors: Array<UserError>;
 };
 
+/** An auto-generated type for paginating through multiple BulkOperations. */
+export type BulkOperationConnection = {
+  __typename?: 'BulkOperationConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<BulkOperationEdge>;
+  /** A list of nodes that are contained in BulkOperationEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<BulkOperation>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** An auto-generated type which holds one BulkOperation and a cursor during pagination. */
+export type BulkOperationEdge = {
+  __typename?: 'BulkOperationEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of BulkOperationEdge. */
+  node: BulkOperation;
+};
+
 /** Error codes for failed bulk operations. */
 export enum BulkOperationErrorCode {
   /**
@@ -3073,7 +3174,7 @@ export enum BulkOperationStatus {
    * [BulkOperation.errorCode](https://shopify.dev/api/admin-graphql/latest/enums/bulkoperationerrorcode).
    */
   Failed = 'FAILED',
-  /** The bulk operation is runnning. */
+  /** The bulk operation is running. */
   Running = 'RUNNING'
 }
 
@@ -3106,6 +3207,14 @@ export enum BulkOperationUserErrorCode {
   OperationInProgress = 'OPERATION_IN_PROGRESS'
 }
 
+/** The set of valid sort keys for the BulkOperations query. */
+export enum BulkOperationsSortKeys {
+  /** Sort by the `completed_at` value. */
+  CompletedAt = 'COMPLETED_AT',
+  /** Sort by the `created_at` value. */
+  CreatedAt = 'CREATED_AT'
+}
+
 /** Return type for `bulkProductResourceFeedbackCreate` mutation. */
 export type BulkProductResourceFeedbackCreatePayload = {
   __typename?: 'BulkProductResourceFeedbackCreatePayload';
@@ -3136,6 +3245,8 @@ export enum BulkProductResourceFeedbackCreateUserErrorCode {
   LessThanOrEqualTo = 'LESS_THAN_OR_EQUAL_TO',
   /** The operation was attempted on too many feedback objects. The maximum number of feedback objects that you can operate on is 50. */
   MaximumFeedbackLimitExceeded = 'MAXIMUM_FEEDBACK_LIMIT_EXCEEDED',
+  /** The channel was not found or does not belong to this app. */
+  NotFound = 'NOT_FOUND',
   /** The feedback for a later version of this resource was already accepted. */
   OutdatedFeedback = 'OUTDATED_FEEDBACK',
   /** The input value needs to be blank. */
@@ -3226,6 +3337,8 @@ export type BusinessEntity = Node & {
   displayName: Scalars['String']['output'];
   /** A globally-unique ID. */
   id: Scalars['ID']['output'];
+  /** The stable central legal entity ID associated with this business entity. */
+  legalEntityId?: Maybe<Scalars['BigInt']['output']>;
   /** Whether it's the merchant's primary Business Entity. */
   primary: Scalars['Boolean']['output'];
   /**
@@ -3429,6 +3542,18 @@ export type CalculatedDraftOrder = {
   alerts: Array<ResourceAlert>;
   /** Whether all variant prices have been overridden. */
   allVariantPricesOverridden: Scalars['Boolean']['output'];
+  /**
+   * The amount due later.
+   * When there are payment terms, this is the total price minus the deposit amount (if any).
+   * When there are no payment terms, this is 0.
+   */
+  amountDueLaterSet: MoneyBag;
+  /**
+   * The amount due now.
+   * When there are payment terms this is the value of the deposit (0 by default).
+   * When there are no payment terms, this is the total price.
+   */
+  amountDueNowSet: MoneyBag;
   /** Whether any variant prices have been overridden. */
   anyVariantPricesOverridden: Scalars['Boolean']['output'];
   /** The custom order-level discount applied. */
@@ -3444,6 +3569,8 @@ export type CalculatedDraftOrder = {
   currencyCode: CurrencyCode;
   /** The customer who will be sent an invoice. */
   customer?: Maybe<Customer>;
+  /** The portion required to be paid at checkout. */
+  deposit?: Maybe<DepositConfiguration>;
   /** All discount codes applied. */
   discountCodes: Array<Scalars['String']['output']>;
   /** The list of the line items in the calculated draft order. */
@@ -4186,6 +4313,8 @@ export type CartTransformCreateUserError = DisplayableError & {
 
 /** Possible error codes that can be returned by `CartTransformCreateUserError`. */
 export enum CartTransformCreateUserErrorCode {
+  /** Shop must be on a Shopify Plus plan to activate functions from a custom app. */
+  CustomAppFunctionNotEligible = 'CUSTOM_APP_FUNCTION_NOT_ELIGIBLE',
   /** A cart transform function already exists for the provided function_id. */
   FunctionAlreadyRegistered = 'FUNCTION_ALREADY_REGISTERED',
   /** Function does not implement the required interface for this cart_transform function. */
@@ -4196,6 +4325,8 @@ export enum CartTransformCreateUserErrorCode {
   InputInvalid = 'INPUT_INVALID',
   /** Could not create or update metafields. */
   InvalidMetafields = 'INVALID_METAFIELDS',
+  /** The maximum number of cart transforms per shop has been reached. */
+  MaximumCartTransforms = 'MAXIMUM_CART_TRANSFORMS',
   /** Either function_id or function_handle must be provided. */
   MissingFunctionIdentifier = 'MISSING_FUNCTION_IDENTIFIER',
   /** Only one of function_id or function_handle can be provided, not both. */
@@ -4270,6 +4401,497 @@ export type CartTransformFeature = {
   /** The cart transform operations eligible for the shop. */
   eligibleOperations: CartTransformEligibleOperations;
 };
+
+/** The set of valid sort keys for the CashActivities query. */
+export enum CashActivitiesSortKeys {
+  /** Sort by the `id` value. */
+  Id = 'ID',
+  /** Sort by the `time` value. */
+  Time = 'TIME'
+}
+
+/** An activity on a cash drawer. */
+export type CashActivity = {
+  /** The amount of cash added or removed as part of the activity. */
+  cash: MoneyV2;
+  /** The point of sale device payment session associated with the activity. */
+  paymentSession: PointOfSaleDevicePaymentSession;
+  /** The staff member who performed the activity. */
+  staffMember: StaffMember;
+  /** The time at which the activity occurred. */
+  time: Scalars['DateTime']['output'];
+};
+
+/** An auto-generated type for paginating through multiple CashActivities. */
+export type CashActivityConnection = {
+  __typename?: 'CashActivityConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<CashActivityEdge>;
+  /** A list of nodes that are contained in CashActivityEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<CashActivity>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** An auto-generated type which holds one CashActivity and a cursor during pagination. */
+export type CashActivityEdge = {
+  __typename?: 'CashActivityEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of CashActivityEdge. */
+  node: CashActivity;
+};
+
+/** A cash adjustment activity. */
+export type CashAdjustmentActivity = CashActivity & {
+  __typename?: 'CashAdjustmentActivity';
+  /** The amount of cash added or removed as part of the activity. */
+  cash: MoneyV2;
+  /** The gift card associated with the activity. */
+  giftCard?: Maybe<GiftCard>;
+  /** A note associated with the activity. */
+  note?: Maybe<Scalars['String']['output']>;
+  /** The point of sale device payment session associated with the activity. */
+  paymentSession: PointOfSaleDevicePaymentSession;
+  /** The reason code for the activity. */
+  reasonCode?: Maybe<CashManagementReasonCode>;
+  /** The staff member who performed the activity. */
+  staffMember: StaffMember;
+  /** The time at which the activity occurred. */
+  time: Scalars['DateTime']['output'];
+  /** The type of adjustment activity. */
+  type: CashAdjustmentActivityType;
+};
+
+/** The type of adjustment activity. */
+export enum CashAdjustmentActivityType {
+  /** A manual cash adjustment. */
+  Adjustment = 'ADJUSTMENT',
+  /** A cash payout, such as a gift card cash out. */
+  CashPayout = 'CASH_PAYOUT',
+  /** A closing adjustment. */
+  ClosingAdjustment = 'CLOSING_ADJUSTMENT'
+}
+
+/** A cash count activity. */
+export type CashCountActivity = CashActivity & {
+  __typename?: 'CashCountActivity';
+  /** The amount of cash added or removed as part of the activity. */
+  cash: MoneyV2;
+  /** The amount of cash counted during the activity. */
+  cashCounted: MoneyV2;
+  /** The discrepancy between the counted and expected cash amounts. */
+  cashDiscrepancy: MoneyV2;
+  /** The expected amount of cash in the drawer at the time of the activity. */
+  cashExpected: MoneyV2;
+  /** A note associated with the activity. */
+  note?: Maybe<Scalars['String']['output']>;
+  /** The point of sale device payment session associated with the activity. */
+  paymentSession: PointOfSaleDevicePaymentSession;
+  /** The reason code for the activity. */
+  reasonCode?: Maybe<CashManagementReasonCode>;
+  /** The staff member who performed the activity. */
+  staffMember: StaffMember;
+  /** The time at which the activity occurred. */
+  time: Scalars['DateTime']['output'];
+  /** The type of count activity. */
+  type: CashCountActivityType;
+};
+
+/** The type of count activity. */
+export enum CashCountActivityType {
+  /** A count performed at the closing of a session. */
+  Closing = 'CLOSING',
+  /** A count performed during a session. */
+  MidSession = 'MID_SESSION',
+  /** A count performed at the opening of a session. */
+  Opening = 'OPENING'
+}
+
+/** A cash drawer for cash management. */
+export type CashDrawer = Node & {
+  __typename?: 'CashDrawer';
+  /** The current balance in the cash drawer. */
+  balance: MoneyV2;
+  /** The activities on the cash drawer. */
+  cashActivities: CashActivityConnection;
+  /** A unique ID for the cash drawer. */
+  id: Scalars['ID']['output'];
+  /** The location of the cash drawer. */
+  location: Location;
+  /** The name of the cash drawer. */
+  name: Scalars['String']['output'];
+  /** The net sales for this cash drawer. */
+  netSales: MoneyV2;
+  /** The Point of Sale devices assigned to this cash drawer. */
+  pointOfSaleDevices?: Maybe<PointOfSaleDeviceConnection>;
+  /** The total adjustments for this cash drawer. */
+  totalAdjustments: MoneyV2;
+  /** The total discrepancies for this cash drawer. */
+  totalDiscrepancies: MoneyV2;
+  /** The total refunds for this cash drawer. */
+  totalRefunds: MoneyV2;
+  /** The total sales for this cash drawer. */
+  totalSales: MoneyV2;
+};
+
+
+/** A cash drawer for cash management. */
+export type CashDrawerCashActivitiesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+  sortKey?: InputMaybe<CashActivitiesSortKeys>;
+  staffMemberId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+/** A cash drawer for cash management. */
+export type CashDrawerNetSalesArgs = {
+  dateRange: CashDrawerDateRangeInput;
+};
+
+
+/** A cash drawer for cash management. */
+export type CashDrawerPointOfSaleDevicesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+/** A cash drawer for cash management. */
+export type CashDrawerTotalAdjustmentsArgs = {
+  dateRange: CashDrawerDateRangeInput;
+};
+
+
+/** A cash drawer for cash management. */
+export type CashDrawerTotalDiscrepanciesArgs = {
+  dateRange: CashDrawerDateRangeInput;
+};
+
+
+/** A cash drawer for cash management. */
+export type CashDrawerTotalRefundsArgs = {
+  dateRange: CashDrawerDateRangeInput;
+};
+
+
+/** A cash drawer for cash management. */
+export type CashDrawerTotalSalesArgs = {
+  dateRange: CashDrawerDateRangeInput;
+};
+
+/** An auto-generated type for paginating through multiple CashDrawers. */
+export type CashDrawerConnection = {
+  __typename?: 'CashDrawerConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<CashDrawerEdge>;
+  /** A list of nodes that are contained in CashDrawerEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<CashDrawer>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** Return type for `cashDrawerCreate` mutation. */
+export type CashDrawerCreatePayload = {
+  __typename?: 'CashDrawerCreatePayload';
+  /** The created cash drawer. */
+  cashDrawer?: Maybe<CashDrawer>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<CashDrawerCreateUserError>;
+};
+
+/** An error that occurs during the execution of `CashDrawerCreate`. */
+export type CashDrawerCreateUserError = DisplayableError & {
+  __typename?: 'CashDrawerCreateUserError';
+  /** The error code. */
+  code?: Maybe<CashDrawerCreateUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `CashDrawerCreateUserError`. */
+export enum CashDrawerCreateUserErrorCode {
+  /** A cash drawer with this name already exists at the specified location. */
+  CashDrawerAlreadyExists = 'CASH_DRAWER_ALREADY_EXISTS',
+  /** Unexpected internal error happened. */
+  InternalError = 'INTERNAL_ERROR',
+  /** The name provided is invalid. */
+  InvalidName = 'INVALID_NAME',
+  /** The location was not found. */
+  LocationNotFound = 'LOCATION_NOT_FOUND',
+  /** Failed to create cash drawer. */
+  NotSaved = 'NOT_SAVED'
+}
+
+/** The input fields for date and time range filter. */
+export type CashDrawerDateRangeInput = {
+  /** The start of the date and time range. */
+  from: Scalars['DateTime']['input'];
+  /** The end of the date and time range. */
+  to: Scalars['DateTime']['input'];
+};
+
+/** An auto-generated type which holds one CashDrawer and a cursor during pagination. */
+export type CashDrawerEdge = {
+  __typename?: 'CashDrawerEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of CashDrawerEdge. */
+  node: CashDrawer;
+};
+
+/** Return type for `cashDrawerFindOrCreate` mutation. */
+export type CashDrawerFindOrCreatePayload = {
+  __typename?: 'CashDrawerFindOrCreatePayload';
+  /** The cash drawer. */
+  cashDrawer?: Maybe<CashDrawer>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<CashDrawerFindOrCreateUserError>;
+};
+
+/** An error that occurs during the execution of `CashDrawerFindOrCreate`. */
+export type CashDrawerFindOrCreateUserError = DisplayableError & {
+  __typename?: 'CashDrawerFindOrCreateUserError';
+  /** The error code. */
+  code?: Maybe<CashDrawerFindOrCreateUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `CashDrawerFindOrCreateUserError`. */
+export enum CashDrawerFindOrCreateUserErrorCode {
+  /** The cash drawer assignment already exists. */
+  CashDrawerAssignmentAlreadyExists = 'CASH_DRAWER_ASSIGNMENT_ALREADY_EXISTS',
+  /** Unexpected internal error happened. */
+  InternalError = 'INTERNAL_ERROR',
+  /** The location was not found. */
+  LocationNotFound = 'LOCATION_NOT_FOUND',
+  /** Failed to find or create cash drawer. */
+  NotSaved = 'NOT_SAVED',
+  /** The point of sale device was not found. */
+  PointOfSaleDeviceNotFound = 'POINT_OF_SALE_DEVICE_NOT_FOUND'
+}
+
+/** The input fields for updating a cash drawer. */
+export type CashDrawerUpdateInput = {
+  /** The new name for the cash drawer. */
+  name: Scalars['String']['input'];
+};
+
+/** Return type for `cashDrawerUpdate` mutation. */
+export type CashDrawerUpdatePayload = {
+  __typename?: 'CashDrawerUpdatePayload';
+  /** The updated cash drawer. */
+  cashDrawer?: Maybe<CashDrawer>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<CashDrawerUpdateUserError>;
+};
+
+/** An error that occurs during the execution of `CashDrawerUpdate`. */
+export type CashDrawerUpdateUserError = DisplayableError & {
+  __typename?: 'CashDrawerUpdateUserError';
+  /** The error code. */
+  code?: Maybe<CashDrawerUpdateUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `CashDrawerUpdateUserError`. */
+export enum CashDrawerUpdateUserErrorCode {
+  /** A cash drawer with this name already exists at the specified location. */
+  CashDrawerAlreadyExists = 'CASH_DRAWER_ALREADY_EXISTS',
+  /** The cash drawer was not found. */
+  CashDrawerNotFound = 'CASH_DRAWER_NOT_FOUND',
+  /** Unexpected internal error happened. */
+  InternalError = 'INTERNAL_ERROR',
+  /** The name provided is invalid. */
+  InvalidName = 'INVALID_NAME',
+  /** Failed to update cash drawer. */
+  NotSaved = 'NOT_SAVED'
+}
+
+/** Custom reason code. */
+export type CashManagementCustomReasonCode = Node & {
+  __typename?: 'CashManagementCustomReasonCode';
+  /** The code for the custom reason code. */
+  code: Scalars['String']['output'];
+  /** A globally-unique ID. */
+  id: Scalars['ID']['output'];
+};
+
+/** Default reason code. */
+export type CashManagementDefaultReasonCode = Node & {
+  __typename?: 'CashManagementDefaultReasonCode';
+  /** The code for the default reason code. */
+  code: CashManagementDefaultReasonCodeEnum;
+  /** A globally-unique ID. */
+  id: Scalars['ID']['output'];
+};
+
+/** Default reason codes for cash management. */
+export enum CashManagementDefaultReasonCodeEnum {
+  /** Point of sale device payment session was automatically closed because the device switched to a different location. */
+  AutoEndSessionLocationChange = 'AUTO_END_SESSION_LOCATION_CHANGE',
+  /** Point of sale device payment session was automatically closed because a staff member logged out. */
+  AutoEndSessionLogout = 'AUTO_END_SESSION_LOGOUT',
+  /** Point of sale device payment session was automatically opened by a cash payment at checkout. */
+  AutoStartSessionCheckout = 'AUTO_START_SESSION_CHECKOUT',
+  /** Cash count. */
+  CashCount = 'CASH_COUNT',
+  /** Cash payout. */
+  CashPayout = 'CASH_PAYOUT',
+  /** Cash pickup. */
+  CashPickup = 'CASH_PICKUP',
+  /** Change correction. */
+  ChangeCorrection = 'CHANGE_CORRECTION',
+  /** Other. */
+  Other = 'OTHER',
+  /** Petty cash. */
+  PettyCash = 'PETTY_CASH',
+  /** Tip payout. */
+  TipPayout = 'TIP_PAYOUT'
+}
+
+/** Reason code for cash management. */
+export type CashManagementReasonCode = CashManagementCustomReasonCode | CashManagementDefaultReasonCode | CashManagementSystemReasonCode;
+
+/** An auto-generated type for paginating through multiple CashManagementReasonCodes. */
+export type CashManagementReasonCodeConnection = {
+  __typename?: 'CashManagementReasonCodeConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<CashManagementReasonCodeEdge>;
+  /** A list of nodes that are contained in CashManagementReasonCodeEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<CashManagementReasonCode>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** Return type for `cashManagementReasonCodeCreate` mutation. */
+export type CashManagementReasonCodeCreatePayload = {
+  __typename?: 'CashManagementReasonCodeCreatePayload';
+  /** The created cash management reason code. */
+  reasonCode?: Maybe<CashManagementCustomReasonCode>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<CashManagementReasonCodeCreateUserError>;
+};
+
+/** An error that occurs during the execution of `CashManagementReasonCodeCreate`. */
+export type CashManagementReasonCodeCreateUserError = DisplayableError & {
+  __typename?: 'CashManagementReasonCodeCreateUserError';
+  /** The error code. */
+  code?: Maybe<CashManagementReasonCodeCreateUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `CashManagementReasonCodeCreateUserError`. */
+export enum CashManagementReasonCodeCreateUserErrorCode {
+  /** The input value is blank. */
+  Blank = 'BLANK',
+  /** The reason code already exists. */
+  CodeAlreadyExists = 'CODE_ALREADY_EXISTS',
+  /** Failed to create cash management reason code. */
+  NotSaved = 'NOT_SAVED'
+}
+
+/** Return type for `cashManagementReasonCodeDelete` mutation. */
+export type CashManagementReasonCodeDeletePayload = {
+  __typename?: 'CashManagementReasonCodeDeletePayload';
+  /** The deleted cash management reason code gid. */
+  deletedId?: Maybe<Scalars['ID']['output']>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<CashManagementReasonCodeDeleteUserError>;
+};
+
+/** An error that occurs during the execution of `CashManagementReasonCodeDelete`. */
+export type CashManagementReasonCodeDeleteUserError = DisplayableError & {
+  __typename?: 'CashManagementReasonCodeDeleteUserError';
+  /** The error code. */
+  code?: Maybe<CashManagementReasonCodeDeleteUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `CashManagementReasonCodeDeleteUserError`. */
+export enum CashManagementReasonCodeDeleteUserErrorCode {
+  /** Database error occurred. */
+  DatabaseError = 'DATABASE_ERROR',
+  /** SYSTEM type reason codes are not deletable. */
+  NotDeletable = 'NOT_DELETABLE',
+  /** Reason code not found. */
+  NotFound = 'NOT_FOUND'
+}
+
+/** An auto-generated type which holds one CashManagementReasonCode and a cursor during pagination. */
+export type CashManagementReasonCodeEdge = {
+  __typename?: 'CashManagementReasonCodeEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of CashManagementReasonCodeEdge. */
+  node: CashManagementReasonCode;
+};
+
+/** A summary of cash management data. */
+export type CashManagementSummary = {
+  __typename?: 'CashManagementSummary';
+  /** The cumulative cash balance of all cash drawers at the provided end date. */
+  cashBalanceAtEnd: MoneyV2;
+  /** The cumulative cash balance of all cash drawers at the provided start date. */
+  cashBalanceAtStart: MoneyV2;
+  /** The net cash flow during the specified period (start date to end date). Calculated as net sales plus adjustments. */
+  netCash: MoneyV2;
+  /** The number of sessions that were closed during the specified period (start date to end date). */
+  sessionsClosed: Scalars['Int']['output'];
+  /** The number of sessions that were opened during the specified period (start date to end date). */
+  sessionsOpened: Scalars['Int']['output'];
+  /** The total cash discrepancies during the specified period (start date to end date). */
+  totalDiscrepancies: MoneyV2;
+};
+
+/** System reason code. */
+export type CashManagementSystemReasonCode = Node & {
+  __typename?: 'CashManagementSystemReasonCode';
+  /** The code for the system reason code. */
+  code: CashManagementSystemReasonCodeEnum;
+  /** A globally-unique ID. */
+  id: Scalars['ID']['output'];
+};
+
+/** System reason codes for cash management. */
+export enum CashManagementSystemReasonCodeEnum {
+  /** Point of sale device payment session was automatically closed because the device switched to a different location. */
+  AutoEndSessionLocationChange = 'AUTO_END_SESSION_LOCATION_CHANGE',
+  /** Point of sale device payment session was automatically closed because a staff member logged out. */
+  AutoEndSessionLogout = 'AUTO_END_SESSION_LOGOUT',
+  /** Point of sale device payment session was automatically opened by a cash payment at checkout. */
+  AutoStartSessionCheckout = 'AUTO_START_SESSION_CHECKOUT',
+  /** Cash payout. */
+  CashPayout = 'CASH_PAYOUT',
+  /** Float setup. */
+  FloatSetup = 'FLOAT_SETUP',
+  /**
+   * Other.
+   * @deprecated Use CashManagementDefaultReasonCodeEnum.OTHER instead.
+   */
+  Other = 'OTHER'
+}
 
 /** The rounding adjustment applied to total payment or refund received for an Order involving cash payments. */
 export type CashRoundingAdjustment = {
@@ -4433,9 +5055,38 @@ export enum CashTrackingSessionsSortKeys {
   TotalDiscrepancyDesc = 'TOTAL_DISCREPANCY_DESC'
 }
 
+/** A cash transaction activity. */
+export type CashTransactionActivity = CashActivity & {
+  __typename?: 'CashTransactionActivity';
+  /** The amount of cash added or removed as part of the activity. */
+  cash: MoneyV2;
+  /** The order transaction associated with the activity. */
+  orderTransaction: OrderTransaction;
+  /** The point of sale device payment session associated with the activity. */
+  paymentSession: PointOfSaleDevicePaymentSession;
+  /** The staff member who performed the activity. */
+  staffMember: StaffMember;
+  /** The time at which the activity occurred. */
+  time: Scalars['DateTime']['output'];
+  /** The type of transaction activity. */
+  type: CashTransactionActivityType;
+};
+
+/** The type of transaction activity. */
+export enum CashTransactionActivityType {
+  /** Change given to a customer. */
+  Change = 'CHANGE',
+  /** A cash refund. */
+  Refund = 'REFUND',
+  /** A cash sale. */
+  Sale = 'SALE'
+}
+
 /**
  * A list of products with publishing and pricing information.
  * A catalog can be associated with a specific context, such as a [`Market`](https://shopify.dev/api/admin-graphql/current/objects/market), [`CompanyLocation`](https://shopify.dev/api/admin-graphql/current/objects/companylocation), or [`App`](https://shopify.dev/api/admin-graphql/current/objects/app).
+ *
+ * Catalogs can optionally include a publication to control product visibility and a price list to customize pricing. When a publication isn't associated with a catalog, product availability is determined by the sales channel.
  */
 export type Catalog = {
   /** A globally-unique ID. */
@@ -4486,7 +5137,7 @@ export type CatalogCreateInput = {
   context: CatalogContextInput;
   /** The ID of the price list to associate to the catalog. */
   priceListId?: InputMaybe<Scalars['ID']['input']>;
-  /** The ID of the publication to associate to the catalog. */
+  /** The ID of the publication to associate to the catalog. Only include this if you need to control which products are visible in the catalog. When omitted, product availability is determined by the sales channel. */
   publicationId?: InputMaybe<Scalars['ID']['input']>;
   /** The status of the catalog. */
   status: CatalogStatus;
@@ -4609,6 +5260,8 @@ export type CatalogUserError = DisplayableError & {
 export enum CatalogUserErrorCode {
   /** An app catalog cannot be assigned to a price list. */
   AppCatalogPriceListAssignment = 'APP_CATALOG_PRICE_LIST_ASSIGNMENT',
+  /** You've reached the maximum number of B2B catalogs allowed for your plan. */
+  B2BCatalogLimitReached = 'B2B_CATALOG_LIMIT_REACHED',
   /** The input value is blank. */
   Blank = 'BLANK',
   /** The catalog can't be associated with more than one market. */
@@ -4629,8 +5282,12 @@ export enum CatalogUserErrorCode {
   CatalogContextDoesNotSupportQuantityPriceBreaks = 'CATALOG_CONTEXT_DOES_NOT_SUPPORT_QUANTITY_PRICE_BREAKS',
   /** Quantity rules can be associated only with company location catalogs or catalogs associated with compatible markets. */
   CatalogContextDoesNotSupportQuantityRules = 'CATALOG_CONTEXT_DOES_NOT_SUPPORT_QUANTITY_RULES',
+  /** The catalog context is currently being modified. Please try again later. */
+  CatalogContextLocked = 'CATALOG_CONTEXT_LOCKED',
   /** Catalog failed to save. */
   CatalogFailedToSave = 'CATALOG_FAILED_TO_SAVE',
+  /** Catalogs and condition types are not compatible with each other. */
+  CatalogNotCompatibleWithConditionTypes = 'CATALOG_NOT_COMPATIBLE_WITH_CONDITION_TYPES',
   /** The catalog wasn't found. */
   CatalogNotFound = 'CATALOG_NOT_FOUND',
   /** A company location catalog outside of a supported plan can only have an archived status. */
@@ -4683,6 +5340,8 @@ export enum CatalogUserErrorCode {
   TooLong = 'TOO_LONG',
   /** The input value is too short. */
   TooShort = 'TOO_SHORT',
+  /** Catalogs assigned to company locations can't be set to active with your plan. */
+  UnpermittedEntitlementsDirectCatalogAssignment = 'UNPERMITTED_ENTITLEMENTS_DIRECT_CATALOG_ASSIGNMENT',
   /** Managing this catalog is not supported by your plan. */
   UnpermittedEntitlementsMarketCatalogs = 'UNPERMITTED_ENTITLEMENTS_MARKET_CATALOGS',
   /** Can't perform this action on a catalog of this type. */
@@ -4690,24 +5349,36 @@ export enum CatalogUserErrorCode {
 }
 
 /**
- * An authenticated link to an external platform that supports syndication and optionally order ingestion, such as Facebook, Pinterest, an online store, or Point of Sale (POS).
+ * A connection between a Shopify shop and an external selling platform that supports product syndication and optionally order ingestion. Each channel binds a merchant's account on a specific platform — such as Amazon, eBay, Google, or a point-of-sale system — to the shop, establishing the publishing destination for product feeds.
  *
- * Each channel provides access to its underlying [`App`](https://shopify.dev/docs/api/admin-graphql/latest/objects/App), published products and collections, and [`Publication`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication) settings, as well as what features of the platform it supports such as [scheduled publishing](https://shopify.dev/docs/apps/build/sales-channels/scheduled-product-publishing). Use channels to manage where catalog items appear, track publication status across platforms, and control [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) visibility for different customer touchpoints.
+ * Sales Channel applications use [`channelCreate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/channelCreate) to establish channels after merchant authentication, and can manage multiple channel connections per app. Each channel is bound to a channel specification that declares the platform's regional coverage, capabilities, and requirements.
+ *
+ * Use channels to manage where catalog items are syndicated, track publication status across platforms, and control [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) visibility for different selling destinations.
  */
 export type Channel = Node & {
   __typename?: 'Channel';
+  /** The unique account ID for the merchant on the external platform. This value is opaque to Shopify — its format is determined by the channel, such as an Amazon Seller ID or Google Merchant Center ID. */
+  accountId?: Maybe<Scalars['String']['output']>;
+  /** The merchant-facing name for the external account. Displayed in Shopify Admin wherever the channel connection is referenced, such as in Markets and order attribution. */
+  accountName?: Maybe<Scalars['String']['output']>;
+  /** The regions where the channel is currently active, derived from the channel's active product feeds. Empty when the channel has no active product feeds. */
+  activeRegions: Array<CountryCode>;
   /** The underlying app used by the channel. */
   app: App;
   /** The list of collection publications. Each record represents information about the publication of a collection. */
   collectionPublicationsV3: ResourcePublicationConnection;
   /** The list of collections published to the channel. */
   collections: CollectionConnection;
-  /** The unique identifier for the channel. */
+  /** A unique, human-readable identifier for the channel within the shop. Set during [`channelCreate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/channelCreate) or auto-generated from the specification handle and account ID. Use with [`channelByHandle`](https://shopify.dev/docs/api/admin-graphql/latest/queries/channelByHandle) for lookups. */
   handle: Scalars['String']['output'];
   /** Whether the collection is available to the channel. */
   hasCollection: Scalars['Boolean']['output'];
   /** A globally-unique ID. */
   id: Scalars['ID']['output'];
+  /** The markets associated with this channel. */
+  markets?: Maybe<MarketConnection>;
+  /** The number of markets associated with this channel. */
+  marketsCount?: Maybe<Count>;
   /** The name of the channel. */
   name: Scalars['String']['output'];
   /**
@@ -4733,15 +5404,21 @@ export type Channel = Node & {
   products: ProductConnection;
   /** Retrieves the total count of [`products`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) published to a specific sales channel. Limited to a maximum of 10000 by default. */
   productsCount?: Maybe<Count>;
+  /** The resource feedback for the channel. Returns `null` when no active feedback exists—for example, after `shopResourceFeedbackCreate` is called with `state: ACCEPTED`, which clears the feedback signal. A `null` result is expected and means the channel has no outstanding feedback. */
+  resourceFeedback?: Maybe<AppFeedback>;
+  /** The handle of the [channel specification](https://shopify.dev/docs/apps/build/sales-channels/channel-config-extension) bound to this channel. The specification declares the channel's regional coverage, capabilities, and requirements, and is deployed by the Sales Channel application via `shopify app deploy`. */
+  specificationHandle?: Maybe<Scalars['String']['output']>;
   /** Whether the channel supports future publishing. */
   supportsFuturePublishing: Scalars['Boolean']['output'];
 };
 
 
 /**
- * An authenticated link to an external platform that supports syndication and optionally order ingestion, such as Facebook, Pinterest, an online store, or Point of Sale (POS).
+ * A connection between a Shopify shop and an external selling platform that supports product syndication and optionally order ingestion. Each channel binds a merchant's account on a specific platform — such as Amazon, eBay, Google, or a point-of-sale system — to the shop, establishing the publishing destination for product feeds.
  *
- * Each channel provides access to its underlying [`App`](https://shopify.dev/docs/api/admin-graphql/latest/objects/App), published products and collections, and [`Publication`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication) settings, as well as what features of the platform it supports such as [scheduled publishing](https://shopify.dev/docs/apps/build/sales-channels/scheduled-product-publishing). Use channels to manage where catalog items appear, track publication status across platforms, and control [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) visibility for different customer touchpoints.
+ * Sales Channel applications use [`channelCreate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/channelCreate) to establish channels after merchant authentication, and can manage multiple channel connections per app. Each channel is bound to a channel specification that declares the platform's regional coverage, capabilities, and requirements.
+ *
+ * Use channels to manage where catalog items are syndicated, track publication status across platforms, and control [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) visibility for different selling destinations.
  */
 export type ChannelCollectionPublicationsV3Args = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -4753,9 +5430,11 @@ export type ChannelCollectionPublicationsV3Args = {
 
 
 /**
- * An authenticated link to an external platform that supports syndication and optionally order ingestion, such as Facebook, Pinterest, an online store, or Point of Sale (POS).
+ * A connection between a Shopify shop and an external selling platform that supports product syndication and optionally order ingestion. Each channel binds a merchant's account on a specific platform — such as Amazon, eBay, Google, or a point-of-sale system — to the shop, establishing the publishing destination for product feeds.
  *
- * Each channel provides access to its underlying [`App`](https://shopify.dev/docs/api/admin-graphql/latest/objects/App), published products and collections, and [`Publication`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication) settings, as well as what features of the platform it supports such as [scheduled publishing](https://shopify.dev/docs/apps/build/sales-channels/scheduled-product-publishing). Use channels to manage where catalog items appear, track publication status across platforms, and control [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) visibility for different customer touchpoints.
+ * Sales Channel applications use [`channelCreate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/channelCreate) to establish channels after merchant authentication, and can manage multiple channel connections per app. Each channel is bound to a channel specification that declares the platform's regional coverage, capabilities, and requirements.
+ *
+ * Use channels to manage where catalog items are syndicated, track publication status across platforms, and control [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) visibility for different selling destinations.
  */
 export type ChannelCollectionsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -4767,9 +5446,11 @@ export type ChannelCollectionsArgs = {
 
 
 /**
- * An authenticated link to an external platform that supports syndication and optionally order ingestion, such as Facebook, Pinterest, an online store, or Point of Sale (POS).
+ * A connection between a Shopify shop and an external selling platform that supports product syndication and optionally order ingestion. Each channel binds a merchant's account on a specific platform — such as Amazon, eBay, Google, or a point-of-sale system — to the shop, establishing the publishing destination for product feeds.
  *
- * Each channel provides access to its underlying [`App`](https://shopify.dev/docs/api/admin-graphql/latest/objects/App), published products and collections, and [`Publication`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication) settings, as well as what features of the platform it supports such as [scheduled publishing](https://shopify.dev/docs/apps/build/sales-channels/scheduled-product-publishing). Use channels to manage where catalog items appear, track publication status across platforms, and control [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) visibility for different customer touchpoints.
+ * Sales Channel applications use [`channelCreate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/channelCreate) to establish channels after merchant authentication, and can manage multiple channel connections per app. Each channel is bound to a channel specification that declares the platform's regional coverage, capabilities, and requirements.
+ *
+ * Use channels to manage where catalog items are syndicated, track publication status across platforms, and control [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) visibility for different selling destinations.
  */
 export type ChannelHasCollectionArgs = {
   id: Scalars['ID']['input'];
@@ -4777,9 +5458,27 @@ export type ChannelHasCollectionArgs = {
 
 
 /**
- * An authenticated link to an external platform that supports syndication and optionally order ingestion, such as Facebook, Pinterest, an online store, or Point of Sale (POS).
+ * A connection between a Shopify shop and an external selling platform that supports product syndication and optionally order ingestion. Each channel binds a merchant's account on a specific platform — such as Amazon, eBay, Google, or a point-of-sale system — to the shop, establishing the publishing destination for product feeds.
  *
- * Each channel provides access to its underlying [`App`](https://shopify.dev/docs/api/admin-graphql/latest/objects/App), published products and collections, and [`Publication`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication) settings, as well as what features of the platform it supports such as [scheduled publishing](https://shopify.dev/docs/apps/build/sales-channels/scheduled-product-publishing). Use channels to manage where catalog items appear, track publication status across platforms, and control [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) visibility for different customer touchpoints.
+ * Sales Channel applications use [`channelCreate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/channelCreate) to establish channels after merchant authentication, and can manage multiple channel connections per app. Each channel is bound to a channel specification that declares the platform's regional coverage, capabilities, and requirements.
+ *
+ * Use channels to manage where catalog items are syndicated, track publication status across platforms, and control [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) visibility for different selling destinations.
+ */
+export type ChannelMarketsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * A connection between a Shopify shop and an external selling platform that supports product syndication and optionally order ingestion. Each channel binds a merchant's account on a specific platform — such as Amazon, eBay, Google, or a point-of-sale system — to the shop, establishing the publishing destination for product feeds.
+ *
+ * Sales Channel applications use [`channelCreate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/channelCreate) to establish channels after merchant authentication, and can manage multiple channel connections per app. Each channel is bound to a channel specification that declares the platform's regional coverage, capabilities, and requirements.
+ *
+ * Use channels to manage where catalog items are syndicated, track publication status across platforms, and control [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) visibility for different selling destinations.
  */
 export type ChannelProductPublicationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -4791,9 +5490,11 @@ export type ChannelProductPublicationsArgs = {
 
 
 /**
- * An authenticated link to an external platform that supports syndication and optionally order ingestion, such as Facebook, Pinterest, an online store, or Point of Sale (POS).
+ * A connection between a Shopify shop and an external selling platform that supports product syndication and optionally order ingestion. Each channel binds a merchant's account on a specific platform — such as Amazon, eBay, Google, or a point-of-sale system — to the shop, establishing the publishing destination for product feeds.
  *
- * Each channel provides access to its underlying [`App`](https://shopify.dev/docs/api/admin-graphql/latest/objects/App), published products and collections, and [`Publication`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication) settings, as well as what features of the platform it supports such as [scheduled publishing](https://shopify.dev/docs/apps/build/sales-channels/scheduled-product-publishing). Use channels to manage where catalog items appear, track publication status across platforms, and control [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) visibility for different customer touchpoints.
+ * Sales Channel applications use [`channelCreate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/channelCreate) to establish channels after merchant authentication, and can manage multiple channel connections per app. Each channel is bound to a channel specification that declares the platform's regional coverage, capabilities, and requirements.
+ *
+ * Use channels to manage where catalog items are syndicated, track publication status across platforms, and control [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) visibility for different selling destinations.
  */
 export type ChannelProductPublicationsV3Args = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -4805,9 +5506,11 @@ export type ChannelProductPublicationsV3Args = {
 
 
 /**
- * An authenticated link to an external platform that supports syndication and optionally order ingestion, such as Facebook, Pinterest, an online store, or Point of Sale (POS).
+ * A connection between a Shopify shop and an external selling platform that supports product syndication and optionally order ingestion. Each channel binds a merchant's account on a specific platform — such as Amazon, eBay, Google, or a point-of-sale system — to the shop, establishing the publishing destination for product feeds.
  *
- * Each channel provides access to its underlying [`App`](https://shopify.dev/docs/api/admin-graphql/latest/objects/App), published products and collections, and [`Publication`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication) settings, as well as what features of the platform it supports such as [scheduled publishing](https://shopify.dev/docs/apps/build/sales-channels/scheduled-product-publishing). Use channels to manage where catalog items appear, track publication status across platforms, and control [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) visibility for different customer touchpoints.
+ * Sales Channel applications use [`channelCreate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/channelCreate) to establish channels after merchant authentication, and can manage multiple channel connections per app. Each channel is bound to a channel specification that declares the platform's regional coverage, capabilities, and requirements.
+ *
+ * Use channels to manage where catalog items are syndicated, track publication status across platforms, and control [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) visibility for different selling destinations.
  */
 export type ChannelProductsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -4819,9 +5522,11 @@ export type ChannelProductsArgs = {
 
 
 /**
- * An authenticated link to an external platform that supports syndication and optionally order ingestion, such as Facebook, Pinterest, an online store, or Point of Sale (POS).
+ * A connection between a Shopify shop and an external selling platform that supports product syndication and optionally order ingestion. Each channel binds a merchant's account on a specific platform — such as Amazon, eBay, Google, or a point-of-sale system — to the shop, establishing the publishing destination for product feeds.
  *
- * Each channel provides access to its underlying [`App`](https://shopify.dev/docs/api/admin-graphql/latest/objects/App), published products and collections, and [`Publication`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication) settings, as well as what features of the platform it supports such as [scheduled publishing](https://shopify.dev/docs/apps/build/sales-channels/scheduled-product-publishing). Use channels to manage where catalog items appear, track publication status across platforms, and control [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) visibility for different customer touchpoints.
+ * Sales Channel applications use [`channelCreate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/channelCreate) to establish channels after merchant authentication, and can manage multiple channel connections per app. Each channel is bound to a channel specification that declares the platform's regional coverage, capabilities, and requirements.
+ *
+ * Use channels to manage where catalog items are syndicated, track publication status across platforms, and control [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) visibility for different selling destinations.
  */
 export type ChannelProductsCountArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -4839,29 +5544,112 @@ export type ChannelConnection = {
   pageInfo: PageInfo;
 };
 
+/** The input fields for creating a [`Channel`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Channel). */
+export type ChannelCreateInput = {
+  /** A unique identifier for the merchant's account on the external platform, such as an Amazon Seller ID or Google Merchant Center ID. Used together with `specificationHandle` to uniquely identify the channel connection. */
+  accountId: Scalars['String']['input'];
+  /** The merchant-facing name for the external account. Displayed in Shopify Admin wherever the channel connection is referenced, such as in Markets and order attribution. Should match how the merchant recognises the account on the external platform. */
+  accountName: Scalars['String']['input'];
+  /** A unique, human-readable identifier for the channel within the shop. For example, `amazon-us-A1B2C3D4E5F6G7`. Used for lookups via [`channelByHandle`](https://shopify.dev/docs/api/admin-graphql/latest/queries/channelByHandle). If not provided, auto-generated from the specification handle and account ID. Must be unique across all channels on the shop. */
+  handle?: InputMaybe<Scalars['String']['input']>;
+  /** The handle of the [channel specification](https://shopify.dev/docs/apps/build/sales-channels/channel-config-extension) to bind to this channel. The specification must have been deployed by the calling application via `shopify app deploy`. Determines the channel's regional coverage, capabilities, and requirements. */
+  specificationHandle: Scalars['String']['input'];
+};
+
+/** Return type for `channelCreate` mutation. */
+export type ChannelCreatePayload = {
+  __typename?: 'ChannelCreatePayload';
+  /** The channel that was created. */
+  channel?: Maybe<Channel>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<ChannelCreateUserError>;
+};
+
+/** An error that occurs during the execution of `ChannelCreate`. */
+export type ChannelCreateUserError = DisplayableError & {
+  __typename?: 'ChannelCreateUserError';
+  /** The error code. */
+  code?: Maybe<ChannelCreateUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `ChannelCreateUserError`. */
+export enum ChannelCreateUserErrorCode {
+  /** The input value is invalid. */
+  Invalid = 'INVALID',
+  /** The record with the ID used as the input value couldn't be found. */
+  NotFound = 'NOT_FOUND'
+}
+
 /**
  * A specific selling surface within a [sales channel](https://shopify.dev/docs/apps/build/sales-channels) platform. A channel definition identifies where products can be sold. Definitions can represent entire platforms (like Facebook or TikTok) or specific sales channels within those platforms, such as Instagram Shops, Instagram Shopping, or TikTok Live.
  *
- * Each definition includes the parent [`Channel`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Channel) name and subchannel name to indicate the selling surface hierarchy. The marketplace flag identifies whether this surface represents a marketplace channel such as shops on Facebook, Instagram, or Buy on Google.
+ * Each definition includes the parent [`Channel`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Channel) name and subchannel name to indicate the selling surface hierarchy.
  */
 export type ChannelDefinition = Node & {
   __typename?: 'ChannelDefinition';
-  /** Name of the channel that this sub channel belongs to. */
+  /**
+   * Name of the channel that this sub channel belongs to.
+   * @deprecated Use [`OrderAttributionDefinition.displayName`](https://shopify.dev/docs/api/admin-graphql/latest/objects/OrderAttributionDefinition#field-OrderAttributionDefinition.fields.displayName) instead.
+   */
   channelName: Scalars['String']['output'];
-  /** Unique string used as a public identifier for the channel definition. */
+  /**
+   * Unique string used as a public identifier for the channel definition.
+   * @deprecated Use [`OrderAttributionDefinition.handle`](https://shopify.dev/docs/api/admin-graphql/latest/objects/OrderAttributionDefinition#field-OrderAttributionDefinition.fields.handle) instead.
+   */
   handle: Scalars['String']['output'];
-  /** The unique ID for the channel definition. */
+  /**
+   * The unique ID for the channel definition.
+   * @deprecated Use [`OrderAttributionDefinition.id`](https://shopify.dev/docs/api/admin-graphql/latest/objects/OrderAttributionDefinition#field-OrderAttributionDefinition.fields.id) instead.
+   */
   id: Scalars['ID']['output'];
-  /** Whether this channel definition represents a marketplace. */
+  /**
+   * Whether this channel definition represents a marketplace.
+   * @deprecated Use [`OrderAttributionDefinition.handle`](https://shopify.dev/docs/api/admin-graphql/latest/objects/OrderAttributionDefinition#field-OrderAttributionDefinition.fields.handle) instead.
+   */
   isMarketplace: Scalars['Boolean']['output'];
-  /** Name of the sub channel (e.g. Online Store, Instagram Shopping, TikTok Live). */
+  /**
+   * Name of the sub channel (e.g. Online Store, Instagram Shopping, TikTok Live).
+   * @deprecated Use [`OrderAttributionDefinition.displayName`](https://shopify.dev/docs/api/admin-graphql/latest/objects/OrderAttributionDefinition#field-OrderAttributionDefinition.fields.displayName) instead.
+   */
   subChannelName: Scalars['String']['output'];
   /**
    * Icon displayed when showing the channel in admin.
-   * @deprecated Use App.icon instead
+   * @deprecated Use [`OrderAttributionDefinition.icon`](https://shopify.dev/docs/api/admin-graphql/latest/objects/OrderAttributionDefinition#field-OrderAttributionDefinition.fields.icon) instead.
    */
   svgIcon?: Maybe<Scalars['String']['output']>;
 };
+
+/** Return type for `channelDelete` mutation. */
+export type ChannelDeletePayload = {
+  __typename?: 'ChannelDeletePayload';
+  /** The ID of the deleted channel. */
+  deletedId?: Maybe<Scalars['ID']['output']>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<ChannelDeleteUserError>;
+};
+
+/** An error that occurs during the execution of `ChannelDelete`. */
+export type ChannelDeleteUserError = DisplayableError & {
+  __typename?: 'ChannelDeleteUserError';
+  /** The error code. */
+  code?: Maybe<ChannelDeleteUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `ChannelDeleteUserError`. */
+export enum ChannelDeleteUserErrorCode {
+  /** The input value is invalid. */
+  Invalid = 'INVALID',
+  /** The record with the ID used as the input value couldn't be found. */
+  NotFound = 'NOT_FOUND'
+}
 
 /** An auto-generated type which holds one Channel and a cursor during pagination. */
 export type ChannelEdge = {
@@ -4872,6 +5660,34 @@ export type ChannelEdge = {
   node: Channel;
 };
 
+/** Return type for `channelFullSync` mutation. */
+export type ChannelFullSyncPayload = {
+  __typename?: 'ChannelFullSyncPayload';
+  /** Trace information for each country-language product feed that was triggered. Returns one entry per feed. */
+  fullSyncTraceInfo?: Maybe<Array<FullSyncTraceInfo>>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<ChannelFullSyncUserError>;
+};
+
+/** An error that occurs during the execution of `ChannelFullSync`. */
+export type ChannelFullSyncUserError = DisplayableError & {
+  __typename?: 'ChannelFullSyncUserError';
+  /** The error code. */
+  code?: Maybe<ChannelFullSyncUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `ChannelFullSyncUserError`. */
+export enum ChannelFullSyncUserErrorCode {
+  /** The input value is invalid. */
+  Invalid = 'INVALID',
+  /** The record with the ID used as the input value couldn't be found. */
+  NotFound = 'NOT_FOUND'
+}
+
 /**
  * Identifies the [sales channel](https://shopify.dev/docs/apps/build/sales-channels) and [`App`](https://shopify.dev/docs/api/admin-graphql/latest/objects/App) from which an [`Order`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Order) originated. Provides attribution details such as the specific platform (Facebook Marketplace, Instagram Shopping) or marketplace where the order was placed.
  *
@@ -4879,17 +5695,2117 @@ export type ChannelEdge = {
  */
 export type ChannelInformation = Node & {
   __typename?: 'ChannelInformation';
-  /** The app associated with the channel. */
+  /**
+   * The app associated with the channel.
+   * @deprecated Use [`Order.attribution`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Order#field-Order.fields.attribution) for order attribution, or [`Order.app`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Order#field-Order.fields.app) and [`Order.publication`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Order#field-Order.fields.publication) for app and sales channel details.
+   */
   app: App;
-  /** The channel definition associated with the channel. */
+  /**
+   * The channel definition associated with the channel.
+   * @deprecated Use [`QueryRoot.orderAttributionDefinitions`](https://shopify.dev/docs/api/admin-graphql/latest/queries/orderAttributionDefinitions) and select `id`, `handle`, `displayName`, and `icon` instead.
+   */
   channelDefinition?: Maybe<ChannelDefinition>;
-  /** The unique ID for the channel. */
+  /**
+   * The unique ID for the channel.
+   * @deprecated Use [`Order.attribution.handle`](https://shopify.dev/docs/api/admin-graphql/latest/objects/OrderAttribution#field-OrderAttribution.fields.handle) instead.
+   */
   channelId: Scalars['ID']['output'];
-  /** The publishing destination display name or channel name. */
+  /**
+   * The publishing destination display name or channel name.
+   * @deprecated Use [`Order.attribution.displayName`](https://shopify.dev/docs/api/admin-graphql/latest/objects/OrderAttribution#field-OrderAttribution.fields.displayName) instead.
+   */
   displayName?: Maybe<Scalars['String']['output']>;
-  /** A globally-unique ID. */
+  /**
+   * A globally-unique ID.
+   * @deprecated Use [`Order.attribution.handle`](https://shopify.dev/docs/api/admin-graphql/latest/objects/OrderAttribution#field-OrderAttribution.fields.handle) instead.
+   */
   id: Scalars['ID']['output'];
 };
+
+/** The input fields for updating a [`Channel`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Channel). */
+export type ChannelUpdateInput = {
+  /** An updated identifier for the merchant's account on the external platform. Changing this value signals that the channel connection now represents a different external account. */
+  accountId?: InputMaybe<Scalars['String']['input']>;
+  /** An updated merchant-facing name for the external account. Displayed in Shopify Admin when multiple channels exist for the same app, to help merchants distinguish between connections. */
+  accountName?: InputMaybe<Scalars['String']['input']>;
+  /** A new unique identifier for the channel within the shop. Must be unique across all channels on the shop. Handles are typically set at creation and rarely changed — use when correcting a handle or migrating legacy channel records. */
+  handle?: InputMaybe<Scalars['String']['input']>;
+  /** The handle of the [channel specification](https://shopify.dev/docs/apps/build/sales-channels/channel-config-extension) to bind to this channel. When changed, the platform re-evaluates the specification's country coverage against the shop's region markets and reconciles product feeds accordingly. */
+  specificationHandle?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Return type for `channelUpdate` mutation. */
+export type ChannelUpdatePayload = {
+  __typename?: 'ChannelUpdatePayload';
+  /** The channel that was updated. */
+  channel?: Maybe<Channel>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<ChannelUpdateUserError>;
+};
+
+/** An error that occurs during the execution of `ChannelUpdate`. */
+export type ChannelUpdateUserError = DisplayableError & {
+  __typename?: 'ChannelUpdateUserError';
+  /** The error code. */
+  code?: Maybe<ChannelUpdateUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `ChannelUpdateUserError`. */
+export enum ChannelUpdateUserErrorCode {
+  /** The input value is invalid. */
+  Invalid = 'INVALID',
+  /** The record with the ID used as the input value couldn't be found. */
+  NotFound = 'NOT_FOUND'
+}
+
+/** A condition checking the channel that the visitor is shopping from. */
+export type ChannelsCondition = {
+  __typename?: 'ChannelsCondition';
+  /** The application level for the condition. */
+  applicationLevel?: Maybe<MarketConditionApplicationType>;
+  /** The channels that comprise the market. */
+  channels: ChannelConnection;
+  /** The total number of channels condition. */
+  channelsCount?: Maybe<Count>;
+};
+
+
+/** A condition checking the channel that the visitor is shopping from. */
+export type ChannelsConditionChannelsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** A checkout and account configuration packages branding settings, UI extensions, and overrides for a shop's checkout. */
+export type CheckoutAndAccountsConfiguration = CheckoutAndAccountsConfigurationInterface & Node & {
+  __typename?: 'CheckoutAndAccountsConfiguration';
+  /** The branding configuration. */
+  branding?: Maybe<CheckoutAndAccountsConfigurationBranding>;
+  /** The date and time when the configuration was created. */
+  createdAt: Scalars['DateTime']['output'];
+  /** The date and time when the configuration was last edited. */
+  editedAt: Scalars['DateTime']['output'];
+  /** A globally-unique ID. */
+  id: Scalars['ID']['output'];
+  /** Whether the configuration is published or not. */
+  isPublished: Scalars['Boolean']['output'];
+  /** The configuration name. */
+  name: Scalars['String']['output'];
+  /** The list of overrides for the configuration. */
+  overrides: Array<CheckoutAndAccountsConfigurationOverride>;
+  /** The date and time when the configuration was last updated. */
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+/** The branding configuration for checkout and customer accounts. */
+export type CheckoutAndAccountsConfigurationBranding = {
+  __typename?: 'CheckoutAndAccountsConfigurationBranding';
+  /** The components that apply to all surfaces. */
+  components?: Maybe<CheckoutAndAccountsConfigurationBrandingComponents>;
+  /** The design tokens allow you to set values that represent specific attributes of your brand like color and font. These attributes are used throughout the user interface. This brings consistency and allows you to easily make broad design changes. */
+  designTokens?: Maybe<CheckoutAndAccountsConfigurationBrandingDesignTokens>;
+  /** The surface-specific customizations. */
+  surfaces?: Maybe<CheckoutAndAccountsConfigurationBrandingSurfaces>;
+};
+
+/** The container background style. */
+export enum CheckoutAndAccountsConfigurationBrandingBackground {
+  /** The Base background style. */
+  Base = 'BASE',
+  /** The Subdued background style. */
+  Subdued = 'SUBDUED'
+}
+
+/** The base color role customizations for a surface. */
+export type CheckoutAndAccountsConfigurationBrandingBaseColorRoles = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingBaseColorRoles';
+  /** The color of accented objects (links and focused state). */
+  accent?: Maybe<Scalars['String']['output']>;
+  /** The color of the background. */
+  background?: Maybe<Scalars['String']['output']>;
+  /** The color of borders. */
+  border?: Maybe<Scalars['String']['output']>;
+  /** The decorative color for highlighting specific parts of the user interface. */
+  decorative?: Maybe<Scalars['String']['output']>;
+  /** The color of icons. */
+  icon?: Maybe<Scalars['String']['output']>;
+  /** The color of text. */
+  text?: Maybe<Scalars['String']['output']>;
+};
+
+/** The input fields for customizing a base group of colors. */
+export type CheckoutAndAccountsConfigurationBrandingBaseColorRolesInput = {
+  /** The color of accented objects (links and focused state). */
+  accent?: InputMaybe<Scalars['String']['input']>;
+  /** The color of the background. */
+  background?: InputMaybe<Scalars['String']['input']>;
+  /** The color of borders. */
+  border?: InputMaybe<Scalars['String']['input']>;
+  /** The decorative color for highlighting specific parts of the user interface. */
+  decorative?: InputMaybe<Scalars['String']['input']>;
+  /** The color of icons. */
+  icon?: InputMaybe<Scalars['String']['input']>;
+  /** The color of text. */
+  text?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Possible values for the border. */
+export enum CheckoutAndAccountsConfigurationBrandingBorder {
+  /** The Block End border. */
+  BlockEnd = 'BLOCK_END',
+  /** The Full border. */
+  Full = 'FULL',
+  /** The None border. */
+  None = 'NONE'
+}
+
+/** The container border style. */
+export enum CheckoutAndAccountsConfigurationBrandingBorderStyle {
+  /** The Base border style. */
+  Base = 'BASE',
+  /** The Dashed border style. */
+  Dashed = 'DASHED',
+  /** The Dotted border style. */
+  Dotted = 'DOTTED'
+}
+
+/** The container border width. */
+export enum CheckoutAndAccountsConfigurationBrandingBorderWidth {
+  /** The Base border width. */
+  Base = 'BASE',
+  /** The Large border width. */
+  Large = 'LARGE',
+  /** The Large 100 border width. */
+  Large_100 = 'LARGE_100',
+  /** The Large 200 border width. */
+  Large_200 = 'LARGE_200'
+}
+
+/** The buttons customizations. */
+export type CheckoutAndAccountsConfigurationBrandingButton = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingButton';
+  /** The block padding. */
+  blockPadding?: Maybe<CheckoutAndAccountsConfigurationBrandingSpacing>;
+  /** The border. */
+  border?: Maybe<CheckoutAndAccountsConfigurationBrandingSimpleBorder>;
+  /** The corner radius. */
+  cornerRadius?: Maybe<CheckoutAndAccountsConfigurationBrandingCornerRadius>;
+  /** The inline padding. */
+  inlinePadding?: Maybe<CheckoutAndAccountsConfigurationBrandingSpacing>;
+  /** The typography. */
+  typography?: Maybe<CheckoutAndAccountsConfigurationBrandingTypographyStyle>;
+};
+
+/** The input fields for customizing the buttons. */
+export type CheckoutAndAccountsConfigurationBrandingButtonInput = {
+  /** The block padding. */
+  blockPadding?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSpacing>;
+  /** The border. */
+  border?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSimpleBorder>;
+  /** The corner radius. */
+  cornerRadius?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCornerRadius>;
+  /** The inline padding. */
+  inlinePadding?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSpacing>;
+  /** The typography style. */
+  typography?: InputMaybe<CheckoutAndAccountsConfigurationBrandingTypographyStyleInput>;
+};
+
+/** The customizations for the breadcrumbs that represent a buyer's journey to the checkout. */
+export type CheckoutAndAccountsConfigurationBrandingBuyerJourney = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingBuyerJourney';
+  /** An option to display or hide the breadcrumbs that represent the buyer's journey on 3-page checkout. */
+  visibility?: Maybe<CheckoutAndAccountsConfigurationBrandingVisibility>;
+};
+
+/** The input fields for updating breadcrumb customizations, which represent the buyer's journey to checkout. */
+export type CheckoutAndAccountsConfigurationBrandingBuyerJourneyInput = {
+  /** The visibility customizations for updating breadcrumbs, which represent the buyer's journey to checkout. */
+  visibility?: InputMaybe<CheckoutAndAccountsConfigurationBrandingVisibility>;
+};
+
+/** The customizations that you can make to cart links at checkout. */
+export type CheckoutAndAccountsConfigurationBrandingCartLink = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingCartLink';
+  /** Whether the cart link is visible at checkout. */
+  visibility?: Maybe<CheckoutAndAccountsConfigurationBrandingVisibility>;
+};
+
+/** Possible values for the cart link content type for the header. */
+export enum CheckoutAndAccountsConfigurationBrandingCartLinkContentType {
+  /** The checkout header content type icon value. */
+  Icon = 'ICON',
+  /** The checkout header content type image value. */
+  Image = 'IMAGE',
+  /** The checkout header content type text value. */
+  Text = 'TEXT'
+}
+
+/** The input fields for customizing the cart link at Checkout. */
+export type CheckoutAndAccountsConfigurationBrandingCartLinkInput = {
+  /** The input to update the visibility of cart links in checkout. This hides the cart icon on one-page and the cart link in the breadcrumbs/buyer journey on three-page checkout. */
+  visibility?: InputMaybe<CheckoutAndAccountsConfigurationBrandingVisibility>;
+};
+
+/** The checkboxes customizations. */
+export type CheckoutAndAccountsConfigurationBrandingCheckbox = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingCheckbox';
+  /** The corner radius. */
+  cornerRadius?: Maybe<CheckoutAndAccountsConfigurationBrandingCornerRadius>;
+};
+
+/** The input fields for customizing the checkboxes. */
+export type CheckoutAndAccountsConfigurationBrandingCheckboxInput = {
+  /** The corner radius. */
+  cornerRadius?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCornerRadius>;
+};
+
+/** The checkout-specific component customizations. */
+export type CheckoutAndAccountsConfigurationBrandingCheckoutComponents = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingCheckoutComponents';
+  /** The customizations for the breadcrumbs that represent a buyer's journey to the checkout. */
+  buyerJourney?: Maybe<CheckoutAndAccountsConfigurationBrandingBuyerJourney>;
+  /** The checkout cart link customizations. For example, by setting the visibility field to `HIDDEN`, you can hide the cart icon in the header for one-page checkout, and the cart link in breadcrumbs in three-page checkout. */
+  cartLink?: Maybe<CheckoutAndAccountsConfigurationBrandingCartLink>;
+  /** The content container customizations. */
+  content?: Maybe<CheckoutAndAccountsConfigurationBrandingContent>;
+  /** The express checkout customizations. */
+  expressCheckout?: Maybe<CheckoutAndAccountsConfigurationBrandingExpressCheckout>;
+  /** The checkout footer customizations. */
+  footer?: Maybe<CheckoutAndAccountsConfigurationBrandingCheckoutFooter>;
+  /** The checkout header customizations. */
+  header?: Maybe<CheckoutAndAccountsConfigurationBrandingCheckoutHeader>;
+  /** The main checkout customizations. */
+  main?: Maybe<CheckoutAndAccountsConfigurationBrandingMain>;
+  /** The order summary customizations. */
+  orderSummary?: Maybe<CheckoutAndAccountsConfigurationBrandingOrderSummary>;
+};
+
+/** The input fields for customizing the Checkout components. */
+export type CheckoutAndAccountsConfigurationBrandingCheckoutComponentsInput = {
+  /** The breadcrumbs that represent a buyer's journey to the checkout. */
+  buyerJourney?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBuyerJourneyInput>;
+  /** The input for checkout cart link customizations. For example, by setting the visibility field to `HIDDEN`, you can hide the cart icon in the header for one-page checkout, and the cart link in breadcrumbs in three-page checkout. */
+  cartLink?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCartLinkInput>;
+  /** The content container. */
+  content?: InputMaybe<CheckoutAndAccountsConfigurationBrandingContentInput>;
+  /** The express checkout. */
+  expressCheckout?: InputMaybe<CheckoutAndAccountsConfigurationBrandingExpressCheckoutInput>;
+  /** The footer. */
+  footer?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCheckoutFooterInput>;
+  /** The header. */
+  header?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCheckoutHeaderInput>;
+  /** The main area. */
+  main?: InputMaybe<CheckoutAndAccountsConfigurationBrandingMainInput>;
+  /** The order summary. */
+  orderSummary?: InputMaybe<CheckoutAndAccountsConfigurationBrandingOrderSummaryInput>;
+};
+
+/** A container for the checkout footer section customizations. */
+export type CheckoutAndAccountsConfigurationBrandingCheckoutFooter = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingCheckoutFooter';
+  /** The footer alignment. */
+  alignment?: Maybe<CheckoutAndAccountsConfigurationBrandingFooterAlignment>;
+  /** The background style of the footer container. */
+  background?: Maybe<CheckoutAndAccountsConfigurationBrandingBackground>;
+  /** The colors customizations. */
+  colors?: Maybe<CheckoutAndAccountsConfigurationBrandingColors>;
+  /** The footer content settings. */
+  content?: Maybe<CheckoutAndAccountsConfigurationBrandingFooterContent>;
+  /** The divided setting. */
+  divided?: Maybe<Scalars['Boolean']['output']>;
+  /** The padding of the footer container. */
+  padding?: Maybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+  /** The footer position. */
+  position?: Maybe<CheckoutAndAccountsConfigurationBrandingFooterPosition>;
+};
+
+/** The input fields for customizing the checkout footer. */
+export type CheckoutAndAccountsConfigurationBrandingCheckoutFooterInput = {
+  /** The footer alignment settings. You can set the footer native content alignment to the left, center, or right. */
+  alignment?: InputMaybe<CheckoutAndAccountsConfigurationBrandingFooterAlignment>;
+  /** The background style of the footer container. */
+  background?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBackground>;
+  /** The colors customizations. */
+  colors?: InputMaybe<CheckoutAndAccountsConfigurationBrandingColorsInput>;
+  /** The input field for setting the footer content customizations. */
+  content?: InputMaybe<CheckoutAndAccountsConfigurationBrandingFooterContentInput>;
+  /** The divided setting. */
+  divided?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The padding of the footer container. */
+  padding?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+  /** The footer position. */
+  position?: InputMaybe<CheckoutAndAccountsConfigurationBrandingFooterPosition>;
+};
+
+/** The checkout header customizations. */
+export type CheckoutAndAccountsConfigurationBrandingCheckoutHeader = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingCheckoutHeader';
+  /** The header alignment. */
+  alignment?: Maybe<CheckoutAndAccountsConfigurationBrandingHeaderAlignment>;
+  /** The background style of the header container. */
+  background?: Maybe<CheckoutAndAccountsConfigurationBrandingBackground>;
+  /** The cart link customizations for 1-page checkout. This field allows to customize the cart icon that renders by default on 1-page checkout. */
+  cartLink?: Maybe<CheckoutAndAccountsConfigurationBrandingHeaderCartLink>;
+  /** The colors customizations. */
+  colors?: Maybe<CheckoutAndAccountsConfigurationBrandingColors>;
+  /** The divided setting. */
+  divided?: Maybe<Scalars['Boolean']['output']>;
+  /** The store logo. */
+  logo?: Maybe<CheckoutAndAccountsConfigurationBrandingLogo>;
+  /** The padding of the header container. */
+  padding?: Maybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+  /** The header position. */
+  position?: Maybe<CheckoutAndAccountsConfigurationBrandingHeaderPosition>;
+};
+
+/** The input fields for customizing the checkout header. */
+export type CheckoutAndAccountsConfigurationBrandingCheckoutHeaderInput = {
+  /** The header alignment. */
+  alignment?: InputMaybe<CheckoutAndAccountsConfigurationBrandingHeaderAlignment>;
+  /** The background style of the header container. */
+  background?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBackground>;
+  /** The input for cart link customizations for 1-page checkout. This field allows to customize the cart icon that renders by default on 1-page checkout. */
+  cartLink?: InputMaybe<CheckoutAndAccountsConfigurationBrandingHeaderCartLinkInput>;
+  /** The colors customizations for the header container. */
+  colors?: InputMaybe<CheckoutAndAccountsConfigurationBrandingColorsInput>;
+  /** The divided setting. */
+  divided?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The store logo. */
+  logo?: InputMaybe<CheckoutAndAccountsConfigurationBrandingLogoInput>;
+  /** The padding of the header container. */
+  padding?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+  /** The header position. */
+  position?: InputMaybe<CheckoutAndAccountsConfigurationBrandingHeaderPosition>;
+};
+
+/** The checkout-specific component customizations. */
+export type CheckoutAndAccountsConfigurationBrandingCheckoutSurface = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingCheckoutSurface';
+  /** The checkout components. */
+  components?: Maybe<CheckoutAndAccountsConfigurationBrandingCheckoutComponents>;
+};
+
+/** The input fields for customizing the Checkout surface. */
+export type CheckoutAndAccountsConfigurationBrandingCheckoutSurfaceInput = {
+  /** The Checkout components. */
+  components?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCheckoutComponentsInput>;
+};
+
+/** The choice list customizations. */
+export type CheckoutAndAccountsConfigurationBrandingChoiceList = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingChoiceList';
+  /** The 'group' variant of ChoiceList. */
+  group?: Maybe<CheckoutAndAccountsConfigurationBrandingChoiceListGroup>;
+};
+
+/** The customizations that apply to the 'group' variant of ChoiceList. */
+export type CheckoutAndAccountsConfigurationBrandingChoiceListGroup = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingChoiceListGroup';
+  /** The spacing between UI elements in the list. */
+  spacing?: Maybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+};
+
+/** The input fields for customizing the 'group' variant of ChoiceList. */
+export type CheckoutAndAccountsConfigurationBrandingChoiceListGroupInput = {
+  /** The spacing between UI elements in the list. */
+  spacing?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+};
+
+/** The input fields for customizing the choice list. */
+export type CheckoutAndAccountsConfigurationBrandingChoiceListInput = {
+  /** The 'group' variant of ChoiceList. */
+  group?: InputMaybe<CheckoutAndAccountsConfigurationBrandingChoiceListGroupInput>;
+};
+
+/** The color role customizations for a surface. */
+export type CheckoutAndAccountsConfigurationBrandingColorRoles = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingColorRoles';
+  /** The color of accented objects (links and focused state). */
+  accent?: Maybe<Scalars['String']['output']>;
+  /** The color of the background. */
+  background?: Maybe<Scalars['String']['output']>;
+  /** The color of borders. */
+  border?: Maybe<Scalars['String']['output']>;
+  /** The decorative color for highlighting specific parts of the user interface. */
+  decorative?: Maybe<Scalars['String']['output']>;
+  /** The color of icons. */
+  icon?: Maybe<Scalars['String']['output']>;
+  /** The color of text. */
+  text?: Maybe<Scalars['String']['output']>;
+};
+
+/** The input fields for customizing a group of colors used together on a surface. */
+export type CheckoutAndAccountsConfigurationBrandingColorRolesInput = {
+  /** The color of accented objects (links and focused state). */
+  accent?: InputMaybe<Scalars['String']['input']>;
+  /** The color of the background. */
+  background?: InputMaybe<Scalars['String']['input']>;
+  /** The color of borders. */
+  border?: InputMaybe<Scalars['String']['input']>;
+  /** The decorative color for highlighting specific parts of the user interface. */
+  decorative?: InputMaybe<Scalars['String']['input']>;
+  /** The color of icons. */
+  icon?: InputMaybe<Scalars['String']['input']>;
+  /** The color of text. */
+  text?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** The color settings used to customize the user interface. */
+export type CheckoutAndAccountsConfigurationBrandingColors = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingColors';
+  /** The main colors, used for the surface background, text, links, and more. */
+  base?: Maybe<CheckoutAndAccountsConfigurationBrandingBaseColorRoles>;
+  /** The colors of form controls, such as the [`TextField`](https://shopify.dev/docs/api/checkout-ui-extensions/latest/components/forms/textfield) and [`ChoiceList`](https://shopify.dev/docs/api/checkout-ui-extensions/latest/components/forms/choicelist) components. */
+  control?: Maybe<CheckoutAndAccountsConfigurationBrandingControlColorRoles>;
+  /** The colors of the primary button. For example, the main payment, or **Pay now** button. */
+  primaryButton?: Maybe<CheckoutAndAccountsConfigurationBrandingPrimaryButtonColorRoles>;
+  /** The colors of the secondary button, which is used for secondary actions. For example, **Buy again**. */
+  secondaryButton?: Maybe<CheckoutAndAccountsConfigurationBrandingSecondaryButtonColorRoles>;
+};
+
+/** The input fields for customizing a base set of colors, from which every component pulls its colors. */
+export type CheckoutAndAccountsConfigurationBrandingColorsInput = {
+  /** The main colors, used for the surface background, text, links, and more. */
+  base?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBaseColorRolesInput>;
+  /** The colors of form controls, such as the [`TextField`](https://shopify.dev/docs/api/checkout-ui-extensions/latest/components/forms/textfield) and [`ChoiceList`](https://shopify.dev/docs/api/checkout-ui-extensions/latest/components/forms/choicelist) components. */
+  control?: InputMaybe<CheckoutAndAccountsConfigurationBrandingControlColorRolesInput>;
+  /** The colors of the primary button. For example, the main payment, or **Pay now** button. */
+  primaryButton?: InputMaybe<CheckoutAndAccountsConfigurationBrandingPrimaryButtonColorRolesInput>;
+  /** The colors of the secondary button, which is used for secondary actions. For example, **Buy again**. */
+  secondaryButton?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSecondaryButtonColorRolesInput>;
+};
+
+/** The base component customizations that apply to all surfaces. */
+export type CheckoutAndAccountsConfigurationBrandingComponents = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingComponents';
+  /** The checkboxes. */
+  checkbox?: Maybe<CheckoutAndAccountsConfigurationBrandingCheckbox>;
+  /** The choice list. */
+  choiceList?: Maybe<CheckoutAndAccountsConfigurationBrandingChoiceList>;
+  /** The form controls. */
+  control?: Maybe<CheckoutAndAccountsConfigurationBrandingControl>;
+  /** The customizations for the page, content, main, and order summary dividers. For example, by setting the borderStyle to `DOTTED`, you can make these dividers render as dotted lines. */
+  divider?: Maybe<CheckoutAndAccountsConfigurationBrandingDividerStyle>;
+  /** The favicon. */
+  favicon?: Maybe<CheckoutAndAccountsConfigurationBrandingImageValue>;
+  /** The footer. */
+  footer?: Maybe<CheckoutAndAccountsConfigurationBrandingFooter>;
+  /** The header. */
+  header?: Maybe<CheckoutAndAccountsConfigurationBrandingHeader>;
+  /** The Heading Level 1. */
+  headingLevel1?: Maybe<CheckoutAndAccountsConfigurationBrandingHeadingLevel>;
+  /** The Heading Level 2. */
+  headingLevel2?: Maybe<CheckoutAndAccountsConfigurationBrandingHeadingLevel>;
+  /** The Heading Level 3. */
+  headingLevel3?: Maybe<CheckoutAndAccountsConfigurationBrandingHeadingLevel>;
+  /** The main area. */
+  main?: Maybe<CheckoutAndAccountsConfigurationBrandingMain>;
+  /** The merchandise thumbnails. */
+  merchandiseThumbnail?: Maybe<CheckoutAndAccountsConfigurationBrandingMerchandiseThumbnail>;
+  /** The primary buttons. */
+  primaryButton?: Maybe<CheckoutAndAccountsConfigurationBrandingButton>;
+  /** The secondary buttons. */
+  secondaryButton?: Maybe<CheckoutAndAccountsConfigurationBrandingButton>;
+  /** The selects. */
+  select?: Maybe<CheckoutAndAccountsConfigurationBrandingSelect>;
+  /** The shared settings. */
+  shared?: Maybe<CheckoutAndAccountsConfigurationBrandingShared>;
+  /** The text fields. */
+  textField?: Maybe<CheckoutAndAccountsConfigurationBrandingTextField>;
+};
+
+/** The input fields for customizing the components. */
+export type CheckoutAndAccountsConfigurationBrandingComponentsInput = {
+  /** The checkboxes customizations. */
+  checkbox?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCheckboxInput>;
+  /** The choice list customizations. */
+  choiceList?: InputMaybe<CheckoutAndAccountsConfigurationBrandingChoiceListInput>;
+  /** The form controls customizations. */
+  control?: InputMaybe<CheckoutAndAccountsConfigurationBrandingControlInput>;
+  /** The divider customizations. */
+  divider?: InputMaybe<CheckoutAndAccountsConfigurationBrandingDividerStyleInput>;
+  /** The favicon. */
+  favicon?: InputMaybe<CheckoutAndAccountsConfigurationBrandingImageInput>;
+  /** The footer customizations. */
+  footer?: InputMaybe<CheckoutAndAccountsConfigurationBrandingFooterInput>;
+  /** The header customizations. */
+  header?: InputMaybe<CheckoutAndAccountsConfigurationBrandingHeaderInput>;
+  /** The Heading Level 1 customizations. */
+  headingLevel1?: InputMaybe<CheckoutAndAccountsConfigurationBrandingHeadingLevelInput>;
+  /** The Heading Level 2 customizations. */
+  headingLevel2?: InputMaybe<CheckoutAndAccountsConfigurationBrandingHeadingLevelInput>;
+  /** The Heading Level 3 customizations. */
+  headingLevel3?: InputMaybe<CheckoutAndAccountsConfigurationBrandingHeadingLevelInput>;
+  /** The main area customizations. */
+  main?: InputMaybe<CheckoutAndAccountsConfigurationBrandingMainInput>;
+  /** The merchandise thumbnails customizations. */
+  merchandiseThumbnail?: InputMaybe<CheckoutAndAccountsConfigurationBrandingMerchandiseThumbnailInput>;
+  /** The primary buttons customizations. */
+  primaryButton?: InputMaybe<CheckoutAndAccountsConfigurationBrandingButtonInput>;
+  /** The secondary buttons customizations. */
+  secondaryButton?: InputMaybe<CheckoutAndAccountsConfigurationBrandingButtonInput>;
+  /** The selects customizations. */
+  select?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSelectInput>;
+  /** The shared customizations. */
+  shared?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSharedInput>;
+  /** The text fields customizations. */
+  textField?: InputMaybe<CheckoutAndAccountsConfigurationBrandingTextFieldInput>;
+};
+
+/** The container's divider customizations. */
+export type CheckoutAndAccountsConfigurationBrandingContainerDivider = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingContainerDivider';
+  /** The divider style. */
+  borderStyle?: Maybe<CheckoutAndAccountsConfigurationBrandingBorderStyle>;
+  /** The divider width. */
+  borderWidth?: Maybe<CheckoutAndAccountsConfigurationBrandingBorderWidth>;
+  /** The divider visibility. */
+  visibility?: Maybe<CheckoutAndAccountsConfigurationBrandingVisibility>;
+};
+
+/** The input fields for customizing a container's divider. */
+export type CheckoutAndAccountsConfigurationBrandingContainerDividerInput = {
+  /** The divider style. */
+  borderStyle?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBorderStyle>;
+  /** The divider width. */
+  borderWidth?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBorderWidth>;
+  /** The divider visibility. */
+  visibility?: InputMaybe<CheckoutAndAccountsConfigurationBrandingVisibility>;
+};
+
+/** The content customizations. */
+export type CheckoutAndAccountsConfigurationBrandingContent = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingContent';
+  /** The divider style and visibility. */
+  divider?: Maybe<CheckoutAndAccountsConfigurationBrandingContainerDivider>;
+};
+
+/** The input fields for customizing the content container. */
+export type CheckoutAndAccountsConfigurationBrandingContentInput = {
+  /** Divider style and visibility on the content container. */
+  divider?: InputMaybe<CheckoutAndAccountsConfigurationBrandingContainerDividerInput>;
+};
+
+/** The form controls customizations. */
+export type CheckoutAndAccountsConfigurationBrandingControl = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingControl';
+  /** The border. */
+  border?: Maybe<CheckoutAndAccountsConfigurationBrandingSimpleBorder>;
+  /** The corner radius. */
+  cornerRadius?: Maybe<CheckoutAndAccountsConfigurationBrandingCornerRadius>;
+  /** The label position. */
+  labelPosition?: Maybe<CheckoutAndAccountsConfigurationBrandingLabelPosition>;
+};
+
+/** The form control color customizations. */
+export type CheckoutAndAccountsConfigurationBrandingControlColorRoles = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingControlColorRoles';
+  /** The color of accented objects (links and focused state). */
+  accent?: Maybe<Scalars['String']['output']>;
+  /** The color of the background. */
+  background?: Maybe<Scalars['String']['output']>;
+  /** The color of borders. */
+  border?: Maybe<Scalars['String']['output']>;
+  /** The decorative color for highlighting specific parts of the user interface. */
+  decorative?: Maybe<Scalars['String']['output']>;
+  /** The color of icons. */
+  icon?: Maybe<Scalars['String']['output']>;
+  /** The colors of selected controls. */
+  selected?: Maybe<CheckoutAndAccountsConfigurationBrandingColorRoles>;
+  /** The color of text. */
+  text?: Maybe<Scalars['String']['output']>;
+};
+
+/** The input fields for customizing colors for form controls. */
+export type CheckoutAndAccountsConfigurationBrandingControlColorRolesInput = {
+  /** The color of accented objects (links and focused state). */
+  accent?: InputMaybe<Scalars['String']['input']>;
+  /** The color of the background. */
+  background?: InputMaybe<Scalars['String']['input']>;
+  /** The color of borders. */
+  border?: InputMaybe<Scalars['String']['input']>;
+  /** The decorative color for highlighting specific parts of the user interface. */
+  decorative?: InputMaybe<Scalars['String']['input']>;
+  /** The color of icons. */
+  icon?: InputMaybe<Scalars['String']['input']>;
+  /** The colors of selected controls. */
+  selected?: InputMaybe<CheckoutAndAccountsConfigurationBrandingColorRolesInput>;
+  /** The color of text. */
+  text?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** The input fields for customizing the form controls. */
+export type CheckoutAndAccountsConfigurationBrandingControlInput = {
+  /** The border. */
+  border?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSimpleBorder>;
+  /** The corner radius. */
+  cornerRadius?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCornerRadius>;
+  /** The label position. */
+  labelPosition?: InputMaybe<CheckoutAndAccountsConfigurationBrandingLabelPosition>;
+};
+
+/** The options for customizing the corner radius of checkout-related objects. Examples include the primary button, the name text fields and the sections within the main area (if they have borders). */
+export enum CheckoutAndAccountsConfigurationBrandingCornerRadius {
+  /** The corner radius with a pixel value defined by designTokens.cornerRadius.base. */
+  Base = 'BASE',
+  /** The corner radius with a pixel value defined by designTokens.cornerRadius.large. */
+  Large = 'LARGE',
+  /** The 0px corner radius (square corners). */
+  None = 'NONE',
+  /** The corner radius with a pixel value defined by designTokens.cornerRadius.small. */
+  Small = 'SMALL'
+}
+
+/** The corner radius variable customizations that define the pixel size of corner radius options. */
+export type CheckoutAndAccountsConfigurationBrandingCornerRadiusVariables = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingCornerRadiusVariables';
+  /** The value in pixels for base corner radii. Example: 5. */
+  base?: Maybe<Scalars['Int']['output']>;
+  /** The value in pixels for large corner radii. Example: 10. */
+  large?: Maybe<Scalars['Int']['output']>;
+  /** The value in pixels for small corner radii. Example: 3. */
+  small?: Maybe<Scalars['Int']['output']>;
+};
+
+/** The input fields for customizing the corner radius variables. */
+export type CheckoutAndAccountsConfigurationBrandingCornerRadiusVariablesInput = {
+  /** The value in pixels for base corner radii. It should be greater than zero. Example: 5. */
+  base?: InputMaybe<Scalars['Int']['input']>;
+  /** The value in pixels for large corner radii. It should be greater than zero. Example: 10. */
+  large?: InputMaybe<Scalars['Int']['input']>;
+  /** The value in pixels for small corner radii. It should be greater than zero. Example: 3. */
+  small?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** The custom font customizations. */
+export type CheckoutAndAccountsConfigurationBrandingCustomFont = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingCustomFont';
+  /** Globally unique ID reference to the custom font file. */
+  genericFileId?: Maybe<Scalars['ID']['output']>;
+  /** The font sources. */
+  sources?: Maybe<Scalars['String']['output']>;
+  /** The font weight. */
+  weight?: Maybe<Scalars['Int']['output']>;
+};
+
+/** The custom font group customizations. */
+export type CheckoutAndAccountsConfigurationBrandingCustomFontGroup = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingCustomFontGroup';
+  /** The base custom font. */
+  base?: Maybe<CheckoutAndAccountsConfigurationBrandingCustomFont>;
+  /** The bold custom font. */
+  bold?: Maybe<CheckoutAndAccountsConfigurationBrandingCustomFont>;
+  /** The font loading strategy. */
+  loadingStrategy?: Maybe<CheckoutAndAccountsConfigurationBrandingFontLoadingStrategy>;
+  /** The font group name. */
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+/** The input fields for customizing a custom font group. */
+export type CheckoutAndAccountsConfigurationBrandingCustomFontGroupInput = {
+  /** The base font. */
+  base: CheckoutAndAccountsConfigurationBrandingCustomFontInput;
+  /** The bold font. */
+  bold: CheckoutAndAccountsConfigurationBrandingCustomFontInput;
+  /** The font loading strategy. */
+  loadingStrategy?: InputMaybe<CheckoutAndAccountsConfigurationBrandingFontLoadingStrategy>;
+};
+
+/** The input fields for customizing a custom font. */
+export type CheckoutAndAccountsConfigurationBrandingCustomFontInput = {
+  /** A globally-unique ID for a font file uploaded via the Files api. Allowed font types are .woff and .woff2. */
+  genericFileId: Scalars['ID']['input'];
+  /** The font weight. Its value should be between 100 and 900. */
+  weight: Scalars['Int']['input'];
+};
+
+/** The customer accounts-specific component customizations. */
+export type CheckoutAndAccountsConfigurationBrandingCustomerAccountsComponents = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingCustomerAccountsComponents';
+  /** The footer customizations. */
+  footer?: Maybe<CheckoutAndAccountsConfigurationBrandingCustomerAccountsFooter>;
+  /** The header customizations. */
+  header?: Maybe<CheckoutAndAccountsConfigurationBrandingCustomerAccountsHeader>;
+  /** The main customer accounts customizations. */
+  main?: Maybe<CheckoutAndAccountsConfigurationBrandingCustomerAccountsMain>;
+};
+
+/** The input fields for customizing the Customer Accounts components. */
+export type CheckoutAndAccountsConfigurationBrandingCustomerAccountsComponentsInput = {
+  /** The footer customizations. */
+  footer?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCustomerAccountsFooterInput>;
+  /** The header customizations. */
+  header?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCustomerAccountsHeaderInput>;
+  /** The main area customizations. */
+  main?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCustomerAccountsMainInput>;
+};
+
+/** A container for the customer accounts footer section customizations. */
+export type CheckoutAndAccountsConfigurationBrandingCustomerAccountsFooter = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingCustomerAccountsFooter';
+  /** The footer alignment. */
+  alignment?: Maybe<CheckoutAndAccountsConfigurationBrandingFooterAlignment>;
+  /** The colors customizations. */
+  colors?: Maybe<CheckoutAndAccountsConfigurationBrandingColors>;
+  /** The padding of the footer container. */
+  padding?: Maybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+};
+
+/** The input fields for customizing the customer accounts footer. */
+export type CheckoutAndAccountsConfigurationBrandingCustomerAccountsFooterInput = {
+  /** The footer alignment settings. You can set the footer native content alignment to the left, center, or right. */
+  alignment?: InputMaybe<CheckoutAndAccountsConfigurationBrandingFooterAlignment>;
+  /** The colors customizations. */
+  colors?: InputMaybe<CheckoutAndAccountsConfigurationBrandingColorsInput>;
+  /** The padding of the footer container. */
+  padding?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+};
+
+/** The checkout header customizations. */
+export type CheckoutAndAccountsConfigurationBrandingCustomerAccountsHeader = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingCustomerAccountsHeader';
+  /** The header alignment. */
+  alignment?: Maybe<CheckoutAndAccountsConfigurationBrandingHeaderAlignment>;
+  /** The colors customizations. */
+  colors?: Maybe<CheckoutAndAccountsConfigurationBrandingColors>;
+  /** The store logo. */
+  logo?: Maybe<CheckoutAndAccountsConfigurationBrandingCustomerAccountsLogo>;
+  /** The padding of the header container. */
+  padding?: Maybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+};
+
+/** The input fields for customizing the customer accounts header. */
+export type CheckoutAndAccountsConfigurationBrandingCustomerAccountsHeaderInput = {
+  /** The header alignment. */
+  alignment?: InputMaybe<CheckoutAndAccountsConfigurationBrandingHeaderAlignment>;
+  /** The colors customizations for the header container. */
+  colors?: InputMaybe<CheckoutAndAccountsConfigurationBrandingColorsInput>;
+  /** The store logo. */
+  logo?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCustomerAccountsLogoInput>;
+  /** The padding of the header container. */
+  padding?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+};
+
+/** The customer accounts store logo customizations. */
+export type CheckoutAndAccountsConfigurationBrandingCustomerAccountsLogo = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingCustomerAccountsLogo';
+  /** The logo image. */
+  image?: Maybe<CheckoutAndAccountsConfigurationBrandingImageValue>;
+  /** The maximum width of the logo. */
+  maxWidth?: Maybe<Scalars['Int']['output']>;
+};
+
+/** The input fields for customizing the logo. */
+export type CheckoutAndAccountsConfigurationBrandingCustomerAccountsLogoInput = {
+  /** The logo image. */
+  image?: InputMaybe<CheckoutAndAccountsConfigurationBrandingImageInput>;
+  /** The maximum width of the logo. */
+  maxWidth?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** The customer accounts-specific main customizations. */
+export type CheckoutAndAccountsConfigurationBrandingCustomerAccountsMain = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingCustomerAccountsMain';
+  /** The colors customizations. */
+  colors?: Maybe<CheckoutAndAccountsConfigurationBrandingColors>;
+  /** The customer accounts main section. */
+  section?: Maybe<CheckoutAndAccountsConfigurationBrandingCustomerAccountsMainSection>;
+};
+
+/** The input fields for customizing the main container. */
+export type CheckoutAndAccountsConfigurationBrandingCustomerAccountsMainInput = {
+  /** The colors customizations. */
+  colors?: InputMaybe<CheckoutAndAccountsConfigurationBrandingColorsInput>;
+  /** The customizations for the main sections. */
+  section?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCustomerAccountsMainSectionInput>;
+};
+
+/** The customer accounts branding section customizations. */
+export type CheckoutAndAccountsConfigurationBrandingCustomerAccountsMainSection = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingCustomerAccountsMainSection';
+  /** The background style of the main sections. */
+  background?: Maybe<CheckoutAndAccountsConfigurationBrandingBackground>;
+  /** The border for the main sections. */
+  border?: Maybe<CheckoutAndAccountsConfigurationBrandingSimpleBorder>;
+  /** The border style of the main sections. */
+  borderStyle?: Maybe<CheckoutAndAccountsConfigurationBrandingBorderStyle>;
+  /** The border width of the main sections. */
+  borderWidth?: Maybe<CheckoutAndAccountsConfigurationBrandingBorderWidth>;
+  /** The colors customizations. */
+  colors?: Maybe<CheckoutAndAccountsConfigurationBrandingColors>;
+  /** The corner radius of the main sections. */
+  cornerRadius?: Maybe<CheckoutAndAccountsConfigurationBrandingCornerRadius>;
+  /** The padding of the main sections. */
+  padding?: Maybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+  /** The shadow of the main sections. */
+  shadow?: Maybe<CheckoutAndAccountsConfigurationBrandingShadow>;
+};
+
+/** The input fields for customizing the customer accounts branding section. */
+export type CheckoutAndAccountsConfigurationBrandingCustomerAccountsMainSectionInput = {
+  /** The background style of the main sections. */
+  background?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBackground>;
+  /** The border for the main sections. */
+  border?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSimpleBorder>;
+  /** The border style of the main sections. */
+  borderStyle?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBorderStyle>;
+  /** The border width of the main sections. */
+  borderWidth?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBorderWidth>;
+  /** The colors customizations. */
+  colors?: InputMaybe<CheckoutAndAccountsConfigurationBrandingColorsInput>;
+  /** The corner radius of the main sections. */
+  cornerRadius?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCornerRadius>;
+  /** The padding of the main sections. */
+  padding?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+  /** The shadow of the main sections. */
+  shadow?: InputMaybe<CheckoutAndAccountsConfigurationBrandingShadow>;
+};
+
+/** The customer accounts-specific component customizations. */
+export type CheckoutAndAccountsConfigurationBrandingCustomerAccountsSurface = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingCustomerAccountsSurface';
+  /** The customer accounts components. */
+  components?: Maybe<CheckoutAndAccountsConfigurationBrandingCustomerAccountsComponents>;
+};
+
+/** The input fields for customizing the Customer Accounts surface. */
+export type CheckoutAndAccountsConfigurationBrandingCustomerAccountsSurfaceInput = {
+  /** The Customer Accounts components. */
+  components?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCustomerAccountsComponentsInput>;
+};
+
+/** The color customizations. */
+export type CheckoutAndAccountsConfigurationBrandingDesignTokenColors = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingDesignTokenColors';
+  /** A set of colors used together on a surface. */
+  palette?: Maybe<CheckoutAndAccountsConfigurationBrandingPalette>;
+};
+
+/** The design token customizations allow you to set values that represent specific attributes of your brand like color and font. These attributes are used throughout the user interface. This brings consistency and allows you to easily make broad design changes. */
+export type CheckoutAndAccountsConfigurationBrandingDesignTokens = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingDesignTokens';
+  /** The colors for global colors. */
+  colors?: Maybe<CheckoutAndAccountsConfigurationBrandingDesignTokenColors>;
+  /** The corner radius variables. */
+  cornerRadius?: Maybe<CheckoutAndAccountsConfigurationBrandingCornerRadiusVariables>;
+  /** The typography. */
+  typography?: Maybe<CheckoutAndAccountsConfigurationBrandingTypography>;
+};
+
+/** The input fields for customizing the colors. */
+export type CheckoutAndAccountsConfigurationBrandingDesignTokensColorsInput = {
+  /** The input to update the color palette. */
+  palette?: InputMaybe<CheckoutAndAccountsConfigurationBrandingPaletteInput>;
+};
+
+/** The input fields for customizing the design tokens. */
+export type CheckoutAndAccountsConfigurationBrandingDesignTokensInput = {
+  /** The color customizations for global colors. */
+  colors?: InputMaybe<CheckoutAndAccountsConfigurationBrandingDesignTokensColorsInput>;
+  /** The corner radius variables. */
+  cornerRadius?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCornerRadiusVariablesInput>;
+  /** The typography. */
+  typography?: InputMaybe<CheckoutAndAccountsConfigurationBrandingTypographyInput>;
+};
+
+/** The customizations for the page, content, main, and order summary dividers. */
+export type CheckoutAndAccountsConfigurationBrandingDividerStyle = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingDividerStyle';
+  /** The border style for the divider. */
+  borderStyle?: Maybe<CheckoutAndAccountsConfigurationBrandingBorderStyle>;
+  /** The border width for the divider. */
+  borderWidth?: Maybe<CheckoutAndAccountsConfigurationBrandingBorderWidth>;
+};
+
+/** The input fields for customizing the global divider. */
+export type CheckoutAndAccountsConfigurationBrandingDividerStyleInput = {
+  /** The border style for the divider. */
+  borderStyle?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBorderStyle>;
+  /** The border width for the divider. */
+  borderWidth?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBorderWidth>;
+};
+
+/** The Express Checkout customizations. */
+export type CheckoutAndAccountsConfigurationBrandingExpressCheckout = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingExpressCheckout';
+  /** The Express Checkout buttons customizations. */
+  button?: Maybe<CheckoutAndAccountsConfigurationBrandingExpressCheckoutButton>;
+};
+
+/** The Express Checkout button customizations. */
+export type CheckoutAndAccountsConfigurationBrandingExpressCheckoutButton = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingExpressCheckoutButton';
+  /** The corner radius. */
+  cornerRadius?: Maybe<CheckoutAndAccountsConfigurationBrandingCornerRadius>;
+};
+
+/** The input fields for customizing the express checkout button. */
+export type CheckoutAndAccountsConfigurationBrandingExpressCheckoutButtonInput = {
+  /** The corner radius. */
+  cornerRadius?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCornerRadius>;
+};
+
+/** The input fields for customizing the Express Checkout. */
+export type CheckoutAndAccountsConfigurationBrandingExpressCheckoutInput = {
+  /** The Express Checkout buttons customizations. */
+  button?: InputMaybe<CheckoutAndAccountsConfigurationBrandingExpressCheckoutButtonInput>;
+};
+
+/** A group of fonts. */
+export type CheckoutAndAccountsConfigurationBrandingFontGroup = CheckoutAndAccountsConfigurationBrandingCustomFontGroup | CheckoutAndAccountsConfigurationBrandingShopifyFontGroup;
+
+/** The input fields used to update a font group. */
+export type CheckoutAndAccountsConfigurationBrandingFontGroupInput = {
+  /** A custom font group. */
+  customFontGroup?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCustomFontGroupInput>;
+  /** A Shopify font group. */
+  shopifyFontGroup?: InputMaybe<CheckoutAndAccountsConfigurationBrandingShopifyFontGroupInput>;
+};
+
+/** The font loading strategy determines how a font face is displayed after it is loaded or failed to load. For more information: https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display. */
+export enum CheckoutAndAccountsConfigurationBrandingFontLoadingStrategy {
+  /** The font display strategy is defined by the browser user agent. */
+  Auto = 'AUTO',
+  /** Gives the font face a short block period and an infinite swap period. */
+  Block = 'BLOCK',
+  /** Gives the font face an extremely small block period and a short swap period. */
+  Fallback = 'FALLBACK',
+  /** Gives the font face an extremely small block period and no swap period. */
+  Optional = 'OPTIONAL',
+  /** Gives the font face an extremely small block period and an infinite swap period. */
+  Swap = 'SWAP'
+}
+
+/** The font size customizations. */
+export type CheckoutAndAccountsConfigurationBrandingFontSize = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingFontSize';
+  /** The base font size. */
+  base?: Maybe<Scalars['Float']['output']>;
+  /** The scale ratio used to derive all font sizes such as small and large. */
+  ratio?: Maybe<Scalars['Float']['output']>;
+};
+
+/** The input fields for customizing the font size. */
+export type CheckoutAndAccountsConfigurationBrandingFontSizeInput = {
+  /** The base font size. Its value should be between 12.0 and 18.0. */
+  base?: InputMaybe<Scalars['Float']['input']>;
+  /** The scale ratio used to derive all font sizes such as small and large. Its value should be between 1.0 and 1.4. */
+  ratio?: InputMaybe<Scalars['Float']['input']>;
+};
+
+/** A container for the footer section customizations. */
+export type CheckoutAndAccountsConfigurationBrandingFooter = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingFooter';
+  /** The footer alignment. */
+  alignment?: Maybe<CheckoutAndAccountsConfigurationBrandingFooterAlignment>;
+  /** The background style of the footer container. */
+  background?: Maybe<CheckoutAndAccountsConfigurationBrandingBackground>;
+  /** The colors customizations. */
+  colors?: Maybe<CheckoutAndAccountsConfigurationBrandingColors>;
+  /** The footer content settings. */
+  content?: Maybe<CheckoutAndAccountsConfigurationBrandingFooterContent>;
+  /** The divided setting. */
+  divided?: Maybe<Scalars['Boolean']['output']>;
+  /** The padding of the footer container. */
+  padding?: Maybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+};
+
+/** Possible values for the footer alignment. */
+export enum CheckoutAndAccountsConfigurationBrandingFooterAlignment {
+  /** The checkout footer alignment Center value. */
+  Center = 'CENTER',
+  /** The checkout footer alignment End value. */
+  End = 'END',
+  /** The checkout footer alignment Start value. */
+  Start = 'START'
+}
+
+/** The footer content customizations. */
+export type CheckoutAndAccountsConfigurationBrandingFooterContent = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingFooterContent';
+  /** The visibility for footer content. */
+  visibility?: Maybe<CheckoutAndAccountsConfigurationBrandingVisibility>;
+};
+
+/** The input fields for customizing the footer content. */
+export type CheckoutAndAccountsConfigurationBrandingFooterContentInput = {
+  /** The visibility customizations for footer content. */
+  visibility?: InputMaybe<CheckoutAndAccountsConfigurationBrandingVisibility>;
+};
+
+/** The input fields for customizing the checkout footer. */
+export type CheckoutAndAccountsConfigurationBrandingFooterInput = {
+  /** The footer alignment settings. You can set the footer native content alignment to the left, center, or right. */
+  alignment?: InputMaybe<CheckoutAndAccountsConfigurationBrandingFooterAlignment>;
+  /** The background style of the footer container. */
+  background?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBackground>;
+  /** The colors customizations. */
+  colors?: InputMaybe<CheckoutAndAccountsConfigurationBrandingColorsInput>;
+  /** The input field for setting the footer content customizations. */
+  content?: InputMaybe<CheckoutAndAccountsConfigurationBrandingFooterContentInput>;
+  /** The divided setting. */
+  divided?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The padding of the footer container. */
+  padding?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+};
+
+/** Possible values for the footer position. */
+export enum CheckoutAndAccountsConfigurationBrandingFooterPosition {
+  /** The End footer position. */
+  End = 'END',
+  /** The Inline footer position. */
+  Inline = 'INLINE'
+}
+
+/** The header customizations. */
+export type CheckoutAndAccountsConfigurationBrandingHeader = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingHeader';
+  /** The header alignment. */
+  alignment?: Maybe<CheckoutAndAccountsConfigurationBrandingHeaderAlignment>;
+  /** The background style of the header container. */
+  background?: Maybe<CheckoutAndAccountsConfigurationBrandingBackground>;
+  /** The colors customizations. */
+  colors?: Maybe<CheckoutAndAccountsConfigurationBrandingColors>;
+  /** The divided setting. */
+  divided?: Maybe<Scalars['Boolean']['output']>;
+  /** The store logo. */
+  logo?: Maybe<CheckoutAndAccountsConfigurationBrandingLogo>;
+  /** The padding of the header container. */
+  padding?: Maybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+};
+
+/** The possible header alignments. */
+export enum CheckoutAndAccountsConfigurationBrandingHeaderAlignment {
+  /** Center alignment. */
+  Center = 'CENTER',
+  /** End alignment. */
+  End = 'END',
+  /** Start alignment. */
+  Start = 'START'
+}
+
+/** The header cart link customizations. */
+export type CheckoutAndAccountsConfigurationBrandingHeaderCartLink = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingHeaderCartLink';
+  /** The content type for the header back to cart link in 1-page checkout. Setting this to image will render the custom image provided using the image field on the header cart_link object. If no image is provided, the default cart icon will be used. */
+  contentType?: Maybe<CheckoutAndAccountsConfigurationBrandingCartLinkContentType>;
+  /** The image that's used for the header back to cart link in 1-page checkout when the content type is set to image. */
+  image?: Maybe<CheckoutAndAccountsConfigurationBrandingImageValue>;
+};
+
+/** The input fields for customizing the cart link for 1-page checkout. This field allows to customize the cart icon that renders by default on 1-page checkout. */
+export type CheckoutAndAccountsConfigurationBrandingHeaderCartLinkInput = {
+  /** The input for the content type for the header back to cart link in 1-page checkout. Setting this to image will render the custom image provided using the image field on the header cart_link object. If no image is provided, the default cart icon will be used. */
+  contentType?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCartLinkContentType>;
+  /** The input for the image that's used for the header back to cart link in 1-page checkout when the content type is set to image. */
+  image?: InputMaybe<CheckoutAndAccountsConfigurationBrandingImageInput>;
+};
+
+/** The input fields for customizing the header. */
+export type CheckoutAndAccountsConfigurationBrandingHeaderInput = {
+  /** The header alignment. */
+  alignment?: InputMaybe<CheckoutAndAccountsConfigurationBrandingHeaderAlignment>;
+  /** The background style of the header container. */
+  background?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBackground>;
+  /** The colors customizations for the header container. */
+  colors?: InputMaybe<CheckoutAndAccountsConfigurationBrandingColorsInput>;
+  /** The divided setting. */
+  divided?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The store logo. */
+  logo?: InputMaybe<CheckoutAndAccountsConfigurationBrandingLogoInput>;
+  /** The padding of the header container. */
+  padding?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+};
+
+/** The possible header positions. */
+export enum CheckoutAndAccountsConfigurationBrandingHeaderPosition {
+  /** Inline position. */
+  Inline = 'INLINE',
+  /** Secondary inline position. */
+  InlineSecondary = 'INLINE_SECONDARY',
+  /** Start position. */
+  Start = 'START'
+}
+
+/** The heading level customizations. */
+export type CheckoutAndAccountsConfigurationBrandingHeadingLevel = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingHeadingLevel';
+  /** The typography. */
+  typography?: Maybe<CheckoutAndAccountsConfigurationBrandingTypographyStyle>;
+};
+
+/** The input fields for customizing the heading level. */
+export type CheckoutAndAccountsConfigurationBrandingHeadingLevelInput = {
+  /** The typography. */
+  typography?: InputMaybe<CheckoutAndAccountsConfigurationBrandingTypographyStyleInput>;
+};
+
+/** The image. */
+export type CheckoutAndAccountsConfigurationBrandingImage = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingImage';
+  /** The image details. */
+  image?: Maybe<Image>;
+};
+
+/** The input fields for customizing the image. */
+export type CheckoutAndAccountsConfigurationBrandingImageInput = {
+  /** A globally-unique ID. */
+  mediaImageId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** The image value. */
+export type CheckoutAndAccountsConfigurationBrandingImageValue = CheckoutAndAccountsConfigurationBrandingImage;
+
+/** The input fields for customizing Checkout and Customer Accounts branding. */
+export type CheckoutAndAccountsConfigurationBrandingInput = {
+  /** The customizations that apply to specific components or areas of the user interface. */
+  components?: InputMaybe<CheckoutAndAccountsConfigurationBrandingComponentsInput>;
+  /** The design tokens allows you to set values that represent specific attributes of your brand like color and font. These attributes are used throughout the user interface. This brings consistency and allows you to easily make broad design changes. */
+  designTokens?: InputMaybe<CheckoutAndAccountsConfigurationBrandingDesignTokensInput>;
+  /** The surface-level customizations. */
+  surfaces?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSurfacesInput>;
+};
+
+/** The label position options. */
+export enum CheckoutAndAccountsConfigurationBrandingLabelPosition {
+  /** The Inside label position. */
+  Inside = 'INSIDE',
+  /** The Outside label position. */
+  Outside = 'OUTSIDE'
+}
+
+/** The store logo customizations. */
+export type CheckoutAndAccountsConfigurationBrandingLogo = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingLogo';
+  /** The logo image. */
+  image?: Maybe<CheckoutAndAccountsConfigurationBrandingImageValue>;
+  /** The maximum width of the logo. */
+  maxWidth?: Maybe<Scalars['Int']['output']>;
+  /** The visibility of the logo. */
+  visibility?: Maybe<CheckoutAndAccountsConfigurationBrandingVisibility>;
+};
+
+/** The input fields for customizing the logo. */
+export type CheckoutAndAccountsConfigurationBrandingLogoInput = {
+  /** The logo image. */
+  image?: InputMaybe<CheckoutAndAccountsConfigurationBrandingImageInput>;
+  /** The maximum width of the logo. */
+  maxWidth?: InputMaybe<Scalars['Int']['input']>;
+  /** The visibility of the logo. */
+  visibility?: InputMaybe<CheckoutAndAccountsConfigurationBrandingVisibility>;
+};
+
+/** The main container customizations. */
+export type CheckoutAndAccountsConfigurationBrandingMain = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingMain';
+  /** The colors customizations. */
+  colors?: Maybe<CheckoutAndAccountsConfigurationBrandingColors>;
+  /** The main container's divider style and visibility. */
+  divider?: Maybe<CheckoutAndAccountsConfigurationBrandingContainerDivider>;
+  /** The main sections. */
+  section?: Maybe<CheckoutAndAccountsConfigurationBrandingMainSection>;
+};
+
+/** The input fields for customizing the main container. */
+export type CheckoutAndAccountsConfigurationBrandingMainInput = {
+  /** The colors customizations. */
+  colors?: InputMaybe<CheckoutAndAccountsConfigurationBrandingColorsInput>;
+  /** Divider style and visibility on the main container. */
+  divider?: InputMaybe<CheckoutAndAccountsConfigurationBrandingContainerDividerInput>;
+  /** The customizations for the main sections. */
+  section?: InputMaybe<CheckoutAndAccountsConfigurationBrandingMainSectionInput>;
+};
+
+/** The main sections customizations. */
+export type CheckoutAndAccountsConfigurationBrandingMainSection = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingMainSection';
+  /** The background style of the main sections. */
+  background?: Maybe<CheckoutAndAccountsConfigurationBrandingBackground>;
+  /** The border for the main sections. */
+  border?: Maybe<CheckoutAndAccountsConfigurationBrandingSimpleBorder>;
+  /** The border style of the main sections. */
+  borderStyle?: Maybe<CheckoutAndAccountsConfigurationBrandingBorderStyle>;
+  /** The border width of the main sections. */
+  borderWidth?: Maybe<CheckoutAndAccountsConfigurationBrandingBorderWidth>;
+  /** The colors customizations. */
+  colors?: Maybe<CheckoutAndAccountsConfigurationBrandingColors>;
+  /** The corner radius of the main sections. */
+  cornerRadius?: Maybe<CheckoutAndAccountsConfigurationBrandingCornerRadius>;
+  /** The padding of the main sections. */
+  padding?: Maybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+  /** The shadow of the main sections. */
+  shadow?: Maybe<CheckoutAndAccountsConfigurationBrandingShadow>;
+};
+
+/** The input fields for customizing the main sections. */
+export type CheckoutAndAccountsConfigurationBrandingMainSectionInput = {
+  /** The background style of the main sections. */
+  background?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBackground>;
+  /** The border for the main sections. */
+  border?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSimpleBorder>;
+  /** The border style of the main sections. */
+  borderStyle?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBorderStyle>;
+  /** The border width of the main sections. */
+  borderWidth?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBorderWidth>;
+  /** The colors customizations. */
+  colors?: InputMaybe<CheckoutAndAccountsConfigurationBrandingColorsInput>;
+  /** The corner radius of the main sections. */
+  cornerRadius?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCornerRadius>;
+  /** The padding of the main sections. */
+  padding?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+  /** The shadow of the main sections. */
+  shadow?: InputMaybe<CheckoutAndAccountsConfigurationBrandingShadow>;
+};
+
+/** The merchandise thumbnails customizations. */
+export type CheckoutAndAccountsConfigurationBrandingMerchandiseThumbnail = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingMerchandiseThumbnail';
+  /** The merchandise thumbnail badge. */
+  badge?: Maybe<CheckoutAndAccountsConfigurationBrandingMerchandiseThumbnailBadge>;
+  /** The border. */
+  border?: Maybe<CheckoutAndAccountsConfigurationBrandingSimpleBorder>;
+  /** The corner radius. */
+  cornerRadius?: Maybe<CheckoutAndAccountsConfigurationBrandingCornerRadius>;
+  /** The property used to customize how the product image fits within merchandise thumbnails. */
+  fit?: Maybe<CheckoutAndAccountsConfigurationBrandingObjectFit>;
+};
+
+/** The merchandise thumbnail badges customizations. */
+export type CheckoutAndAccountsConfigurationBrandingMerchandiseThumbnailBadge = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingMerchandiseThumbnailBadge';
+  /** The background. */
+  background?: Maybe<CheckoutAndAccountsConfigurationBrandingMerchandiseThumbnailBadgeBackground>;
+};
+
+/** The merchandise thumbnail badge background. */
+export enum CheckoutAndAccountsConfigurationBrandingMerchandiseThumbnailBadgeBackground {
+  /** The Accent background. */
+  Accent = 'ACCENT',
+  /** The Base background. */
+  Base = 'BASE'
+}
+
+/** The input fields for customizing the merchandise thumbnail badges. */
+export type CheckoutAndAccountsConfigurationBrandingMerchandiseThumbnailBadgeInput = {
+  /** The background. */
+  background?: InputMaybe<CheckoutAndAccountsConfigurationBrandingMerchandiseThumbnailBadgeBackground>;
+};
+
+/** The input fields for customizing the merchandise thumbnails. */
+export type CheckoutAndAccountsConfigurationBrandingMerchandiseThumbnailInput = {
+  /** The aspect ratio. */
+  aspectRatio?: InputMaybe<Scalars['Float']['input']>;
+  /** The merchandise thumbnail badge. */
+  badge?: InputMaybe<CheckoutAndAccountsConfigurationBrandingMerchandiseThumbnailBadgeInput>;
+  /** The border. */
+  border?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSimpleBorder>;
+  /** The corner radius. */
+  cornerRadius?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCornerRadius>;
+  /** The property used to customize how the product image fits within merchandise thumbnails. */
+  fit?: InputMaybe<CheckoutAndAccountsConfigurationBrandingObjectFit>;
+};
+
+/** Possible values for object fit. */
+export enum CheckoutAndAccountsConfigurationBrandingObjectFit {
+  /** The Contain value for fit. The image is scaled to maintain its aspect ratio while fitting within the containing box. The entire image is made to fill the box, while preserving its aspect ratio, so the image will be "letterboxed" if its aspect ratio does not match the aspect ratio of the box. This is the default value. */
+  Contain = 'CONTAIN',
+  /** The Cover value for fit. The image is sized to maintain its aspect ratio while filling the entire containing box. If the image's aspect ratio does not match the aspect ratio of the containing box, then the object will be clipped to fit. */
+  Cover = 'COVER'
+}
+
+/** The order summary customizations. */
+export type CheckoutAndAccountsConfigurationBrandingOrderSummary = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingOrderSummary';
+  /** The background image of the order summary container. */
+  backgroundImage?: Maybe<CheckoutAndAccountsConfigurationBrandingImageValue>;
+  /** The colors customizations. */
+  colors?: Maybe<CheckoutAndAccountsConfigurationBrandingColors>;
+  /** The order summary container's divider style and visibility. */
+  divider?: Maybe<CheckoutAndAccountsConfigurationBrandingContainerDivider>;
+  /** The order summary sections. */
+  section?: Maybe<CheckoutAndAccountsConfigurationBrandingOrderSummarySection>;
+};
+
+/** The input fields for customizing the order summary container. */
+export type CheckoutAndAccountsConfigurationBrandingOrderSummaryInput = {
+  /** The background image of the order summary container (must not be of SVG format). */
+  backgroundImage?: InputMaybe<CheckoutAndAccountsConfigurationBrandingImageInput>;
+  /** The colors customizations. */
+  colors?: InputMaybe<CheckoutAndAccountsConfigurationBrandingColorsInput>;
+  /** Divider style and visibility on the order summary container. */
+  divider?: InputMaybe<CheckoutAndAccountsConfigurationBrandingContainerDividerInput>;
+  /** The customizations for the order summary sections. */
+  section?: InputMaybe<CheckoutAndAccountsConfigurationBrandingOrderSummarySectionInput>;
+};
+
+/** The order summary sections customizations. */
+export type CheckoutAndAccountsConfigurationBrandingOrderSummarySection = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingOrderSummarySection';
+  /** The background style of the order summary sections. */
+  background?: Maybe<CheckoutAndAccountsConfigurationBrandingBackground>;
+  /** The border for the order summary sections. */
+  border?: Maybe<CheckoutAndAccountsConfigurationBrandingSimpleBorder>;
+  /** The border style of the order summary sections. */
+  borderStyle?: Maybe<CheckoutAndAccountsConfigurationBrandingBorderStyle>;
+  /** The border width of the order summary sections. */
+  borderWidth?: Maybe<CheckoutAndAccountsConfigurationBrandingBorderWidth>;
+  /** The colors customizations. */
+  colors?: Maybe<CheckoutAndAccountsConfigurationBrandingColors>;
+  /** The corner radius of the order summary sections. */
+  cornerRadius?: Maybe<CheckoutAndAccountsConfigurationBrandingCornerRadius>;
+  /** The padding of the order summary sections. */
+  padding?: Maybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+  /** The shadow of the order summary sections. */
+  shadow?: Maybe<CheckoutAndAccountsConfigurationBrandingShadow>;
+};
+
+/** The input fields for customizing the order summary sections. */
+export type CheckoutAndAccountsConfigurationBrandingOrderSummarySectionInput = {
+  /** The background style of the order summary sections. */
+  background?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBackground>;
+  /** The border for the order summary sections. */
+  border?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSimpleBorder>;
+  /** The border style of the order summary sections. */
+  borderStyle?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBorderStyle>;
+  /** The border width of the order summary sections. */
+  borderWidth?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBorderWidth>;
+  /** The colors customizations. */
+  colors?: InputMaybe<CheckoutAndAccountsConfigurationBrandingColorsInput>;
+  /** The corner radius of the order summary sections. */
+  cornerRadius?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCornerRadius>;
+  /** The padding of the order summary sections. */
+  padding?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+  /** The shadow of the order summary sections. */
+  shadow?: InputMaybe<CheckoutAndAccountsConfigurationBrandingShadow>;
+};
+
+/** A set of colors used together on a surface. */
+export type CheckoutAndAccountsConfigurationBrandingPalette = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingPalette';
+  /** A color in the palette (hex value). */
+  color1?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color2?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color3?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color4?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color5?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color6?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color7?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color8?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color9?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color10?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color11?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color12?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color13?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color14?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color15?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color16?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color17?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color18?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color19?: Maybe<Scalars['String']['output']>;
+  /** A color in the palette (hex value). */
+  color20?: Maybe<Scalars['String']['output']>;
+};
+
+/** The input fields to update the color palette. */
+export type CheckoutAndAccountsConfigurationBrandingPaletteInput = {
+  /** A color in the palette (hex value). */
+  color1?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color2?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color3?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color4?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color5?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color6?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color7?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color8?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color9?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color10?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color11?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color12?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color13?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color14?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color15?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color16?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color17?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color18?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color19?: InputMaybe<Scalars['String']['input']>;
+  /** A color in the palette (hex value). */
+  color20?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** The primary button color customizations. */
+export type CheckoutAndAccountsConfigurationBrandingPrimaryButtonColorRoles = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingPrimaryButtonColorRoles';
+  /** The color of accented objects (links and focused state). */
+  accent?: Maybe<Scalars['String']['output']>;
+  /** The color of the background. */
+  background?: Maybe<Scalars['String']['output']>;
+  /** The color of borders. */
+  border?: Maybe<Scalars['String']['output']>;
+  /** The decorative color for highlighting specific parts of the user interface. */
+  decorative?: Maybe<Scalars['String']['output']>;
+  /** The colors of the button on hover. */
+  hover?: Maybe<CheckoutAndAccountsConfigurationBrandingColorRoles>;
+  /** The color of icons. */
+  icon?: Maybe<Scalars['String']['output']>;
+  /** The color of text. */
+  text?: Maybe<Scalars['String']['output']>;
+};
+
+/** The input fields for customizing colors for primary buttons. */
+export type CheckoutAndAccountsConfigurationBrandingPrimaryButtonColorRolesInput = {
+  /** The color of accented objects (links and focused state). */
+  accent?: InputMaybe<Scalars['String']['input']>;
+  /** The color of the background. */
+  background?: InputMaybe<Scalars['String']['input']>;
+  /** The color of borders. */
+  border?: InputMaybe<Scalars['String']['input']>;
+  /** The decorative color for highlighting specific parts of the user interface. */
+  decorative?: InputMaybe<Scalars['String']['input']>;
+  /** The colors of the button on hover. */
+  hover?: InputMaybe<CheckoutAndAccountsConfigurationBrandingColorRolesInput>;
+  /** The color of icons. */
+  icon?: InputMaybe<Scalars['String']['input']>;
+  /** The color of text. */
+  text?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** The secondary button color customizations. */
+export type CheckoutAndAccountsConfigurationBrandingSecondaryButtonColorRoles = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingSecondaryButtonColorRoles';
+  /** The color of accented objects (links and focused state). */
+  accent?: Maybe<Scalars['String']['output']>;
+  /** The color of the background. */
+  background?: Maybe<Scalars['String']['output']>;
+  /** The color of borders. */
+  border?: Maybe<Scalars['String']['output']>;
+  /** The decorative color for highlighting specific parts of the user interface. */
+  decorative?: Maybe<Scalars['String']['output']>;
+  /** The colors of the button on hover. */
+  hover?: Maybe<CheckoutAndAccountsConfigurationBrandingColorRoles>;
+  /** The color of icons. */
+  icon?: Maybe<Scalars['String']['output']>;
+  /** The color of text. */
+  text?: Maybe<Scalars['String']['output']>;
+};
+
+/** The input fields for customizing colors for secondary buttons. */
+export type CheckoutAndAccountsConfigurationBrandingSecondaryButtonColorRolesInput = {
+  /** The color of accented objects (links and focused state). */
+  accent?: InputMaybe<Scalars['String']['input']>;
+  /** The color of the background. */
+  background?: InputMaybe<Scalars['String']['input']>;
+  /** The color of borders. */
+  border?: InputMaybe<Scalars['String']['input']>;
+  /** The decorative color for highlighting specific parts of the user interface. */
+  decorative?: InputMaybe<Scalars['String']['input']>;
+  /** The colors of the button on hover. */
+  hover?: InputMaybe<CheckoutAndAccountsConfigurationBrandingColorRolesInput>;
+  /** The color of icons. */
+  icon?: InputMaybe<Scalars['String']['input']>;
+  /** The color of text. */
+  text?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** The selects customizations. */
+export type CheckoutAndAccountsConfigurationBrandingSelect = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingSelect';
+  /** The border. */
+  border?: Maybe<CheckoutAndAccountsConfigurationBrandingBorder>;
+  /** The typography. */
+  typography?: Maybe<CheckoutAndAccountsConfigurationBrandingTypographyStyle>;
+};
+
+/** The input fields for customizing the selects. */
+export type CheckoutAndAccountsConfigurationBrandingSelectInput = {
+  /** The border. */
+  border?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBorder>;
+  /** The typography. */
+  typography?: InputMaybe<CheckoutAndAccountsConfigurationBrandingTypographyStyleInput>;
+};
+
+/** The container shadow. */
+export enum CheckoutAndAccountsConfigurationBrandingShadow {
+  /** The Base shadow. */
+  Base = 'BASE',
+  /** The Large 100 shadow. */
+  Large_100 = 'LARGE_100',
+  /** The Large 200 shadow. */
+  Large_200 = 'LARGE_200',
+  /** The Small 100 shadow. */
+  Small_100 = 'SMALL_100',
+  /** The Small 200 shadow. */
+  Small_200 = 'SMALL_200'
+}
+
+/** The shared customizations. */
+export type CheckoutAndAccountsConfigurationBrandingShared = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingShared';
+  /** The shared color customizations for semantic and functional colors. */
+  colors?: Maybe<CheckoutAndAccountsConfigurationBrandingSharedColors>;
+  /** The shared corner radius setting that overrides all other [corner radius](https://shopify.dev/docs/api/admin-graphql/latest/enums/CheckoutAndAccountsConfigurationBrandingCornerRadius) customizations. */
+  cornerRadius?: Maybe<CheckoutAndAccountsConfigurationBrandingSharedCornerRadius>;
+  /** The shared typography customizations. */
+  typography?: Maybe<CheckoutAndAccountsConfigurationBrandingSharedTypographyStyle>;
+};
+
+/** Shared color customizations for semantic and functional colors. */
+export type CheckoutAndAccountsConfigurationBrandingSharedColors = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingSharedColors';
+  /** The accent color for interactive elements. */
+  accent?: Maybe<Scalars['String']['output']>;
+  /** The button color. */
+  button?: Maybe<Scalars['String']['output']>;
+  /** The form control color. */
+  control?: Maybe<Scalars['String']['output']>;
+  /** The critical/error color. */
+  critical?: Maybe<Scalars['String']['output']>;
+  /** The decorative color. */
+  decorative?: Maybe<Scalars['String']['output']>;
+  /** The informational color. */
+  info?: Maybe<Scalars['String']['output']>;
+  /** The success color. */
+  success?: Maybe<Scalars['String']['output']>;
+  /** The warning color. */
+  warning?: Maybe<Scalars['String']['output']>;
+};
+
+/** The input fields for customizing shared colors. */
+export type CheckoutAndAccountsConfigurationBrandingSharedColorsInput = {
+  /** The accent color for interactive elements. */
+  accent?: InputMaybe<Scalars['String']['input']>;
+  /** The button color. */
+  button?: InputMaybe<Scalars['String']['input']>;
+  /** The form control color. */
+  control?: InputMaybe<Scalars['String']['input']>;
+  /** The critical/error color. */
+  critical?: InputMaybe<Scalars['String']['input']>;
+  /** The decorative color. */
+  decorative?: InputMaybe<Scalars['String']['input']>;
+  /** The informational color. */
+  info?: InputMaybe<Scalars['String']['input']>;
+  /** The success color. */
+  success?: InputMaybe<Scalars['String']['input']>;
+  /** The warning color. */
+  warning?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Possible choices to override corner radius customizations on all applicable objects. Note that this selection can only be used to set the override to `NONE` (0px). */
+export enum CheckoutAndAccountsConfigurationBrandingSharedCornerRadius {
+  /** Set the shared corner radius override to 0px (square corners). */
+  None = 'NONE'
+}
+
+/** The input fields for customizing the shared settings. */
+export type CheckoutAndAccountsConfigurationBrandingSharedInput = {
+  /** The shared color customizations. */
+  colors?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSharedColorsInput>;
+  /** Select a shared corner radius setting that overrides all other corner radii customizations. */
+  cornerRadius?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSharedCornerRadius>;
+  /** The shared typography customizations. */
+  typography?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSharedTypographyStyleInput>;
+};
+
+/** The shared typography customizations. */
+export type CheckoutAndAccountsConfigurationBrandingSharedTypographyStyle = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingSharedTypographyStyle';
+  /** The kerning. */
+  kerning?: Maybe<CheckoutAndAccountsConfigurationBrandingTypographyKerning>;
+  /** The letter case. */
+  letterCase?: Maybe<CheckoutAndAccountsConfigurationBrandingTypographyLetterCase>;
+};
+
+/** The input fields for customizing the shared typography. */
+export type CheckoutAndAccountsConfigurationBrandingSharedTypographyStyleInput = {
+  /** The kerning. */
+  kerning?: InputMaybe<CheckoutAndAccountsConfigurationBrandingTypographyKerning>;
+  /** The letter case. */
+  letterCase?: InputMaybe<CheckoutAndAccountsConfigurationBrandingTypographyLetterCase>;
+};
+
+/** The Shopify font customizations. */
+export type CheckoutAndAccountsConfigurationBrandingShopifyFont = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingShopifyFont';
+  /** The font sources. */
+  sources?: Maybe<Scalars['String']['output']>;
+  /** The font weight. */
+  weight?: Maybe<Scalars['Int']['output']>;
+};
+
+/** The Shopify font group customizations. */
+export type CheckoutAndAccountsConfigurationBrandingShopifyFontGroup = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingShopifyFontGroup';
+  /** The base Shopify font. */
+  base?: Maybe<CheckoutAndAccountsConfigurationBrandingShopifyFont>;
+  /** The bold Shopify font. */
+  bold?: Maybe<CheckoutAndAccountsConfigurationBrandingShopifyFont>;
+  /** The font loading strategy. */
+  loadingStrategy?: Maybe<CheckoutAndAccountsConfigurationBrandingFontLoadingStrategy>;
+  /** The font group name. */
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+/** The input fields for customizing a Shopify font group. */
+export type CheckoutAndAccountsConfigurationBrandingShopifyFontGroupInput = {
+  /** The Shopify base font handle. */
+  baseFontHandle: Scalars['String']['input'];
+  /** The Shopify bold font handle. */
+  boldFontHandle: Scalars['String']['input'];
+  /** The font loading strategy. */
+  loadingStrategy?: InputMaybe<CheckoutAndAccountsConfigurationBrandingFontLoadingStrategy>;
+};
+
+/** The sign-in-specific component customizations. */
+export type CheckoutAndAccountsConfigurationBrandingSignInComponents = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingSignInComponents';
+  /** The header customizations. */
+  header?: Maybe<CheckoutAndAccountsConfigurationBrandingSignInHeader>;
+  /** The main customizations. */
+  main?: Maybe<CheckoutAndAccountsConfigurationBrandingSignInMain>;
+};
+
+/** The input fields for customizing the sign-in components. */
+export type CheckoutAndAccountsConfigurationBrandingSignInComponentsInput = {
+  /** The header customizations. */
+  header?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSignInHeaderInput>;
+  /** The main customizations. */
+  main?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSignInMainInput>;
+};
+
+/** The sign-in header customizations. */
+export type CheckoutAndAccountsConfigurationBrandingSignInHeader = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingSignInHeader';
+  /** The store logo. */
+  logo?: Maybe<CheckoutAndAccountsConfigurationBrandingSignInLogo>;
+  /** The padding of the header container. */
+  padding?: Maybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+};
+
+/** The input fields for customizing the sign-in header. */
+export type CheckoutAndAccountsConfigurationBrandingSignInHeaderInput = {
+  /** The store logo. */
+  logo?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSignInLogoInput>;
+  /** The padding of the header container. */
+  padding?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSpacingKeyword>;
+};
+
+/** The sign-in store logo customizations. */
+export type CheckoutAndAccountsConfigurationBrandingSignInLogo = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingSignInLogo';
+  /** The logo image. */
+  image?: Maybe<CheckoutAndAccountsConfigurationBrandingImageValue>;
+  /** The maximum width of the logo. */
+  maxWidth?: Maybe<Scalars['Int']['output']>;
+};
+
+/** The input fields for customizing the sign-in logo. */
+export type CheckoutAndAccountsConfigurationBrandingSignInLogoInput = {
+  /** The logo image. */
+  image?: InputMaybe<CheckoutAndAccountsConfigurationBrandingImageInput>;
+  /** The maximum width of the logo. */
+  maxWidth?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** The sign-in-specific main customizations. */
+export type CheckoutAndAccountsConfigurationBrandingSignInMain = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingSignInMain';
+  /** The background image of the main container. */
+  backgroundImage?: Maybe<CheckoutAndAccountsConfigurationBrandingImageValue>;
+  /** The colors customizations. */
+  colors?: Maybe<CheckoutAndAccountsConfigurationBrandingColors>;
+  /** The main sections. */
+  section?: Maybe<CheckoutAndAccountsConfigurationBrandingMainSection>;
+};
+
+/** The input fields for customizing the sign-in main container. */
+export type CheckoutAndAccountsConfigurationBrandingSignInMainInput = {
+  /** The background image of the main container. */
+  backgroundImage?: InputMaybe<CheckoutAndAccountsConfigurationBrandingImageInput>;
+  /** The colors customizations. */
+  colors?: InputMaybe<CheckoutAndAccountsConfigurationBrandingColorsInput>;
+  /** The customizations for the main sections. */
+  section?: InputMaybe<CheckoutAndAccountsConfigurationBrandingMainSectionInput>;
+};
+
+/** The sign-in-specific component customizations. */
+export type CheckoutAndAccountsConfigurationBrandingSignInSurface = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingSignInSurface';
+  /** The sign-in components. */
+  components?: Maybe<CheckoutAndAccountsConfigurationBrandingSignInComponents>;
+};
+
+/** The input fields for customizing the sign-in surface. */
+export type CheckoutAndAccountsConfigurationBrandingSignInSurfaceInput = {
+  /** The sign-in components. */
+  components?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSignInComponentsInput>;
+};
+
+/** Possible values for the simple border. */
+export enum CheckoutAndAccountsConfigurationBrandingSimpleBorder {
+  /** The Full simple border. */
+  Full = 'FULL',
+  /** The None simple border. */
+  None = 'NONE'
+}
+
+/** Possible values for the spacing. */
+export enum CheckoutAndAccountsConfigurationBrandingSpacing {
+  /** The Base spacing. */
+  Base = 'BASE',
+  /** The Extra Loose spacing. */
+  ExtraLoose = 'EXTRA_LOOSE',
+  /** The Extra Tight spacing. */
+  ExtraTight = 'EXTRA_TIGHT',
+  /** The Loose spacing. */
+  Loose = 'LOOSE',
+  /** The None spacing. */
+  None = 'NONE',
+  /** The Tight spacing. */
+  Tight = 'TIGHT'
+}
+
+/** The spacing between UI elements. */
+export enum CheckoutAndAccountsConfigurationBrandingSpacingKeyword {
+  /** The Base spacing. */
+  Base = 'BASE',
+  /** The Large spacing. */
+  Large = 'LARGE',
+  /** The Large 100 spacing. */
+  Large_100 = 'LARGE_100',
+  /** The Large 200 spacing. */
+  Large_200 = 'LARGE_200',
+  /** The Large 300 spacing. */
+  Large_300 = 'LARGE_300',
+  /** The Large 400 spacing. */
+  Large_400 = 'LARGE_400',
+  /** The Large 500 spacing. */
+  Large_500 = 'LARGE_500',
+  /** The None spacing. */
+  None = 'NONE',
+  /** The Small spacing. */
+  Small = 'SMALL',
+  /** The Small 100 spacing. */
+  Small_100 = 'SMALL_100',
+  /** The Small 200 spacing. */
+  Small_200 = 'SMALL_200',
+  /** The Small 300 spacing. */
+  Small_300 = 'SMALL_300',
+  /** The Small 400 spacing. */
+  Small_400 = 'SMALL_400',
+  /** The Small 500 spacing. */
+  Small_500 = 'SMALL_500'
+}
+
+/** The surface-specific component customizations for checkout and customer accounts. */
+export type CheckoutAndAccountsConfigurationBrandingSurfaces = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingSurfaces';
+  /** The checkout-specific component overrides. */
+  checkout?: Maybe<CheckoutAndAccountsConfigurationBrandingCheckoutSurface>;
+  /** The customer accounts-specific component overrides. */
+  customerAccounts?: Maybe<CheckoutAndAccountsConfigurationBrandingCustomerAccountsSurface>;
+  /** The sign-in-specific component overrides. */
+  signIn?: Maybe<CheckoutAndAccountsConfigurationBrandingSignInSurface>;
+};
+
+/** The input fields for customizing surfaces branding. */
+export type CheckoutAndAccountsConfigurationBrandingSurfacesInput = {
+  /** The checkout surface customizations. */
+  checkout?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCheckoutSurfaceInput>;
+  /** The customer accounts surface customizations. */
+  customerAccounts?: InputMaybe<CheckoutAndAccountsConfigurationBrandingCustomerAccountsSurfaceInput>;
+  /** The sign-in surface customizations. */
+  signIn?: InputMaybe<CheckoutAndAccountsConfigurationBrandingSignInSurfaceInput>;
+};
+
+/** The text fields customizations. */
+export type CheckoutAndAccountsConfigurationBrandingTextField = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingTextField';
+  /** The border. */
+  border?: Maybe<CheckoutAndAccountsConfigurationBrandingBorder>;
+  /** The typography. */
+  typography?: Maybe<CheckoutAndAccountsConfigurationBrandingTypographyStyle>;
+};
+
+/** The input fields for customizing the text fields. */
+export type CheckoutAndAccountsConfigurationBrandingTextFieldInput = {
+  /** The border. */
+  border?: InputMaybe<CheckoutAndAccountsConfigurationBrandingBorder>;
+  /** The typography. */
+  typography?: InputMaybe<CheckoutAndAccountsConfigurationBrandingTypographyStyleInput>;
+};
+
+/** The typography customizations. */
+export type CheckoutAndAccountsConfigurationBrandingTypography = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingTypography';
+  /** The font group used for most components such as text, buttons and form controls. */
+  primary?: Maybe<CheckoutAndAccountsConfigurationBrandingFontGroup>;
+  /** The font group used for heading components by default. */
+  secondary?: Maybe<CheckoutAndAccountsConfigurationBrandingFontGroup>;
+  /** The font size (base size in pixels and scaling between different sizes). */
+  size?: Maybe<CheckoutAndAccountsConfigurationBrandingFontSize>;
+};
+
+/** The font selection. */
+export enum CheckoutAndAccountsConfigurationBrandingTypographyFont {
+  /** The primary font. */
+  Primary = 'PRIMARY',
+  /** The secondary font. */
+  Secondary = 'SECONDARY'
+}
+
+/** The input fields for customizing the typography. */
+export type CheckoutAndAccountsConfigurationBrandingTypographyInput = {
+  /** The font group used for most components such as text, buttons and form controls. */
+  primary?: InputMaybe<CheckoutAndAccountsConfigurationBrandingFontGroupInput>;
+  /** The font group used for heading components by default. */
+  secondary?: InputMaybe<CheckoutAndAccountsConfigurationBrandingFontGroupInput>;
+  /** The font size. */
+  size?: InputMaybe<CheckoutAndAccountsConfigurationBrandingFontSizeInput>;
+};
+
+/** Possible values for the typography kerning. */
+export enum CheckoutAndAccountsConfigurationBrandingTypographyKerning {
+  /** Base or default kerning. */
+  Base = 'BASE',
+  /** Extra loose kerning, leaving even more space in between characters. */
+  ExtraLoose = 'EXTRA_LOOSE',
+  /** Loose kerning, leaving more space than the default in between characters. */
+  Loose = 'LOOSE'
+}
+
+/** Possible values for the typography letter case. */
+export enum CheckoutAndAccountsConfigurationBrandingTypographyLetterCase {
+  /** All letters are is lower case. */
+  Lower = 'LOWER',
+  /** No letter casing applied. */
+  None = 'NONE',
+  /** Capitalize the first letter of each word. */
+  Title = 'TITLE',
+  /** All letters are uppercase. */
+  Upper = 'UPPER'
+}
+
+/** Possible choices for the font size. */
+export enum CheckoutAndAccountsConfigurationBrandingTypographySize {
+  /** The Base font size. Example: 14px. */
+  Base = 'BASE',
+  /** The Extra extra large font size. Example: 24px. */
+  ExtraExtraLarge = 'EXTRA_EXTRA_LARGE',
+  /** The Extra large font size. Example: 21px. */
+  ExtraLarge = 'EXTRA_LARGE',
+  /** The Extra small font size. Example: 10px. */
+  ExtraSmall = 'EXTRA_SMALL',
+  /** The Large font size. Example: 19px. */
+  Large = 'LARGE',
+  /** The Medium font size. Example: 16px. */
+  Medium = 'MEDIUM',
+  /** The Small font size. Example: 12px. */
+  Small = 'SMALL'
+}
+
+/** The typography customizations. */
+export type CheckoutAndAccountsConfigurationBrandingTypographyStyle = {
+  __typename?: 'CheckoutAndAccountsConfigurationBrandingTypographyStyle';
+  /** The font. */
+  font?: Maybe<CheckoutAndAccountsConfigurationBrandingTypographyFont>;
+  /** The kerning. */
+  kerning?: Maybe<CheckoutAndAccountsConfigurationBrandingTypographyKerning>;
+  /** The letter case. */
+  letterCase?: Maybe<CheckoutAndAccountsConfigurationBrandingTypographyLetterCase>;
+  /** The font size. */
+  size?: Maybe<CheckoutAndAccountsConfigurationBrandingTypographySize>;
+  /** The font weight. */
+  weight?: Maybe<CheckoutAndAccountsConfigurationBrandingTypographyWeight>;
+};
+
+/** The input fields for customizing the typography. */
+export type CheckoutAndAccountsConfigurationBrandingTypographyStyleInput = {
+  /** The font. */
+  font?: InputMaybe<CheckoutAndAccountsConfigurationBrandingTypographyFont>;
+  /** The kerning. */
+  kerning?: InputMaybe<CheckoutAndAccountsConfigurationBrandingTypographyKerning>;
+  /** The letter case. */
+  letterCase?: InputMaybe<CheckoutAndAccountsConfigurationBrandingTypographyLetterCase>;
+  /** The font size. */
+  size?: InputMaybe<CheckoutAndAccountsConfigurationBrandingTypographySize>;
+  /** The font weight. */
+  weight?: InputMaybe<CheckoutAndAccountsConfigurationBrandingTypographyWeight>;
+};
+
+/** Possible values for the font weight. */
+export enum CheckoutAndAccountsConfigurationBrandingTypographyWeight {
+  /** The base weight. */
+  Base = 'BASE',
+  /** The bold weight. */
+  Bold = 'BOLD'
+}
+
+/** Possible visibility states. */
+export enum CheckoutAndAccountsConfigurationBrandingVisibility {
+  /** The Hidden visibility setting. */
+  Hidden = 'HIDDEN',
+  /** The Visible visibility setting. */
+  Visible = 'VISIBLE'
+}
+
+/** An auto-generated type for paginating through multiple CheckoutAndAccountsConfigurations. */
+export type CheckoutAndAccountsConfigurationConnection = {
+  __typename?: 'CheckoutAndAccountsConfigurationConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<CheckoutAndAccountsConfigurationEdge>;
+  /** A list of nodes that are contained in CheckoutAndAccountsConfigurationEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<CheckoutAndAccountsConfiguration>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** An auto-generated type which holds one CheckoutAndAccountsConfiguration and a cursor during pagination. */
+export type CheckoutAndAccountsConfigurationEdge = {
+  __typename?: 'CheckoutAndAccountsConfigurationEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of CheckoutAndAccountsConfigurationEdge. */
+  node: CheckoutAndAccountsConfiguration;
+};
+
+/** The input fields for checkout and account configurations. */
+export type CheckoutAndAccountsConfigurationInput = {
+  /** The branding settings of the configuration. */
+  branding?: InputMaybe<CheckoutAndAccountsConfigurationBrandingInput>;
+  /** The overrides to create/update in the configuration. */
+  overrides?: InputMaybe<Array<CheckoutAndAccountsConfigurationOverrideInput>>;
+};
+
+/** Represents a checkout and accounts configuration interface. */
+export type CheckoutAndAccountsConfigurationInterface = {
+  /** The branding configuration. */
+  branding?: Maybe<CheckoutAndAccountsConfigurationBranding>;
+  /** The date and time when the configuration was created. */
+  createdAt: Scalars['DateTime']['output'];
+  /** The date and time when the configuration was last edited. */
+  editedAt: Scalars['DateTime']['output'];
+  /** The configuration name. */
+  name: Scalars['String']['output'];
+  /** The date and time when the configuration was last updated. */
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+/** A checkout and account configuration override modifies a parent configuration for specific markets. */
+export type CheckoutAndAccountsConfigurationOverride = CheckoutAndAccountsConfigurationInterface & Node & {
+  __typename?: 'CheckoutAndAccountsConfigurationOverride';
+  /** The branding configuration. */
+  branding?: Maybe<CheckoutAndAccountsConfigurationBranding>;
+  /** The date and time when the configuration was created. */
+  createdAt: Scalars['DateTime']['output'];
+  /** The date and time when the configuration was last edited. */
+  editedAt: Scalars['DateTime']['output'];
+  /** A globally-unique ID. */
+  id: Scalars['ID']['output'];
+  /** The configuration name. */
+  name: Scalars['String']['output'];
+  /** The date and time when the configuration was last updated. */
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+/** The input fields for checkout and account configuration overrides. */
+export type CheckoutAndAccountsConfigurationOverrideInput = {
+  /** The branding settings of the configuration. */
+  branding?: InputMaybe<CheckoutAndAccountsConfigurationBrandingInput>;
+  /** The ID of the configuration override to update. */
+  id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** Return type for `checkoutAndAccountsConfigurationUpdate` mutation. */
+export type CheckoutAndAccountsConfigurationUpdatePayload = {
+  __typename?: 'CheckoutAndAccountsConfigurationUpdatePayload';
+  /** The updated configuration. */
+  configuration?: Maybe<CheckoutAndAccountsConfiguration>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<CheckoutAndAccountsConfigurationUserError>;
+};
+
+/** An error that occurs during the execution of a mutation for managing checkout and accounts configurations. */
+export type CheckoutAndAccountsConfigurationUserError = DisplayableError & {
+  __typename?: 'CheckoutAndAccountsConfigurationUserError';
+  /** The error code. */
+  code?: Maybe<CheckoutAndAccountsConfigurationUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+  /** The reason for the error. */
+  reason: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `CheckoutAndAccountsConfigurationUserError`. */
+export enum CheckoutAndAccountsConfigurationUserErrorCode {
+  /** The input value is blank. */
+  Blank = 'BLANK',
+  /** Internal error. Looks like something went wrong on our end. */
+  InternalServerError = 'INTERNAL_SERVER_ERROR',
+  /** The input value is invalid. */
+  Invalid = 'INVALID',
+  /** One or more required fields are missing in the input. */
+  Missing = 'MISSING',
+  /** One or more requested items couldn't be found. */
+  NotFound = 'NOT_FOUND',
+  /** The request could not be completed — please try again later. */
+  Transient = 'TRANSIENT'
+}
+
+/** The set of valid sort keys for the CheckoutAndAccountsConfigurationsGraphQL query. */
+export enum CheckoutAndAccountsConfigurationsGraphQlSortKeys {
+  /** Sort by the `created_at` value. */
+  CreatedAt = 'CREATED_AT',
+  /** Sort by the `edited_at` value. */
+  EditedAt = 'EDITED_AT',
+  /** Sort by the `id` value. */
+  Id = 'ID',
+  /** Sort by the `is_published` value. */
+  IsPublished = 'IS_PUBLISHED'
+}
 
 /**
  * Creates a unified visual identity for your checkout that keeps customers engaged and reinforces your brand throughout the purchase process. This comprehensive branding system lets you control every visual aspect of checkout, from colors and fonts to layouts and imagery, so your checkout feels like a natural extension of your store.
@@ -5284,6 +8200,10 @@ export enum CheckoutBrandingColorSchemeSelection {
   ColorScheme3 = 'COLOR_SCHEME3',
   /** The COLOR_SCHEME4 color scheme selection. */
   ColorScheme4 = 'COLOR_SCHEME4',
+  /** The COLOR_SCHEME5 color scheme selection. */
+  ColorScheme5 = 'COLOR_SCHEME5',
+  /** The COLOR_SCHEME6 color scheme selection. */
+  ColorScheme6 = 'COLOR_SCHEME6',
   /** The TRANSPARENT color scheme selection. */
   Transparent = 'TRANSPARENT'
 }
@@ -5299,6 +8219,10 @@ export type CheckoutBrandingColorSchemes = {
   scheme3?: Maybe<CheckoutBrandingColorScheme>;
   /** An extra scheme available to customize more surfaces, components or specific states of the user interface. */
   scheme4?: Maybe<CheckoutBrandingColorScheme>;
+  /** An extra scheme available to customize more surfaces, components or specific states of the user interface. */
+  scheme5?: Maybe<CheckoutBrandingColorScheme>;
+  /** An extra scheme available to customize more surfaces, components or specific states of the user interface. */
+  scheme6?: Maybe<CheckoutBrandingColorScheme>;
 };
 
 /** The input fields for the color schemes. */
@@ -5311,6 +8235,10 @@ export type CheckoutBrandingColorSchemesInput = {
   scheme3?: InputMaybe<CheckoutBrandingColorSchemeInput>;
   /** An extra scheme available to customize more surfaces, components or specific states of the user interface. */
   scheme4?: InputMaybe<CheckoutBrandingColorSchemeInput>;
+  /** An extra scheme available to customize more surfaces, components or specific states of the user interface. */
+  scheme5?: InputMaybe<CheckoutBrandingColorSchemeInput>;
+  /** An extra scheme available to customize more surfaces, components or specific states of the user interface. */
+  scheme6?: InputMaybe<CheckoutBrandingColorSchemeInput>;
 };
 
 /** The possible colors. */
@@ -6559,11 +9487,6 @@ export enum CodeDiscountSortKeys {
  * [online stores](https://shopify.dev/docs/apps/build/online-store),
  * [sales channels](https://shopify.dev/docs/apps/build/sales-channels), and marketing campaigns.
  *
- * There are two types of collections:
- *
- * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
- * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically included in the collection.
- *
  * The `Collection` object provides information to:
  *
  * - Organize products by category, season, or promotion.
@@ -6582,10 +9505,12 @@ export enum CodeDiscountSortKeys {
  * for unique layouts. They also support advanced features like translated content, resource feedback,
  * and contextual publication for location-based catalogs.
  *
- * Learn about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+ * Learn about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
  */
 export type Collection = HasEvents & HasMetafieldDefinitions & HasMetafields & HasPublishedTranslations & Node & Publishable & {
   __typename?: 'Collection';
+  /** Collection duplicate operations involving this collection, either as a source (copying products from this collection to another) or a target (copying products to this collection from another). */
+  activeOperations: CollectionOperations;
   /**
    * The number of
    * [publications](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication)
@@ -6593,6 +9518,8 @@ export type Collection = HasEvents & HasMetafieldDefinitions & HasMetafields & H
    * [feedback errors](https://shopify.dev/docs/api/admin-graphql/latest/objects/ResourceFeedback).
    */
   availablePublicationsCount?: Maybe<Count>;
+  /** The date and time when the collection was created. */
+  createdAt: Scalars['DateTime']['output'];
   /** A single-line, text-only description of the collection, stripped of any HTML tags and formatting that were included in the description. */
   description: Scalars['String']['output'];
   /** The description of the collection, including any HTML tags and formatting. This content is typically displayed to customers, such as on an online store, depending on the theme. */
@@ -6638,10 +9565,11 @@ export type Collection = HasEvents & HasMetafieldDefinitions & HasMetafields & H
   /** The number of products in the collection. */
   productsCount?: Maybe<Count>;
   /**
-   * The number of
+   * The total number of
    * [publications](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication)
-   * that a resource is published to, without
+   * that a resource is published to, including publications with
    * [feedback errors](https://shopify.dev/docs/api/admin-graphql/latest/objects/ResourceFeedback).
+   * To get a count that excludes publications with feedback errors, use `availablePublicationsCount`.
    * @deprecated Use `resourcePublicationsCount` instead.
    */
   publicationCount: Scalars['Int']['output'];
@@ -6666,6 +9594,7 @@ export type Collection = HasEvents & HasMetafieldDefinitions & HasMetafields & H
    * Whether the resource is published to the app's
    * [publication](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication).
    * For example, the resource might be published to the app's online store channel.
+   * @deprecated Use `publishedOnPublication` instead.
    */
   publishedOnCurrentPublication: Scalars['Boolean']['output'];
   /**
@@ -6679,23 +9608,33 @@ export type Collection = HasEvents & HasMetafieldDefinitions & HasMetafields & H
    */
   resourcePublications: ResourcePublicationConnection;
   /**
-   * The number of
+   * The total number of
    * [publications](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication)
-   * that a resource is published to, without
+   * that a resource is published to, including publications with
    * [feedback errors](https://shopify.dev/docs/api/admin-graphql/latest/objects/ResourceFeedback).
+   * To get a count that excludes publications with feedback errors, use `availablePublicationsCount`.
    */
   resourcePublicationsCount?: Maybe<Count>;
   /**
    * The list of resources that are either published or staged to be published to a
    * [publication](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication).
+   * By default, only publications to `APP` catalog types are returned.
+   * For `Product` and `ProductVariant`, use the `catalogType` argument to retrieve
+   * publications for other catalog types, such as `COMPANY_LOCATION` (B2B) or `MARKET`.
+   * `Collection` only supports publications to `APP` catalog types.
    */
   resourcePublicationsV2: ResourcePublicationV2Connection;
-  /** For a smart (automated) collection, specifies the rules that determine whether a product is included. */
+  /**
+   * Specifies the rules that determine whether a product is included.
+   * @deprecated Use `sources` instead.
+   */
   ruleSet?: Maybe<CollectionRuleSet>;
   /** If the default SEO fields for page title and description have been modified, contains the modified information. */
   seo: Seo;
   /** The order in which the products in the collection are displayed by default in the Shopify admin and in sales channels, such as an online store. */
   sortOrder: CollectionSortOrder;
+  /** The sources that provide products for this collection. Each source represents a way products are included in the collection, such as through conditions and rules. */
+  sources: Array<CollectionSource>;
   /**
    * The Storefront GraphQL API ID of the `Collection`.
    *
@@ -6703,6 +9642,13 @@ export type Collection = HasEvents & HasMetafieldDefinitions & HasMetafields & H
    * @deprecated Use `id` instead.
    */
   storefrontId: Scalars['StorefrontID']['output'];
+  /**
+   * Whether this collection is eligible to be referenced as a sub-collection from
+   * another collection's source. Returns one state per role (inclusion / exclusion).
+   *
+   * Use this to filter ineligible targets up front and surface the reason.
+   */
+  subCollectionEligibility: CollectionSubCollectionEligibility;
   /** The suffix of the Liquid template being used to show the collection in an online store. For example, if the value is `custom`, then the collection is using the `collection.custom.liquid` template. If the value is `null`, then the collection is using the default `collection.liquid` template. */
   templateSuffix?: Maybe<Scalars['String']['output']>;
   /** The name of the collection. It's displayed in the Shopify admin and is typically displayed in sales channels, such as an online store. */
@@ -6731,11 +9677,6 @@ export type Collection = HasEvents & HasMetafieldDefinitions & HasMetafields & H
  * [online stores](https://shopify.dev/docs/apps/build/online-store),
  * [sales channels](https://shopify.dev/docs/apps/build/sales-channels), and marketing campaigns.
  *
- * There are two types of collections:
- *
- * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
- * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically included in the collection.
- *
  * The `Collection` object provides information to:
  *
  * - Organize products by category, season, or promotion.
@@ -6754,7 +9695,7 @@ export type Collection = HasEvents & HasMetafieldDefinitions & HasMetafields & H
  * for unique layouts. They also support advanced features like translated content, resource feedback,
  * and contextual publication for location-based catalogs.
  *
- * Learn about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+ * Learn about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
  */
 export type CollectionDescriptionArgs = {
   truncateAt?: InputMaybe<Scalars['Int']['input']>;
@@ -6768,11 +9709,6 @@ export type CollectionDescriptionArgs = {
  * [online stores](https://shopify.dev/docs/apps/build/online-store),
  * [sales channels](https://shopify.dev/docs/apps/build/sales-channels), and marketing campaigns.
  *
- * There are two types of collections:
- *
- * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
- * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically included in the collection.
- *
  * The `Collection` object provides information to:
  *
  * - Organize products by category, season, or promotion.
@@ -6791,7 +9727,7 @@ export type CollectionDescriptionArgs = {
  * for unique layouts. They also support advanced features like translated content, resource feedback,
  * and contextual publication for location-based catalogs.
  *
- * Learn about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+ * Learn about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
  */
 export type CollectionEventsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6811,11 +9747,6 @@ export type CollectionEventsArgs = {
  * [online stores](https://shopify.dev/docs/apps/build/online-store),
  * [sales channels](https://shopify.dev/docs/apps/build/sales-channels), and marketing campaigns.
  *
- * There are two types of collections:
- *
- * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
- * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically included in the collection.
- *
  * The `Collection` object provides information to:
  *
  * - Organize products by category, season, or promotion.
@@ -6834,7 +9765,7 @@ export type CollectionEventsArgs = {
  * for unique layouts. They also support advanced features like translated content, resource feedback,
  * and contextual publication for location-based catalogs.
  *
- * Learn about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+ * Learn about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
  */
 export type CollectionHasProductArgs = {
   id: Scalars['ID']['input'];
@@ -6848,11 +9779,6 @@ export type CollectionHasProductArgs = {
  * [online stores](https://shopify.dev/docs/apps/build/online-store),
  * [sales channels](https://shopify.dev/docs/apps/build/sales-channels), and marketing campaigns.
  *
- * There are two types of collections:
- *
- * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
- * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically included in the collection.
- *
  * The `Collection` object provides information to:
  *
  * - Organize products by category, season, or promotion.
@@ -6871,7 +9797,7 @@ export type CollectionHasProductArgs = {
  * for unique layouts. They also support advanced features like translated content, resource feedback,
  * and contextual publication for location-based catalogs.
  *
- * Learn about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+ * Learn about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
  */
 export type CollectionMetafieldArgs = {
   key: Scalars['String']['input'];
@@ -6886,11 +9812,6 @@ export type CollectionMetafieldArgs = {
  * [online stores](https://shopify.dev/docs/apps/build/online-store),
  * [sales channels](https://shopify.dev/docs/apps/build/sales-channels), and marketing campaigns.
  *
- * There are two types of collections:
- *
- * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
- * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically included in the collection.
- *
  * The `Collection` object provides information to:
  *
  * - Organize products by category, season, or promotion.
@@ -6909,7 +9830,7 @@ export type CollectionMetafieldArgs = {
  * for unique layouts. They also support advanced features like translated content, resource feedback,
  * and contextual publication for location-based catalogs.
  *
- * Learn about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+ * Learn about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
  */
 export type CollectionMetafieldDefinitionsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6931,11 +9852,6 @@ export type CollectionMetafieldDefinitionsArgs = {
  * [online stores](https://shopify.dev/docs/apps/build/online-store),
  * [sales channels](https://shopify.dev/docs/apps/build/sales-channels), and marketing campaigns.
  *
- * There are two types of collections:
- *
- * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
- * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically included in the collection.
- *
  * The `Collection` object provides information to:
  *
  * - Organize products by category, season, or promotion.
@@ -6954,7 +9870,7 @@ export type CollectionMetafieldDefinitionsArgs = {
  * for unique layouts. They also support advanced features like translated content, resource feedback,
  * and contextual publication for location-based catalogs.
  *
- * Learn about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+ * Learn about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
  */
 export type CollectionMetafieldsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6974,11 +9890,6 @@ export type CollectionMetafieldsArgs = {
  * [online stores](https://shopify.dev/docs/apps/build/online-store),
  * [sales channels](https://shopify.dev/docs/apps/build/sales-channels), and marketing campaigns.
  *
- * There are two types of collections:
- *
- * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
- * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically included in the collection.
- *
  * The `Collection` object provides information to:
  *
  * - Organize products by category, season, or promotion.
@@ -6997,7 +9908,7 @@ export type CollectionMetafieldsArgs = {
  * for unique layouts. They also support advanced features like translated content, resource feedback,
  * and contextual publication for location-based catalogs.
  *
- * Learn about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+ * Learn about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
  */
 export type CollectionProductsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -7016,11 +9927,6 @@ export type CollectionProductsArgs = {
  * [online stores](https://shopify.dev/docs/apps/build/online-store),
  * [sales channels](https://shopify.dev/docs/apps/build/sales-channels), and marketing campaigns.
  *
- * There are two types of collections:
- *
- * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
- * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically included in the collection.
- *
  * The `Collection` object provides information to:
  *
  * - Organize products by category, season, or promotion.
@@ -7039,7 +9945,7 @@ export type CollectionProductsArgs = {
  * for unique layouts. They also support advanced features like translated content, resource feedback,
  * and contextual publication for location-based catalogs.
  *
- * Learn about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+ * Learn about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
  */
 export type CollectionPublicationCountArgs = {
   onlyPublished?: InputMaybe<Scalars['Boolean']['input']>;
@@ -7053,11 +9959,6 @@ export type CollectionPublicationCountArgs = {
  * [online stores](https://shopify.dev/docs/apps/build/online-store),
  * [sales channels](https://shopify.dev/docs/apps/build/sales-channels), and marketing campaigns.
  *
- * There are two types of collections:
- *
- * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
- * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically included in the collection.
- *
  * The `Collection` object provides information to:
  *
  * - Organize products by category, season, or promotion.
@@ -7076,7 +9977,7 @@ export type CollectionPublicationCountArgs = {
  * for unique layouts. They also support advanced features like translated content, resource feedback,
  * and contextual publication for location-based catalogs.
  *
- * Learn about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+ * Learn about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
  */
 export type CollectionPublicationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -7095,11 +9996,6 @@ export type CollectionPublicationsArgs = {
  * [online stores](https://shopify.dev/docs/apps/build/online-store),
  * [sales channels](https://shopify.dev/docs/apps/build/sales-channels), and marketing campaigns.
  *
- * There are two types of collections:
- *
- * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
- * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically included in the collection.
- *
  * The `Collection` object provides information to:
  *
  * - Organize products by category, season, or promotion.
@@ -7118,7 +10014,7 @@ export type CollectionPublicationsArgs = {
  * for unique layouts. They also support advanced features like translated content, resource feedback,
  * and contextual publication for location-based catalogs.
  *
- * Learn about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+ * Learn about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
  */
 export type CollectionPublishedOnChannelArgs = {
   channelId: Scalars['ID']['input'];
@@ -7132,11 +10028,6 @@ export type CollectionPublishedOnChannelArgs = {
  * [online stores](https://shopify.dev/docs/apps/build/online-store),
  * [sales channels](https://shopify.dev/docs/apps/build/sales-channels), and marketing campaigns.
  *
- * There are two types of collections:
- *
- * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
- * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically included in the collection.
- *
  * The `Collection` object provides information to:
  *
  * - Organize products by category, season, or promotion.
@@ -7155,7 +10046,7 @@ export type CollectionPublishedOnChannelArgs = {
  * for unique layouts. They also support advanced features like translated content, resource feedback,
  * and contextual publication for location-based catalogs.
  *
- * Learn about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+ * Learn about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
  */
 export type CollectionPublishedOnPublicationArgs = {
   publicationId: Scalars['ID']['input'];
@@ -7169,11 +10060,6 @@ export type CollectionPublishedOnPublicationArgs = {
  * [online stores](https://shopify.dev/docs/apps/build/online-store),
  * [sales channels](https://shopify.dev/docs/apps/build/sales-channels), and marketing campaigns.
  *
- * There are two types of collections:
- *
- * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
- * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically included in the collection.
- *
  * The `Collection` object provides information to:
  *
  * - Organize products by category, season, or promotion.
@@ -7192,7 +10078,7 @@ export type CollectionPublishedOnPublicationArgs = {
  * for unique layouts. They also support advanced features like translated content, resource feedback,
  * and contextual publication for location-based catalogs.
  *
- * Learn about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+ * Learn about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
  */
 export type CollectionResourcePublicationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -7211,11 +10097,6 @@ export type CollectionResourcePublicationsArgs = {
  * [online stores](https://shopify.dev/docs/apps/build/online-store),
  * [sales channels](https://shopify.dev/docs/apps/build/sales-channels), and marketing campaigns.
  *
- * There are two types of collections:
- *
- * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
- * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically included in the collection.
- *
  * The `Collection` object provides information to:
  *
  * - Organize products by category, season, or promotion.
@@ -7234,7 +10115,7 @@ export type CollectionResourcePublicationsArgs = {
  * for unique layouts. They also support advanced features like translated content, resource feedback,
  * and contextual publication for location-based catalogs.
  *
- * Learn about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+ * Learn about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
  */
 export type CollectionResourcePublicationsCountArgs = {
   onlyPublished?: InputMaybe<Scalars['Boolean']['input']>;
@@ -7248,11 +10129,6 @@ export type CollectionResourcePublicationsCountArgs = {
  * [online stores](https://shopify.dev/docs/apps/build/online-store),
  * [sales channels](https://shopify.dev/docs/apps/build/sales-channels), and marketing campaigns.
  *
- * There are two types of collections:
- *
- * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
- * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically included in the collection.
- *
  * The `Collection` object provides information to:
  *
  * - Organize products by category, season, or promotion.
@@ -7271,7 +10147,7 @@ export type CollectionResourcePublicationsCountArgs = {
  * for unique layouts. They also support advanced features like translated content, resource feedback,
  * and contextual publication for location-based catalogs.
  *
- * Learn about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+ * Learn about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
  */
 export type CollectionResourcePublicationsV2Args = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -7291,11 +10167,6 @@ export type CollectionResourcePublicationsV2Args = {
  * [online stores](https://shopify.dev/docs/apps/build/online-store),
  * [sales channels](https://shopify.dev/docs/apps/build/sales-channels), and marketing campaigns.
  *
- * There are two types of collections:
- *
- * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
- * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically included in the collection.
- *
  * The `Collection` object provides information to:
  *
  * - Organize products by category, season, or promotion.
@@ -7314,7 +10185,7 @@ export type CollectionResourcePublicationsV2Args = {
  * for unique layouts. They also support advanced features like translated content, resource feedback,
  * and contextual publication for location-based catalogs.
  *
- * Learn about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+ * Learn about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
  */
 export type CollectionTranslationsArgs = {
   locale: Scalars['String']['input'];
@@ -7329,11 +10200,6 @@ export type CollectionTranslationsArgs = {
  * [online stores](https://shopify.dev/docs/apps/build/online-store),
  * [sales channels](https://shopify.dev/docs/apps/build/sales-channels), and marketing campaigns.
  *
- * There are two types of collections:
- *
- * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
- * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically included in the collection.
- *
  * The `Collection` object provides information to:
  *
  * - Organize products by category, season, or promotion.
@@ -7352,7 +10218,7 @@ export type CollectionTranslationsArgs = {
  * for unique layouts. They also support advanced features like translated content, resource feedback,
  * and contextual publication for location-based catalogs.
  *
- * Learn about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+ * Learn about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
  */
 export type CollectionUnpublishedChannelsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -7370,11 +10236,6 @@ export type CollectionUnpublishedChannelsArgs = {
  * [online stores](https://shopify.dev/docs/apps/build/online-store),
  * [sales channels](https://shopify.dev/docs/apps/build/sales-channels), and marketing campaigns.
  *
- * There are two types of collections:
- *
- * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
- * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically included in the collection.
- *
  * The `Collection` object provides information to:
  *
  * - Organize products by category, season, or promotion.
@@ -7393,7 +10254,7 @@ export type CollectionUnpublishedChannelsArgs = {
  * for unique layouts. They also support advanced features like translated content, resource feedback,
  * and contextual publication for location-based catalogs.
  *
- * Learn about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+ * Learn about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
  */
 export type CollectionUnpublishedPublicationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -7440,6 +10301,210 @@ export enum CollectionAddProductsV2UserErrorCode {
   CollectionDoesNotExist = 'COLLECTION_DOES_NOT_EXIST'
 }
 
+/** A non-metaobject metafield definition usable as a collection condition. */
+export type CollectionConditionBasicMetafieldDefinition = CollectionConditionMetafieldDefinitionInterface & {
+  __typename?: 'CollectionConditionBasicMetafieldDefinition';
+  /** The description of the metafield definition. */
+  description?: Maybe<Scalars['String']['output']>;
+  /** The ID of the underlying metafield definition. */
+  id: Scalars['ID']['output'];
+  /** The unique identifier for the metafield definition within its namespace. */
+  key: Scalars['String']['output'];
+  /** The human-readable name of the metafield definition. */
+  name: Scalars['String']['output'];
+  /** The container for a group of metafields that the metafield definition is associated with. */
+  namespace: Scalars['String']['output'];
+  /** The resource type that the metafield definition is attached to. */
+  ownerType: MetafieldOwnerType;
+  /** The data type of the metafield definition. */
+  type: MetafieldDefinitionType;
+  /** A list of validation options for the metafields that belong to the metafield definition. */
+  validations: Array<MetafieldDefinitionValidation>;
+};
+
+/** Specifies whether products must match any or all conditions to be included in the collection. */
+export enum CollectionConditionMatchType {
+  /** Products match only if they satisfy all of the conditions. */
+  All = 'ALL',
+  /** Products match if they satisfy one or more of the conditions. */
+  Any = 'ANY'
+}
+
+/** Common fields exposed by every metafield definition usable as a collection condition. */
+export type CollectionConditionMetafieldDefinitionInterface = {
+  /** The description of the metafield definition. */
+  description?: Maybe<Scalars['String']['output']>;
+  /** The ID of the underlying metafield definition. */
+  id: Scalars['ID']['output'];
+  /** The unique identifier for the metafield definition within its namespace. */
+  key: Scalars['String']['output'];
+  /** The human-readable name of the metafield definition. */
+  name: Scalars['String']['output'];
+  /** The container for a group of metafields that the metafield definition is associated with. */
+  namespace: Scalars['String']['output'];
+  /** The resource type that the metafield definition is attached to. */
+  ownerType: MetafieldOwnerType;
+  /** The data type of the metafield definition. */
+  type: MetafieldDefinitionType;
+  /** A list of validation options for the metafields that belong to the metafield definition. */
+  validations: Array<MetafieldDefinitionValidation>;
+};
+
+/** A metaobject-reference metafield definition usable as a collection condition. */
+export type CollectionConditionMetaobjectMetafieldDefinition = CollectionConditionMetafieldDefinitionInterface & {
+  __typename?: 'CollectionConditionMetaobjectMetafieldDefinition';
+  /** The description of the metafield definition. */
+  description?: Maybe<Scalars['String']['output']>;
+  /** The ID of the underlying metafield definition. */
+  id: Scalars['ID']['output'];
+  /** The unique identifier for the metafield definition within its namespace. */
+  key: Scalars['String']['output'];
+  /** The metaobject definition referenced by this metafield definition. */
+  metaobjectDefinition: MetaobjectDefinition;
+  /** The human-readable name of the metafield definition. */
+  name: Scalars['String']['output'];
+  /** The container for a group of metafields that the metafield definition is associated with. */
+  namespace: Scalars['String']['output'];
+  /** The resource type that the metafield definition is attached to. */
+  ownerType: MetafieldOwnerType;
+  /** The data type of the metafield definition. */
+  type: MetafieldDefinitionType;
+  /** A list of validation options for the metafields that belong to the metafield definition. */
+  validations: Array<MetafieldDefinitionValidation>;
+};
+
+/** A collection source that uses conditions and selections to determine which products are included. */
+export type CollectionConditionsSource = CollectionSource & Node & {
+  __typename?: 'CollectionConditionsSource';
+  /** The app that created this source, if applicable. In the case of shareable sources, this app manages this source's conditions and selections exclusively. */
+  app?: Maybe<App>;
+  /** An optional description of the source. */
+  description?: Maybe<Scalars['String']['output']>;
+  /** The rules and selections for excluding products from the collection. */
+  exclusion?: Maybe<CollectionSourceExclusion>;
+  /** The unique identifier for this source. */
+  id: Scalars['ID']['output'];
+  /** The rules and selections for including products in the collection. */
+  inclusion: CollectionSourceInclusion;
+  /**
+   * The products that are members of this source: products matched by the source's inclusion
+   * conditions and manual selections, with the source's exclusion conditions, excluded
+   * collections, and manual exclusions removed.
+   */
+  products: ProductConnection;
+  /** Whether this source can be shared across multiple collections. */
+  shareable: Scalars['Boolean']['output'];
+  /** Whether conditions match products or individual variants. */
+  targetType: CollectionSourceTargetType;
+  /** The title of the source. */
+  title: Scalars['String']['output'];
+};
+
+
+/** A collection source that uses conditions and selections to determine which products are included. */
+export type CollectionConditionsSourceProductsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** An auto-generated type for paginating through multiple CollectionConditionsSources. */
+export type CollectionConditionsSourceConnection = {
+  __typename?: 'CollectionConditionsSourceConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<CollectionConditionsSourceEdge>;
+  /** A list of nodes that are contained in CollectionConditionsSourceEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<CollectionConditionsSource>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** Return type for `collectionConditionsSourceCreate` mutation. */
+export type CollectionConditionsSourceCreatePayload = {
+  __typename?: 'CollectionConditionsSourceCreatePayload';
+  /** The created collection source. */
+  source?: Maybe<CollectionConditionsSource>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<UserError>;
+};
+
+/** Return type for `collectionConditionsSourceDelete` mutation. */
+export type CollectionConditionsSourceDeletePayload = {
+  __typename?: 'CollectionConditionsSourceDeletePayload';
+  /** The ID of the deleted collection source. */
+  deletedId?: Maybe<Scalars['ID']['output']>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<UserError>;
+};
+
+/** An auto-generated type which holds one CollectionConditionsSource and a cursor during pagination. */
+export type CollectionConditionsSourceEdge = {
+  __typename?: 'CollectionConditionsSourceEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of CollectionConditionsSourceEdge. */
+  node: CollectionConditionsSource;
+};
+
+/** The set of valid sort keys for the CollectionConditionsSource query. */
+export enum CollectionConditionsSourceSortKeys {
+  /** Sort by the `id` value. */
+  Id = 'ID',
+  /** Sort by the `title` value. */
+  Title = 'TITLE'
+}
+
+/** Return type for `collectionConditionsSourceUpdate` mutation. */
+export type CollectionConditionsSourceUpdatePayload = {
+  __typename?: 'CollectionConditionsSourceUpdatePayload';
+  /** The updated collection source. */
+  source?: Maybe<CollectionConditionsSource>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<UserError>;
+};
+
+/** An app together with the shareable collection sources it publishes for the shop. */
+export type CollectionConditionsSourcesByApp = {
+  __typename?: 'CollectionConditionsSourcesByApp';
+  /** The app that publishes the collection sources. */
+  app: App;
+  /** The shareable collection sources owned by this app. */
+  sources: CollectionConditionsSourceConnection;
+};
+
+
+/** An app together with the shareable collection sources it publishes for the shop. */
+export type CollectionConditionsSourcesByAppSourcesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+  sortKey?: InputMaybe<CollectionConditionsSourceSortKeys>;
+};
+
+/** An auto-generated type for paginating through multiple CollectionConditionsSourcesByApps. */
+export type CollectionConditionsSourcesByAppConnection = {
+  __typename?: 'CollectionConditionsSourcesByAppConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<CollectionConditionsSourcesByAppEdge>;
+  /** A list of nodes that are contained in CollectionConditionsSourcesByAppEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<CollectionConditionsSourcesByApp>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** An auto-generated type which holds one CollectionConditionsSourcesByApp and a cursor during pagination. */
+export type CollectionConditionsSourcesByAppEdge = {
+  __typename?: 'CollectionConditionsSourcesByAppEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of CollectionConditionsSourcesByAppEdge. */
+  node: CollectionConditionsSourcesByApp;
+};
+
 /** An auto-generated type for paginating through multiple Collections. */
 export type CollectionConnection = {
   __typename?: 'CollectionConnection';
@@ -7451,6 +10516,42 @@ export type CollectionConnection = {
   pageInfo: PageInfo;
 };
 
+/** The input fields required to create a collection source. */
+export type CollectionCreateConditionsSourceInput = {
+  /** An optional description of the source. */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** The exclusion rules for the source. */
+  exclusion?: InputMaybe<CollectionCreateSourceExclusionInput>;
+  /** The inclusion rules for the source. */
+  inclusion?: InputMaybe<CollectionCreateSourceInclusionInput>;
+  /** What granularity this source operates at. Defaults to PRODUCTS. */
+  targetType?: InputMaybe<CollectionSourceTargetType>;
+  /** The title of the source. */
+  title: Scalars['String']['input'];
+};
+
+/** The input fields required to create a collection. */
+export type CollectionCreateInput = {
+  /** The description of the collection, in HTML format. */
+  descriptionHtml?: InputMaybe<Scalars['String']['input']>;
+  /** A unique human-friendly string for the collection. Automatically generated from the collection's title. */
+  handle?: InputMaybe<Scalars['String']['input']>;
+  /** The image associated with the collection. */
+  image?: InputMaybe<ImageInput>;
+  /** The metafields to associate with the collection. */
+  metafields?: InputMaybe<Array<MetafieldInput>>;
+  /** SEO information for the collection. */
+  seo?: InputMaybe<SeoInput>;
+  /** The order in which the collection's products are sorted. */
+  sortOrder?: InputMaybe<CollectionSortOrder>;
+  /** The sources to create for the collection. */
+  sources?: InputMaybe<Array<CollectionCreateSourceTargetInput>>;
+  /** The theme template used when viewing the collection in a store. */
+  templateSuffix?: InputMaybe<Scalars['String']['input']>;
+  /** The title of the collection. */
+  title: Scalars['String']['input'];
+};
+
 /** Return type for `collectionCreate` mutation. */
 export type CollectionCreatePayload = {
   __typename?: 'CollectionCreatePayload';
@@ -7458,6 +10559,46 @@ export type CollectionCreatePayload = {
   collection?: Maybe<Collection>;
   /** The list of errors that occurred from executing the mutation. */
   userErrors: Array<UserError>;
+};
+
+/** The input fields for creating exclusion rules for a collection source. */
+export type CollectionCreateSourceExclusionInput = {
+  /** The conditions that products must match to be excluded from the collection. */
+  conditions?: InputMaybe<Array<CollectionSourceExclusionConditionInput>>;
+  /** Whether products must match all or any of the conditions to be excluded. */
+  matchType?: InputMaybe<CollectionConditionMatchType>;
+  /** The products to explicitly exclude from the collection. */
+  selections?: InputMaybe<Array<CollectionExclusionProductSelectionInput>>;
+};
+
+/** The input fields for creating inclusion rules for a collection source. */
+export type CollectionCreateSourceInclusionInput = {
+  /** The conditions that products must match to be included in the collection. */
+  conditions?: InputMaybe<Array<CollectionSourceInclusionConditionInput>>;
+  /** Whether products must match all or any of the conditions. */
+  matchType?: InputMaybe<CollectionConditionMatchType>;
+  /** The products to explicitly include in the collection. */
+  selections?: InputMaybe<Array<CollectionInclusionProductSelectionInput>>;
+};
+
+/** The input fields for adding a source to a collection — provide exactly one field that represents the type of source to create. */
+export type CollectionCreateSourceTargetInput = {
+  /** An existing shareable source to link to the collection. */
+  shareableSource?: InputMaybe<CollectionShareableSourceInput>;
+  /** Net new conditions-based source (target_type products or variants) to create — must belong to one collection. */
+  source?: InputMaybe<CollectionCreateConditionsSourceInput>;
+  /** Net new sub-collection source (target_type collections) whose membership comes from one or more referenced collections. */
+  subCollections?: InputMaybe<CollectionCreateSubCollectionsSourceInput>;
+};
+
+/** The input fields required to create a sub-collection source — a source whose membership comes from one or more referenced collections. */
+export type CollectionCreateSubCollectionsSourceInput = {
+  /** The global IDs of the sub-collections whose products supply this source. */
+  collectionIds: Array<Scalars['ID']['input']>;
+  /** An optional description of the source. */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** The title of the source. */
+  title: Scalars['String']['input'];
 };
 
 /** The input fields for specifying the collection to delete. */
@@ -7477,6 +10618,79 @@ export type CollectionDeletePayload = {
   userErrors: Array<UserError>;
 };
 
+/** The input fields for duplicating a collection. */
+export type CollectionDuplicateInput = {
+  /** The ID of the collection to be duplicated. */
+  collectionId: Scalars['ID']['input'];
+  /** Whether to duplicate the collection's publications (channel availability). When `true` (default), the duplicated collection will be published to the same channels as the original. When `false`, the duplicated collection will be unpublished on all channels. */
+  copyPublications?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The new title of the collection. */
+  newTitle: Scalars['String']['input'];
+};
+
+/** Represents an in-progress collection duplication operation. Collection duplication is a synchronous operation for simple collections, and an asynchronous operation for collections containing too many products to process synchronously. */
+export type CollectionDuplicateOperation = {
+  __typename?: 'CollectionDuplicateOperation';
+  /** Whether the collection is the source that products are being duplicated from, or the target collection that products are being duplicated onto. */
+  collectionRole: CollectionDuplicateOperationRole;
+  /** The background job performing the duplication. */
+  job: Job;
+};
+
+/** The role a collection plays in a duplication operation. */
+export enum CollectionDuplicateOperationRole {
+  /** Products are being duplicated from this collection. */
+  Source = 'SOURCE',
+  /** Products are being duplicated onto this collection. */
+  Target = 'TARGET'
+}
+
+/** Return type for `collectionDuplicate` mutation. */
+export type CollectionDuplicatePayload = {
+  __typename?: 'CollectionDuplicatePayload';
+  /**
+   * The newly created duplicate collection. Will contain all data if duplication completed synchronously.
+   * If async processing is required, the collection will be created but products will be added in the background
+   * and can be tracked via the job field or the collection's active_operations field.
+   */
+  collection?: Maybe<Collection>;
+  /** The background job copying manually included products onto the target collection. Only returned if async processing is required, otherwise products will be copied synchronously when the collection is created. */
+  job?: Maybe<Job>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<CollectionDuplicateUserError>;
+};
+
+/** Errors related to collection duplication. */
+export type CollectionDuplicateUserError = DisplayableError & {
+  __typename?: 'CollectionDuplicateUserError';
+  /** The error code. */
+  code?: Maybe<CollectionDuplicateUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `CollectionDuplicateUserError`. */
+export enum CollectionDuplicateUserErrorCode {
+  /** The collection title must not be blank. */
+  Blank = 'BLANK',
+  /** The collection was not found. Please check the collection ID and try again. */
+  CollectionNotFound = 'COLLECTION_NOT_FOUND',
+  /** The duplicated collection isn't valid. */
+  Invalid = 'INVALID',
+  /** The URL handle generated from the new title is already in use. Please choose a different title. */
+  Taken = 'TAKEN',
+  /** The collection title or URL handle is too long. */
+  TooLong = 'TOO_LONG',
+  /** The shop has reached its limit of collection sources with conditions. */
+  TooManyConditionBackedSources = 'TOO_MANY_CONDITION_BACKED_SOURCES',
+  /** The shop has reached its limit of collections with sub-collection exclusions. */
+  TooManySubCollectionExclusionCollections = 'TOO_MANY_SUB_COLLECTION_EXCLUSION_COLLECTIONS',
+  /** The shop has reached its limit of collections with sub-collection inclusions. */
+  TooManySubCollectionInclusionCollections = 'TOO_MANY_SUB_COLLECTION_INCLUSION_COLLECTIONS'
+}
+
 /** An auto-generated type which holds one Collection and a cursor during pagination. */
 export type CollectionEdge = {
   __typename?: 'CollectionEdge';
@@ -7484,6 +10698,39 @@ export type CollectionEdge = {
   cursor: Scalars['String']['output'];
   /** The item at the end of CollectionEdge. */
   node: Collection;
+};
+
+/** Represents a product that has been manually selected for exclusion from a collection. */
+export type CollectionExclusionProductSelection = {
+  __typename?: 'CollectionExclusionProductSelection';
+  /** The product that's manually excluded from the collection. */
+  product: Product;
+};
+
+/** An auto-generated type for paginating through multiple CollectionExclusionProductSelections. */
+export type CollectionExclusionProductSelectionConnection = {
+  __typename?: 'CollectionExclusionProductSelectionConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<CollectionExclusionProductSelectionEdge>;
+  /** A list of nodes that are contained in CollectionExclusionProductSelectionEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<CollectionExclusionProductSelection>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** An auto-generated type which holds one CollectionExclusionProductSelection and a cursor during pagination. */
+export type CollectionExclusionProductSelectionEdge = {
+  __typename?: 'CollectionExclusionProductSelectionEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of CollectionExclusionProductSelectionEdge. */
+  node: CollectionExclusionProductSelection;
+};
+
+/** The input fields for selecting specific products to exclude from a collection. */
+export type CollectionExclusionProductSelectionInput = {
+  /** The ID of the product to exclude from the collection. */
+  productId: Scalars['ID']['input'];
 };
 
 /** The input fields for identifying a collection. */
@@ -7494,6 +10741,48 @@ export type CollectionIdentifierInput = {
   handle?: InputMaybe<Scalars['String']['input']>;
   /** The ID of the collection. */
   id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** Represents a product that has been manually selected for inclusion in a collection. */
+export type CollectionInclusionProductSelection = {
+  __typename?: 'CollectionInclusionProductSelection';
+  /** The product that's manually included in the collection. */
+  product: Product;
+  /**
+   * The IDs of variants of this product that have been manually included
+   * in the collection. Null when no variant-level manual selections exist
+   * for this product; non-empty when one or more variants have been
+   * manually included.
+   */
+  variantIds?: Maybe<Array<Scalars['ID']['output']>>;
+};
+
+/** An auto-generated type for paginating through multiple CollectionInclusionProductSelections. */
+export type CollectionInclusionProductSelectionConnection = {
+  __typename?: 'CollectionInclusionProductSelectionConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<CollectionInclusionProductSelectionEdge>;
+  /** A list of nodes that are contained in CollectionInclusionProductSelectionEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<CollectionInclusionProductSelection>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** An auto-generated type which holds one CollectionInclusionProductSelection and a cursor during pagination. */
+export type CollectionInclusionProductSelectionEdge = {
+  __typename?: 'CollectionInclusionProductSelectionEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of CollectionInclusionProductSelectionEdge. */
+  node: CollectionInclusionProductSelection;
+};
+
+/** The input fields for selecting specific products to include in a collection. */
+export type CollectionInclusionProductSelectionInput = {
+  /** The ID of the product to include in the collection. */
+  productId: Scalars['ID']['input'];
+  /** The IDs of the product variants to include in the collection. */
+  variantIds?: InputMaybe<Array<Scalars['ID']['input']>>;
 };
 
 /** The input fields required to create a collection. */
@@ -7508,14 +10797,17 @@ export type CollectionInput = {
   image?: InputMaybe<ImageInput>;
   /** The metafields to associate with the collection. */
   metafields?: InputMaybe<Array<MetafieldInput>>;
-  /** Initial list of collection products. Only valid with `collectionCreate` and without rules. */
+  /** Initial list of collection products. Only valid with `collectionCreate`. */
   products?: InputMaybe<Array<Scalars['ID']['input']>>;
   /**
    * Indicates whether a redirect is required after a new handle has been provided.
    * If true, then the old handle is redirected to the new one automatically.
    */
   redirectNewHandle?: InputMaybe<Scalars['Boolean']['input']>;
-  /** The rules used to assign products to the collection. */
+  /**
+   * The rules used to assign products to the collection. This is the legacy smart-collection model;
+   * use `sources` with `conditions` instead. Each `ruleSet` rule has an equivalent `condition`.
+   */
   ruleSet?: InputMaybe<CollectionRuleSetInput>;
   /** SEO information for the collection. */
   seo?: InputMaybe<SeoInput>;
@@ -7525,6 +10817,13 @@ export type CollectionInput = {
   templateSuffix?: InputMaybe<Scalars['String']['input']>;
   /** The title of the collection. Required for creating a new collection. */
   title?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Represents operations involving a collection. */
+export type CollectionOperations = {
+  __typename?: 'CollectionOperations';
+  /** Collection duplicate operations. */
+  duplicate: Array<CollectionDuplicateOperation>;
 };
 
 /**
@@ -7672,7 +10971,7 @@ export type CollectionRuleCategoryCondition = {
   value: TaxonomyCategory;
 };
 
-/** Specifies the attribute of a product being used to populate the smart collection. */
+/** Specifies the attribute of a product being used to populate the collection. */
 export enum CollectionRuleColumn {
   /**
    * An attribute evaluated based on the `compare_at_price` attribute of the product's variants.
@@ -7681,12 +10980,12 @@ export enum CollectionRuleColumn {
    */
   IsPriceReduced = 'IS_PRICE_REDUCED',
   /**
-   * This rule type is designed to dynamically include products in a smart collection based on their category id.
+   * This rule type is designed to dynamically include products in a collection based on their category id.
    * When a specific product category is set as a condition, this rule will match products that are directly assigned to the specified category.
    */
   ProductCategoryId = 'PRODUCT_CATEGORY_ID',
   /**
-   * This rule type is designed to dynamically include products in a smart collection based on their category id.
+   * This rule type is designed to dynamically include products in a collection based on their category id.
    * When a specific product category is set as a condition, this rule will not only match products that are
    * directly assigned to the specified category but also include any products categorized under any descendant of that category.
    */
@@ -7721,19 +11020,19 @@ export enum CollectionRuleColumn {
 export type CollectionRuleConditionObject = CollectionRuleCategoryCondition | CollectionRuleMetafieldCondition | CollectionRuleProductCategoryCondition | CollectionRuleTextCondition;
 
 /**
- * Defines the available columns and relationships that can be used when creating rules for smart collections. This provides the schema for building automated collection logic based on product attributes.
+ * Defines the available columns and relationships that can be used when creating rules for collections. This provides the schema for building automated collection logic based on product attributes.
  *
  * For example, merchants can create rules like "product type equals 'Shirts'" or "vendor contains 'Nike'" using the conditions defined in this object to automatically populate collections.
  *
  * Use `CollectionRuleConditions` to:
- * - Discovering valid field options for smart collection rule interfaces
+ * - Discovering valid field options for collection rule interfaces
  * - Understanding which conditions are available for automated collections
  * - Exploring available product attributes for collection automation
  * - Learning about proper field relationships for rule implementation
  *
- * The conditions define which product fields can be used in smart collection rules and what types of comparisons are allowed for each field.
+ * The conditions define which product fields can be used in collection rules and what types of comparisons are allowed for each field.
  *
- * Learn more about [smart collections](https://shopify.dev/docs/api/admin-graphql/latest/objects/Collection).
+ * Learn more about [collections with conditions](https://shopify.dev/docs/api/admin-graphql/latest/objects/Collection).
  */
 export type CollectionRuleConditions = {
   __typename?: 'CollectionRuleConditions';
@@ -7765,7 +11064,7 @@ export type CollectionRuleInput = {
   relation: CollectionRuleRelation;
 };
 
-/** Identifies a metafield definition used as a rule for the smart collection. */
+/** Identifies a metafield definition used as a rule for the collection. */
 export type CollectionRuleMetafieldCondition = {
   __typename?: 'CollectionRuleMetafieldCondition';
   /** The metafield definition associated with the condition. */
@@ -7835,6 +11134,12 @@ export type CollectionRuleTextCondition = {
   value: Scalars['String']['output'];
 };
 
+/** The input fields for linking an existing shareable source to a collection. */
+export type CollectionShareableSourceInput = {
+  /** The ID of an existing shareable source to link to the collection. */
+  sourceId: Scalars['ID']['input'];
+};
+
 /** The set of valid sort keys for the Collection query. */
 export enum CollectionSortKeys {
   /** Sort by the `id` value. */
@@ -7864,11 +11169,1304 @@ export enum CollectionSortOrder {
   CreatedDesc = 'CREATED_DESC',
   /** In the order set manually by the merchant. */
   Manual = 'MANUAL',
+  /** By most relevant products. */
+  MostRelevant = 'MOST_RELEVANT',
   /** By price, in ascending order (lowest - highest). */
   PriceAsc = 'PRICE_ASC',
   /** By price, in descending order (highest - lowest). */
   PriceDesc = 'PRICE_DESC'
 }
+
+/** A source that provides products for a collection. */
+export type CollectionSource = {
+  /** The app that created this source, if applicable. In the case of shareable sources, this app manages this source's conditions and selections exclusively. */
+  app?: Maybe<App>;
+  /** An optional description of the source. */
+  description?: Maybe<Scalars['String']['output']>;
+  /** The unique identifier for this source. */
+  id: Scalars['ID']['output'];
+  /** The title of the source. */
+  title: Scalars['String']['output'];
+};
+
+/** Defines the rules and selections for excluding products from a collection. */
+export type CollectionSourceExclusion = {
+  __typename?: 'CollectionSourceExclusion';
+  /** The conditions that determine which products are excluded from the collection. */
+  conditions: Array<CollectionSourceExclusionCondition>;
+  /**
+   * Specifies whether products must match any or all non-collection exclusion conditions. Collection exclusion
+   * conditions are always applied independently with ANY semantics, so this field returns ANY for
+   * collection-only exclusions and null when collection and non-collection exclusion conditions are mixed.
+   */
+  matchType?: Maybe<CollectionConditionMatchType>;
+  /** The products that have been manually selected for exclusion from the collection. */
+  selections: CollectionExclusionProductSelectionConnection;
+};
+
+
+/** Defines the rules and selections for excluding products from a collection. */
+export type CollectionSourceExclusionSelectionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** A condition that determines which products should be excluded from a collection. */
+export type CollectionSourceExclusionCondition = {
+  /** The unique identifier for this exclusion condition. */
+  id: Scalars['ID']['output'];
+};
+
+/** A condition based on collections for excluding products from a collection. */
+export type CollectionSourceExclusionConditionCollection = CollectionSourceExclusionCondition & {
+  __typename?: 'CollectionSourceExclusionConditionCollection';
+  /** The unique identifier for this exclusion condition. */
+  id: Scalars['ID']['output'];
+  /** Collection exclusion conditions always match any referenced collection. */
+  matchType: CollectionConditionMatchType;
+  /** The collection values whose products are excluded. */
+  values: Array<Collection>;
+};
+
+/** The input fields for an exclusion condition based on collections. */
+export type CollectionSourceExclusionConditionCollectionInput = {
+  /** The collection IDs whose products are excluded. */
+  values: Array<Scalars['ID']['input']>;
+};
+
+/** The input fields for a condition that determines which products are excluded from a collection. Exactly one condition type must be provided. */
+export type CollectionSourceExclusionConditionInput = {
+  /** A condition based on collections. */
+  collection?: InputMaybe<CollectionSourceExclusionConditionCollectionInput>;
+  /** A condition based on product categories. */
+  productCategory?: InputMaybe<CollectionSourceExclusionConditionProductCategoryInput>;
+  /** A condition based on product tags. */
+  productTag?: InputMaybe<CollectionSourceExclusionConditionProductTagInput>;
+  /** A condition based on product types. */
+  productType?: InputMaybe<CollectionSourceExclusionConditionProductTypeInput>;
+  /** A condition based on product vendors. */
+  productVendor?: InputMaybe<CollectionSourceExclusionConditionProductVendorInput>;
+};
+
+/** A condition based on product category IDs for excluding products from a collection. */
+export type CollectionSourceExclusionConditionProductCategory = CollectionSourceExclusionCondition & {
+  __typename?: 'CollectionSourceExclusionConditionProductCategory';
+  /** The unique identifier for this exclusion condition. */
+  id: Scalars['ID']['output'];
+  /** Specifies whether products must match any or all values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product category ID and the condition values. */
+  relation: CollectionSourceExclusionConditionProductCategoryRelation;
+  /** The product category values to match against. */
+  values: Array<CollectionSourceExclusionConditionProductCategoryValue>;
+};
+
+/** The input fields for an exclusion condition based on product categories. */
+export type CollectionSourceExclusionConditionProductCategoryInput = {
+  /** Whether to match any or all of the values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product category and the condition values. */
+  relation: CollectionSourceExclusionConditionProductCategoryRelation;
+  /** The product category values to match against. */
+  values: Array<CollectionSourceExclusionConditionProductCategoryValueInput>;
+};
+
+/** The relation for comparing product categories in exclusion conditions. */
+export enum CollectionSourceExclusionConditionProductCategoryRelation {
+  /** The product category equals the specified value. */
+  Equals = 'EQUALS'
+}
+
+/** A value for a product category exclusion condition. */
+export type CollectionSourceExclusionConditionProductCategoryValue = {
+  __typename?: 'CollectionSourceExclusionConditionProductCategoryValue';
+  /** The product category to match against. */
+  category: TaxonomyCategory;
+  /** Whether to include descendants of the product category. */
+  includeDescendants: Scalars['Boolean']['output'];
+};
+
+/** The input fields for a product category value in an exclusion condition. */
+export type CollectionSourceExclusionConditionProductCategoryValueInput = {
+  /** The ID of the product category. */
+  categoryId: Scalars['ID']['input'];
+  /** Whether to include descendants of the product category. */
+  includeDescendants?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** A condition based on product tags for excluding products from a collection. */
+export type CollectionSourceExclusionConditionProductTag = CollectionSourceExclusionCondition & {
+  __typename?: 'CollectionSourceExclusionConditionProductTag';
+  /** The unique identifier for this exclusion condition. */
+  id: Scalars['ID']['output'];
+  /** Determines how many values a metafield must match against in order to satisfy this condition. Will be either at least one given value, or all of the given values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product tag and the condition values. */
+  relation: CollectionSourceExclusionConditionProductTagRelation;
+  /** The tag values to match against. */
+  values: Array<Scalars['String']['output']>;
+};
+
+/** The input fields for an exclusion condition based on product tags. */
+export type CollectionSourceExclusionConditionProductTagInput = {
+  /** Whether to match any or all of the values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product tag and the condition values. */
+  relation: CollectionSourceExclusionConditionProductTagRelation;
+  /** The tag values to match against. */
+  values: Array<Scalars['String']['input']>;
+};
+
+/** The relationship between the product tag and the condition values. */
+export enum CollectionSourceExclusionConditionProductTagRelation {
+  /** The product is tagged with the specified value. */
+  TaggedWith = 'TAGGED_WITH'
+}
+
+/** A condition based on product types for excluding products from a collection. */
+export type CollectionSourceExclusionConditionProductType = CollectionSourceExclusionCondition & {
+  __typename?: 'CollectionSourceExclusionConditionProductType';
+  /** The unique identifier for this exclusion condition. */
+  id: Scalars['ID']['output'];
+  /** Specifies whether products must match any or all values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product type and the condition values. */
+  relation: CollectionSourceExclusionConditionProductTypeRelation;
+  /** The product type values to match against. */
+  values: Array<Scalars['String']['output']>;
+};
+
+/** The input fields for an exclusion condition based on product types. */
+export type CollectionSourceExclusionConditionProductTypeInput = {
+  /** Whether to match any or all of the values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product type and the condition values. */
+  relation: CollectionSourceExclusionConditionProductTypeRelation;
+  /** The product type values to match against. */
+  values: Array<Scalars['String']['input']>;
+};
+
+/** The relation for comparing product types in exclusion conditions. */
+export enum CollectionSourceExclusionConditionProductTypeRelation {
+  /** The product type contains the specified value. */
+  Contains = 'CONTAINS',
+  /** The product type equals the specified value. */
+  Equals = 'EQUALS'
+}
+
+/** A condition based on product vendors for excluding products from a collection. */
+export type CollectionSourceExclusionConditionProductVendor = CollectionSourceExclusionCondition & {
+  __typename?: 'CollectionSourceExclusionConditionProductVendor';
+  /** The unique identifier for this exclusion condition. */
+  id: Scalars['ID']['output'];
+  /** Specifies whether products must match any or all values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product vendor and the condition values. */
+  relation: CollectionSourceExclusionConditionProductVendorRelation;
+  /** The product vendor values to match against. */
+  values: Array<Scalars['String']['output']>;
+};
+
+/** The input fields for an exclusion condition based on product vendors. */
+export type CollectionSourceExclusionConditionProductVendorInput = {
+  /** Whether to match any or all of the values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product vendor and the condition values. */
+  relation: CollectionSourceExclusionConditionProductVendorRelation;
+  /** The product vendor values to match against. */
+  values: Array<Scalars['String']['input']>;
+};
+
+/** The relation for comparing product vendors in exclusion conditions. */
+export enum CollectionSourceExclusionConditionProductVendorRelation {
+  /** The product vendor contains the specified value. */
+  Contains = 'CONTAINS',
+  /** The product vendor equals the specified value. */
+  Equals = 'EQUALS'
+}
+
+/** An exclusion condition introduced in a newer API version that is not modeled by this version of the API. Clients should treat the relation and values as opaque strings. */
+export type CollectionSourceExclusionConditionUnknown = CollectionSourceExclusionCondition & {
+  __typename?: 'CollectionSourceExclusionConditionUnknown';
+  /** The unique identifier for this exclusion condition. */
+  id: Scalars['ID']['output'];
+  /** Whether products must match any or all values. Null when the condition has no concept of a match type. */
+  matchType?: Maybe<CollectionConditionMatchType>;
+  /** The relation, as a raw string. Nullable and not coerced into an enum because the set of possible relations is open-ended for unknown condition types, and some future conditions may not have a relation at all. */
+  relation?: Maybe<Scalars['String']['output']>;
+  /** The condition values, as raw strings. Nullable because some future condition types may have no values at all. */
+  values?: Maybe<Array<Scalars['String']['output']>>;
+};
+
+/** The input fields for updating an exclusion condition based on collections. */
+export type CollectionSourceExclusionConditionUpdateCollectionInput = {
+  /** The collection IDs whose products are excluded. */
+  values: Array<Scalars['ID']['input']>;
+};
+
+/** The input fields for updating a condition that determines which products are excluded from a collection. Exactly one condition type must be provided. */
+export type CollectionSourceExclusionConditionUpdateInput = {
+  /** An update to an exclusion condition based on collections. */
+  collection?: InputMaybe<CollectionSourceExclusionConditionUpdateCollectionInput>;
+  /** An update to an exclusion condition based on product categories. */
+  productCategory?: InputMaybe<CollectionSourceExclusionConditionUpdateProductCategoryInput>;
+  /** An update to an exclusion condition based on product tags. */
+  productTag?: InputMaybe<CollectionSourceExclusionConditionUpdateProductTagInput>;
+  /** An update to an exclusion condition based on product types. */
+  productType?: InputMaybe<CollectionSourceExclusionConditionUpdateProductTypeInput>;
+  /** An update to an exclusion condition based on product vendors. */
+  productVendor?: InputMaybe<CollectionSourceExclusionConditionUpdateProductVendorInput>;
+};
+
+/** The input fields for updating an exclusion condition based on product categories. */
+export type CollectionSourceExclusionConditionUpdateProductCategoryInput = {
+  /** Whether to match any or all of the values. */
+  matchType?: InputMaybe<CollectionConditionMatchType>;
+  /** The relationship between the product category and the condition values. */
+  relation?: InputMaybe<CollectionSourceExclusionConditionProductCategoryRelation>;
+  /** The product category values to match against. */
+  values?: InputMaybe<Array<CollectionSourceExclusionConditionProductCategoryValueInput>>;
+};
+
+/** The input fields for updating an exclusion condition based on product tags. */
+export type CollectionSourceExclusionConditionUpdateProductTagInput = {
+  /** Whether to match any or all of the values. */
+  matchType?: InputMaybe<CollectionConditionMatchType>;
+  /** The relationship between the product tag and the condition values. */
+  relation?: InputMaybe<CollectionSourceExclusionConditionProductTagRelation>;
+  /** The tag values to match against. */
+  values?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** The input fields for updating an exclusion condition based on product types. */
+export type CollectionSourceExclusionConditionUpdateProductTypeInput = {
+  /** Whether to match any or all of the values. */
+  matchType?: InputMaybe<CollectionConditionMatchType>;
+  /** The relationship between the product type and the condition values. */
+  relation?: InputMaybe<CollectionSourceExclusionConditionProductTypeRelation>;
+  /** The product type values to match against. */
+  values?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** The input fields for updating an exclusion condition based on product vendors. */
+export type CollectionSourceExclusionConditionUpdateProductVendorInput = {
+  /** Whether to match any or all of the values. */
+  matchType?: InputMaybe<CollectionConditionMatchType>;
+  /** The relationship between the product vendor and the condition values. */
+  relation?: InputMaybe<CollectionSourceExclusionConditionProductVendorRelation>;
+  /** The product vendor values to match against. */
+  values?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** Defines the rules and selections for including products in a collection. */
+export type CollectionSourceInclusion = {
+  __typename?: 'CollectionSourceInclusion';
+  /** The conditions that determine which products are included in the collection. */
+  conditions: Array<CollectionSourceInclusionCondition>;
+  /** Specifies whether products must match any or all conditions. Only relevant when conditions are present. */
+  matchType?: Maybe<CollectionConditionMatchType>;
+  /** The products that have been manually selected for inclusion in the collection. */
+  selections: CollectionInclusionProductSelectionConnection;
+};
+
+
+/** Defines the rules and selections for including products in a collection. */
+export type CollectionSourceInclusionSelectionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/**
+ * A condition that determines which products should be included in a collection.
+ *
+ * This is an interface implemented by a concrete type per condition kind (for example,
+ * `CollectionSourceInclusionConditionProductTag` or `CollectionSourceInclusionConditionVariantTitle`).
+ * Fields such as `relation` are defined on each concrete type and return a type-specific enum (for example,
+ * `CollectionSourceInclusionConditionProductTagRelation` versus
+ * `CollectionSourceInclusionConditionVariantTitleRelation`). Conditions are mutually exclusive concrete
+ * types, but may contain overlapping field names such as `relation`. If your GraphQL tooling flags these
+ * as ambiguous, give each field a distinct alias (for example, `tagRelation: relation` and
+ * `variantTitleRelation: relation`) or use inline fragments.
+ */
+export type CollectionSourceInclusionCondition = {
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+};
+
+/**
+ * A condition that determines which products are included in a collection.
+ *
+ * Available condition types, grouped by what they filter on:
+ *
+ * - **Product attributes**: `productTag`, `productTitle`, `productType`, `productVendor`, `productStatus`,
+ * `productCategory`.
+ * - **Variant attributes**: `variantTitle`, `variantPrice`, `variantCompareAtPrice`, `variantInventory`,
+ * `variantWeight`.
+ * - **Pricing**: `isPriceReduced`.
+ * - **Metafields**: `metafieldBoolean`, `metafieldDecimal`, `metafieldString`, `metafieldStringList`,
+ * `metafieldMetaobject`, `metafieldMetaobjectList`, and either `metafieldInteger` or `metafieldInt` for
+ * integer metafields. Use `metafieldInteger` before API version 2026-10 and `metafieldInt` from 2026-10
+ * onward. `metafieldInteger` is deprecated as of 2026-10 and removed as of 2027-01.
+ *
+ * Each condition type specifies its own `relation` (for example, `EQUALS`, `CONTAINS`, `TAGGED_WITH`) and
+ * value shape. Combine multiple conditions in a single source's `inclusion.conditions` list and use the
+ * source's `matchType` to require that products match `ANY` or `ALL` of them.
+ */
+export type CollectionSourceInclusionConditionInput = {
+  /** A condition based on boolean metafield values. */
+  metafieldBoolean?: InputMaybe<CollectionSourceInclusionConditionMetafieldBooleanInput>;
+  /** A condition based on decimal metafield values. */
+  metafieldDecimal?: InputMaybe<CollectionSourceInclusionConditionMetafieldDecimalInput>;
+  /** A condition based on integer metafield values. */
+  metafieldInteger?: InputMaybe<CollectionSourceInclusionConditionMetafieldIntegerInput>;
+  /** A condition based on single metaobject reference metafield values. */
+  metafieldMetaobject?: InputMaybe<CollectionSourceInclusionConditionMetafieldMetaobjectInput>;
+  /** A condition based on metaobject list reference metafield values. */
+  metafieldMetaobjectList?: InputMaybe<CollectionSourceInclusionConditionMetafieldMetaobjectListInput>;
+  /** A condition based on string metafield values. */
+  metafieldString?: InputMaybe<CollectionSourceInclusionConditionMetafieldStringInput>;
+  /** A condition based on string list metafield values. */
+  metafieldStringList?: InputMaybe<CollectionSourceInclusionConditionMetafieldStringListInput>;
+  /** A condition based on product categories. */
+  productCategory?: InputMaybe<CollectionSourceInclusionConditionProductCategoryInput>;
+  /** A condition based on product status. */
+  productStatus?: InputMaybe<CollectionSourceInclusionConditionProductStatusInput>;
+  /** A condition based on product tags. */
+  productTag?: InputMaybe<CollectionSourceInclusionConditionProductTagInput>;
+  /** A condition based on product titles. */
+  productTitle?: InputMaybe<CollectionSourceInclusionConditionProductTitleInput>;
+  /** A condition based on product types. */
+  productType?: InputMaybe<CollectionSourceInclusionConditionProductTypeInput>;
+  /** A condition based on product vendors. */
+  productVendor?: InputMaybe<CollectionSourceInclusionConditionProductVendorInput>;
+  /** A condition based on variant compare at prices. */
+  variantCompareAtPrice?: InputMaybe<CollectionSourceInclusionConditionVariantCompareAtPriceInput>;
+  /** A condition based on variant inventory quantities. */
+  variantInventory?: InputMaybe<CollectionSourceInclusionConditionVariantInventoryInput>;
+  /** A condition based on variant prices. */
+  variantPrice?: InputMaybe<CollectionSourceInclusionConditionVariantPriceInput>;
+  /** A condition based on variant titles. */
+  variantTitle?: InputMaybe<CollectionSourceInclusionConditionVariantTitleInput>;
+  /** A condition based on variant weights. */
+  variantWeight?: InputMaybe<CollectionSourceInclusionConditionVariantWeightInput>;
+};
+
+/**
+ * A condition that determines which products should be included in a collection.
+ *
+ * This is an interface implemented by a concrete type per condition kind (for example,
+ * `CollectionSourceInclusionConditionProductTag` or `CollectionSourceInclusionConditionVariantTitle`).
+ * Fields such as `relation` are defined on each concrete type and return a type-specific enum (for example,
+ * `CollectionSourceInclusionConditionProductTagRelation` versus
+ * `CollectionSourceInclusionConditionVariantTitleRelation`). Conditions are mutually exclusive concrete
+ * types, but may contain overlapping field names such as `relation`. If your GraphQL tooling flags these
+ * as ambiguous, give each field a distinct alias (for example, `tagRelation: relation` and
+ * `variantTitleRelation: relation`) or use inline fragments.
+ */
+export type CollectionSourceInclusionConditionMetafield = {
+  /** The metafield definition to use for the condition. */
+  definition: MetafieldDefinition;
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+};
+
+/** A condition based on boolean metafield values for including products in a collection. */
+export type CollectionSourceInclusionConditionMetafieldBoolean = CollectionSourceInclusionCondition & CollectionSourceInclusionConditionMetafield & {
+  __typename?: 'CollectionSourceInclusionConditionMetafieldBoolean';
+  /** The metafield definition to use for the condition. */
+  definition: MetafieldDefinition;
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** The relationship between the metafield value and the condition. */
+  relation: CollectionSourceInclusionConditionMetafieldBooleanRelation;
+  /** The boolean value to match against. */
+  value: Scalars['Boolean']['output'];
+};
+
+/** The input fields for a condition based on boolean metafield values. */
+export type CollectionSourceInclusionConditionMetafieldBooleanInput = {
+  /** The ID of the metafield definition. */
+  definitionId: Scalars['ID']['input'];
+  /** The relationship between the metafield value and the condition value. */
+  relation: CollectionSourceInclusionConditionMetafieldBooleanRelation;
+  /** The boolean value to match against. */
+  value: Scalars['Boolean']['input'];
+};
+
+/** The relation for comparing boolean metafield values. */
+export enum CollectionSourceInclusionConditionMetafieldBooleanRelation {
+  /** The metafield value equals the condition value. */
+  Equals = 'EQUALS'
+}
+
+/** A condition based on decimal metafield values for including products in a collection. */
+export type CollectionSourceInclusionConditionMetafieldDecimal = CollectionSourceInclusionCondition & CollectionSourceInclusionConditionMetafield & {
+  __typename?: 'CollectionSourceInclusionConditionMetafieldDecimal';
+  /** The metafield definition to use for the condition. */
+  definition: MetafieldDefinition;
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** The relationship between the metafield value and the condition value. */
+  relation: CollectionSourceInclusionConditionMetafieldDecimalRelation;
+  /** The decimal value to match against. */
+  value: Scalars['Decimal']['output'];
+};
+
+/** The input fields for a condition based on decimal metafield values. */
+export type CollectionSourceInclusionConditionMetafieldDecimalInput = {
+  /** The ID of the metafield definition. */
+  definitionId: Scalars['ID']['input'];
+  /** The relationship between the metafield value and the condition value. */
+  relation: CollectionSourceInclusionConditionMetafieldDecimalRelation;
+  /** The decimal value to match against. */
+  value: Scalars['Decimal']['input'];
+};
+
+/** The relation for comparing decimal metafield values. */
+export enum CollectionSourceInclusionConditionMetafieldDecimalRelation {
+  /** The metafield value equals the specified value. */
+  Equals = 'EQUALS',
+  /** The metafield value is greater than the specified value. */
+  GreaterThan = 'GREATER_THAN',
+  /** The metafield value is less than the specified value. */
+  LessThan = 'LESS_THAN'
+}
+
+/** A condition based on integer metafield values for including products in a collection. This object is deprecated as of API version 2026-10 in favor of `CollectionSourceInclusionConditionMetafieldInt`, which supports the full integer metafield value range. On those versions this legacy type is only returned to queries that reference it without also referencing `CollectionSourceInclusionConditionMetafieldInt`. As of API version 2027-01, this legacy type is removed entirely. */
+export type CollectionSourceInclusionConditionMetafieldInteger = CollectionSourceInclusionCondition & CollectionSourceInclusionConditionMetafield & {
+  __typename?: 'CollectionSourceInclusionConditionMetafieldInteger';
+  /** The metafield definition to use for the condition. */
+  definition: MetafieldDefinition;
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** The relationship between the metafield value and the condition value. */
+  relation: CollectionSourceInclusionConditionMetafieldIntegerRelation;
+  /** The integer value to match against. */
+  value: Scalars['Int']['output'];
+};
+
+/** The input fields for a condition based on integer metafield values. */
+export type CollectionSourceInclusionConditionMetafieldIntegerInput = {
+  /** The ID of the metafield definition. */
+  definitionId: Scalars['ID']['input'];
+  /** The relationship between the metafield value and the condition value. */
+  relation: CollectionSourceInclusionConditionMetafieldIntegerRelation;
+  /** The integer value to match against. */
+  value: Scalars['Int']['input'];
+};
+
+/** The relation for comparing integer metafield values. */
+export enum CollectionSourceInclusionConditionMetafieldIntegerRelation {
+  /** The metafield value equals the specified value. */
+  Equals = 'EQUALS',
+  /** The metafield value is greater than the specified value. */
+  GreaterThan = 'GREATER_THAN',
+  /** The metafield value is less than the specified value. */
+  LessThan = 'LESS_THAN'
+}
+
+/** A condition based on single metaobject reference metafield values for including products in a collection. */
+export type CollectionSourceInclusionConditionMetafieldMetaobject = CollectionSourceInclusionCondition & CollectionSourceInclusionConditionMetafield & {
+  __typename?: 'CollectionSourceInclusionConditionMetafieldMetaobject';
+  /** The metafield definition to use for the condition. */
+  definition: MetafieldDefinition;
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** The relationship between the metafield value and the condition value. */
+  relation: CollectionSourceInclusionConditionMetafieldMetaobjectRelation;
+  /** The metaobject to match against. */
+  value: Metaobject;
+};
+
+/** The input fields for a condition based on single metaobject reference metafield values. */
+export type CollectionSourceInclusionConditionMetafieldMetaobjectInput = {
+  /** The ID of the metafield definition. */
+  definitionId: Scalars['ID']['input'];
+  /** The relationship between the metafield value and the condition value. */
+  relation: CollectionSourceInclusionConditionMetafieldMetaobjectRelation;
+  /** The metaobject ID to match against. */
+  value: Scalars['ID']['input'];
+};
+
+/** A condition based on list of metaobject reference metafield values for including products in a collection. */
+export type CollectionSourceInclusionConditionMetafieldMetaobjectList = CollectionSourceInclusionCondition & CollectionSourceInclusionConditionMetafield & {
+  __typename?: 'CollectionSourceInclusionConditionMetafieldMetaobjectList';
+  /** The metafield definition to use for the condition. */
+  definition: MetafieldDefinition;
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** Determines how many values a metafield must match against in order to satisfy this condition. Will be either at least one given value, or all of the given values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the metafield value and the condition values. */
+  relation: CollectionSourceInclusionConditionMetafieldMetaobjectListRelation;
+  /** The metaobjects to match against. */
+  values: Array<Metaobject>;
+};
+
+/** The input fields for a condition based on metaobject list reference metafield values. */
+export type CollectionSourceInclusionConditionMetafieldMetaobjectListInput = {
+  /** The ID of the metafield definition. */
+  definitionId: Scalars['ID']['input'];
+  /** Whether to match any or all of the values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the metafield value and the condition values. */
+  relation: CollectionSourceInclusionConditionMetafieldMetaobjectListRelation;
+  /** The metaobject IDs to match against. */
+  values: Array<Scalars['ID']['input']>;
+};
+
+/** The relationship between the metaobject value and the condition values. */
+export enum CollectionSourceInclusionConditionMetafieldMetaobjectListRelation {
+  /** Matches if the supplied metaobject value is equal to one or more of the values in the metafield's metaobject list. */
+  Includes = 'INCLUDES'
+}
+
+/** The relation for comparing metaobject metafield values. */
+export enum CollectionSourceInclusionConditionMetafieldMetaobjectRelation {
+  /** The metaobject value equals the condition value. */
+  Equals = 'EQUALS'
+}
+
+/** A condition based on string metafield values for including products in a collection. */
+export type CollectionSourceInclusionConditionMetafieldString = CollectionSourceInclusionCondition & CollectionSourceInclusionConditionMetafield & {
+  __typename?: 'CollectionSourceInclusionConditionMetafieldString';
+  /** The metafield definition to use for the condition. */
+  definition: MetafieldDefinition;
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** Determines how many values a metafield must match against in order to satisfy this condition. Will be either at least one given value, or all of the given values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the metafield value and the condition values. */
+  relation: CollectionSourceInclusionConditionMetafieldStringRelation;
+  /** The string values to match against. */
+  values: Array<Scalars['String']['output']>;
+};
+
+/** The input fields for a condition based on string metafield values. */
+export type CollectionSourceInclusionConditionMetafieldStringInput = {
+  /** The ID of the metafield definition. */
+  definitionId: Scalars['ID']['input'];
+  /** Whether to match any or all of the values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the metafield value and the condition values. */
+  relation: CollectionSourceInclusionConditionMetafieldStringRelation;
+  /** The string values to match against. */
+  values: Array<Scalars['String']['input']>;
+};
+
+/** A condition based on list of string metafield values for including products in a collection. */
+export type CollectionSourceInclusionConditionMetafieldStringList = CollectionSourceInclusionCondition & CollectionSourceInclusionConditionMetafield & {
+  __typename?: 'CollectionSourceInclusionConditionMetafieldStringList';
+  /** The metafield definition to use for the condition. */
+  definition: MetafieldDefinition;
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** Determines how many values a metafield must match against in order to satisfy this condition. Will be either at least one given value, or all of the given values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the metafield value and the condition values. */
+  relation: CollectionSourceInclusionConditionMetafieldStringListRelation;
+  /** The string values to match against. */
+  values: Array<Scalars['String']['output']>;
+};
+
+/** The input fields for a condition based on string list metafield values. */
+export type CollectionSourceInclusionConditionMetafieldStringListInput = {
+  /** The ID of the metafield definition. */
+  definitionId: Scalars['ID']['input'];
+  /** Whether to match any or all of the values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the metafield value and the condition values. */
+  relation: CollectionSourceInclusionConditionMetafieldStringListRelation;
+  /** The string values to match against. */
+  values: Array<Scalars['String']['input']>;
+};
+
+/** The relationship between the metafield value and the condition values. */
+export enum CollectionSourceInclusionConditionMetafieldStringListRelation {
+  /** The metafield value includes the specified value. */
+  Includes = 'INCLUDES'
+}
+
+/** The relationship between the metafield value and the condition values. */
+export enum CollectionSourceInclusionConditionMetafieldStringRelation {
+  /** The metafield value equals the specified value. */
+  Equals = 'EQUALS'
+}
+
+/** A condition based on product category IDs for including products in a collection. */
+export type CollectionSourceInclusionConditionProductCategory = CollectionSourceInclusionCondition & {
+  __typename?: 'CollectionSourceInclusionConditionProductCategory';
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** Specifies whether products must match any or all values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product category ID and the condition values. */
+  relation: CollectionSourceInclusionConditionProductCategoryRelation;
+  /** The product category values to match against. */
+  values: Array<CollectionSourceInclusionConditionProductCategoryValue>;
+};
+
+/** The input fields for a condition based on product categories. */
+export type CollectionSourceInclusionConditionProductCategoryInput = {
+  /** Whether to match any or all of the values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product category and the condition values. */
+  relation: CollectionSourceInclusionConditionProductCategoryRelation;
+  /** The product category values to match against. */
+  values: Array<CollectionSourceInclusionConditionProductCategoryValueInput>;
+};
+
+/** The relation for comparing product category IDs. */
+export enum CollectionSourceInclusionConditionProductCategoryRelation {
+  /** The product category ID equals the specified value. */
+  Equals = 'EQUALS',
+  /** The product category ID does not equal the specified value. */
+  NotEquals = 'NOT_EQUALS'
+}
+
+/** A value for a product category condition. */
+export type CollectionSourceInclusionConditionProductCategoryValue = {
+  __typename?: 'CollectionSourceInclusionConditionProductCategoryValue';
+  /** The product category to match against. */
+  category: TaxonomyCategory;
+  /** Whether to include descendants of the product category. */
+  includeDescendants: Scalars['Boolean']['output'];
+};
+
+/** The input fields for a product category value in a collection condition. */
+export type CollectionSourceInclusionConditionProductCategoryValueInput = {
+  /** The ID of the product category. */
+  categoryId: Scalars['ID']['input'];
+  /** Whether to include descendants of the product category. */
+  includeDescendants: Scalars['Boolean']['input'];
+};
+
+/** A condition based on product status for including products in a collection. */
+export type CollectionSourceInclusionConditionProductStatus = CollectionSourceInclusionCondition & {
+  __typename?: 'CollectionSourceInclusionConditionProductStatus';
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** Specifies whether products must match any or all values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product status and the condition values. */
+  relation: CollectionSourceInclusionConditionProductStatusRelation;
+  /** The product status values to match against. */
+  values: Array<ProductStatus>;
+};
+
+/** The input fields for a condition based on product status. */
+export type CollectionSourceInclusionConditionProductStatusInput = {
+  /** Whether to match any or all of the values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product status and the condition values. */
+  relation: CollectionSourceInclusionConditionProductStatusRelation;
+  /** The product status values to match against. */
+  values: Array<ProductStatus>;
+};
+
+/** The relation for comparing product status. */
+export enum CollectionSourceInclusionConditionProductStatusRelation {
+  /** The product status equals the specified value. */
+  Equals = 'EQUALS',
+  /** The product status does not equal the specified value. */
+  NotEquals = 'NOT_EQUALS'
+}
+
+/** A condition based on product tags for including products in a collection. */
+export type CollectionSourceInclusionConditionProductTag = CollectionSourceInclusionCondition & {
+  __typename?: 'CollectionSourceInclusionConditionProductTag';
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** Determines how many values a metafield must match against in order to satisfy this condition. Will be either at least one given value, or all of the given values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product tag and the condition values. */
+  relation: CollectionSourceInclusionConditionProductTagRelation;
+  /** The tag values to match against. */
+  values: Array<Scalars['String']['output']>;
+};
+
+/** The input fields for a condition based on product tags. */
+export type CollectionSourceInclusionConditionProductTagInput = {
+  /** Whether to match any or all of the values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product tag and the condition values. */
+  relation: CollectionSourceInclusionConditionProductTagRelation;
+  /** The tag values to match against. */
+  values: Array<Scalars['String']['input']>;
+};
+
+/** The relationship between the product tag and the condition values. */
+export enum CollectionSourceInclusionConditionProductTagRelation {
+  /** The product is not tagged with the specified value. */
+  NotTaggedWith = 'NOT_TAGGED_WITH',
+  /** The product is tagged with the specified value. */
+  TaggedWith = 'TAGGED_WITH'
+}
+
+/** A condition based on product titles for including products in a collection. */
+export type CollectionSourceInclusionConditionProductTitle = CollectionSourceInclusionCondition & {
+  __typename?: 'CollectionSourceInclusionConditionProductTitle';
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** Determines how many values a metafield must match against in order to satisfy this condition. Will be either at least one given value, or all of the given values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product title and the condition values. */
+  relation: CollectionSourceInclusionConditionProductTitleRelation;
+  /** The title values to match against. */
+  values: Array<Scalars['String']['output']>;
+};
+
+/** The input fields for a condition based on product titles. */
+export type CollectionSourceInclusionConditionProductTitleInput = {
+  /** Whether to match any or all of the values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product title and the condition values. */
+  relation: CollectionSourceInclusionConditionProductTitleRelation;
+  /** The title values to match against. */
+  values: Array<Scalars['String']['input']>;
+};
+
+/** The relationship between the product title and the condition values. */
+export enum CollectionSourceInclusionConditionProductTitleRelation {
+  /** The product title contains the specified value. */
+  Contains = 'CONTAINS',
+  /** The product title does not contain the specified value. */
+  DoesNotContain = 'DOES_NOT_CONTAIN',
+  /** The product title ends with the specified value. */
+  EndsWith = 'ENDS_WITH',
+  /** The product title equals the specified value. */
+  Equals = 'EQUALS',
+  /** The product title does not equal the specified value. */
+  NotEquals = 'NOT_EQUALS',
+  /** The product title starts with the specified value. */
+  StartsWith = 'STARTS_WITH'
+}
+
+/** A condition based on product types for including products in a collection. */
+export type CollectionSourceInclusionConditionProductType = CollectionSourceInclusionCondition & {
+  __typename?: 'CollectionSourceInclusionConditionProductType';
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** Specifies whether products must match any or all values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product type and the condition values. */
+  relation: CollectionSourceInclusionConditionProductTypeRelation;
+  /** The product type values to match against. */
+  values: Array<Scalars['String']['output']>;
+};
+
+/** The input fields for a condition based on product types. */
+export type CollectionSourceInclusionConditionProductTypeInput = {
+  /** Whether to match any or all of the values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product type and the condition values. */
+  relation: CollectionSourceInclusionConditionProductTypeRelation;
+  /** The product type values to match against. */
+  values: Array<Scalars['String']['input']>;
+};
+
+/** The relation for comparing product types. */
+export enum CollectionSourceInclusionConditionProductTypeRelation {
+  /** The product type contains the specified value. */
+  Contains = 'CONTAINS',
+  /** The product type does not contain the specified value. */
+  DoesNotContain = 'DOES_NOT_CONTAIN',
+  /** The product type ends with the specified value. */
+  EndsWith = 'ENDS_WITH',
+  /** The product type equals the specified value. */
+  Equals = 'EQUALS',
+  /** The product type does not equal the specified value. */
+  NotEquals = 'NOT_EQUALS',
+  /** The product type starts with the specified value. */
+  StartsWith = 'STARTS_WITH'
+}
+
+/** A condition based on product vendors for including products in a collection. */
+export type CollectionSourceInclusionConditionProductVendor = CollectionSourceInclusionCondition & {
+  __typename?: 'CollectionSourceInclusionConditionProductVendor';
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** Specifies whether products must match any or all values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product vendor and the condition values. */
+  relation: CollectionSourceInclusionConditionProductVendorRelation;
+  /** The product vendor values to match against. */
+  values: Array<Scalars['String']['output']>;
+};
+
+/** The input fields for a condition based on product vendors. */
+export type CollectionSourceInclusionConditionProductVendorInput = {
+  /** Whether to match any or all of the values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the product vendor and the condition values. */
+  relation: CollectionSourceInclusionConditionProductVendorRelation;
+  /** The product vendor values to match against. */
+  values: Array<Scalars['String']['input']>;
+};
+
+/** The relation for comparing product vendors. */
+export enum CollectionSourceInclusionConditionProductVendorRelation {
+  /** The product vendor contains the specified value. */
+  Contains = 'CONTAINS',
+  /** The product vendor does not contain the specified value. */
+  DoesNotContain = 'DOES_NOT_CONTAIN',
+  /** The product vendor ends with the specified value. */
+  EndsWith = 'ENDS_WITH',
+  /** The product vendor equals the specified value. */
+  Equals = 'EQUALS',
+  /** The product vendor does not equal the specified value. */
+  NotEquals = 'NOT_EQUALS',
+  /** The product vendor starts with the specified value. */
+  StartsWith = 'STARTS_WITH'
+}
+
+/** An inclusion condition introduced in a newer API version that is not modeled by this version of the API. Clients should treat the relation and values as opaque strings. */
+export type CollectionSourceInclusionConditionUnknown = CollectionSourceInclusionCondition & {
+  __typename?: 'CollectionSourceInclusionConditionUnknown';
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** Whether products must match any or all values. Null when the condition has no concept of a match type. */
+  matchType?: Maybe<CollectionConditionMatchType>;
+  /** The relation, as a raw string. Nullable and not coerced into an enum because the set of possible relations is open-ended for unknown condition types, and some future conditions may not have a relation at all. */
+  relation?: Maybe<Scalars['String']['output']>;
+  /** The condition values, as raw strings. Nullable because some future condition types may have no values at all. */
+  values?: Maybe<Array<Scalars['String']['output']>>;
+};
+
+/** The input fields for updating a condition that determines which products are included in a collection. Exactly one condition type must be provided. */
+export type CollectionSourceInclusionConditionUpdateInput = {
+  /** An update to a condition based on boolean metafield values. */
+  metafieldBoolean?: InputMaybe<CollectionSourceInclusionConditionUpdateMetafieldBooleanInput>;
+  /** An update to a condition based on decimal metafield values. */
+  metafieldDecimal?: InputMaybe<CollectionSourceInclusionConditionUpdateMetafieldDecimalInput>;
+  /** An update to a condition based on integer metafield values. */
+  metafieldInteger?: InputMaybe<CollectionSourceInclusionConditionUpdateMetafieldIntegerInput>;
+  /** An update to a condition based on single metaobject reference metafield values. */
+  metafieldMetaobject?: InputMaybe<CollectionSourceInclusionConditionUpdateMetafieldMetaobjectInput>;
+  /** An update to a condition based on metaobject list reference metafield values. */
+  metafieldMetaobjectList?: InputMaybe<CollectionSourceInclusionConditionUpdateMetafieldMetaobjectListInput>;
+  /** An update to a condition based on string metafield values. */
+  metafieldString?: InputMaybe<CollectionSourceInclusionConditionUpdateMetafieldStringInput>;
+  /** An update to a condition based on string list metafield values. */
+  metafieldStringList?: InputMaybe<CollectionSourceInclusionConditionUpdateMetafieldStringListInput>;
+  /** An update to a condition based on product categories. */
+  productCategory?: InputMaybe<CollectionSourceInclusionConditionUpdateProductCategoryInput>;
+  /** An update to a condition based on product status. */
+  productStatus?: InputMaybe<CollectionSourceInclusionConditionUpdateProductStatusInput>;
+  /** An update to a condition based on product tags. */
+  productTag?: InputMaybe<CollectionSourceInclusionConditionUpdateProductTagInput>;
+  /** An update to a condition based on product titles. */
+  productTitle?: InputMaybe<CollectionSourceInclusionConditionUpdateProductTitleInput>;
+  /** An update to a condition based on product types. */
+  productType?: InputMaybe<CollectionSourceInclusionConditionUpdateProductTypeInput>;
+  /** An update to a condition based on product vendors. */
+  productVendor?: InputMaybe<CollectionSourceInclusionConditionUpdateProductVendorInput>;
+  /** An update to a condition based on variant compare at prices. */
+  variantCompareAtPrice?: InputMaybe<CollectionSourceInclusionConditionUpdateVariantCompareAtPriceInput>;
+  /** An update to a condition based on variant inventory quantities. */
+  variantInventory?: InputMaybe<CollectionSourceInclusionConditionUpdateVariantInventoryInput>;
+  /** An update to a condition based on variant prices. */
+  variantPrice?: InputMaybe<CollectionSourceInclusionConditionUpdateVariantPriceInput>;
+  /** An update to a condition based on variant titles. */
+  variantTitle?: InputMaybe<CollectionSourceInclusionConditionUpdateVariantTitleInput>;
+  /** An update to a condition based on variant weights. */
+  variantWeight?: InputMaybe<CollectionSourceInclusionConditionUpdateVariantWeightInput>;
+};
+
+/** The input fields for updating a condition based on boolean metafield values. */
+export type CollectionSourceInclusionConditionUpdateMetafieldBooleanInput = {
+  /** The ID of the metafield definition. */
+  definitionId?: InputMaybe<Scalars['ID']['input']>;
+  /** The relationship between the metafield value and the condition value. */
+  relation?: InputMaybe<CollectionSourceInclusionConditionMetafieldBooleanRelation>;
+  /** The boolean value to match against. */
+  value?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** The input fields for updating a condition based on decimal metafield values. */
+export type CollectionSourceInclusionConditionUpdateMetafieldDecimalInput = {
+  /** The ID of the metafield definition. */
+  definitionId?: InputMaybe<Scalars['ID']['input']>;
+  /** The relationship between the metafield value and the condition value. */
+  relation?: InputMaybe<CollectionSourceInclusionConditionMetafieldDecimalRelation>;
+  /** The decimal value to match against. */
+  value?: InputMaybe<Scalars['Decimal']['input']>;
+};
+
+/** The input fields for updating a condition based on integer metafield values. */
+export type CollectionSourceInclusionConditionUpdateMetafieldIntegerInput = {
+  /** The ID of the metafield definition. */
+  definitionId?: InputMaybe<Scalars['ID']['input']>;
+  /** The relationship between the metafield value and the condition value. */
+  relation?: InputMaybe<CollectionSourceInclusionConditionMetafieldIntegerRelation>;
+  /** The integer value to match against. */
+  value?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** The input fields for updating a condition based on single metaobject reference metafield values. */
+export type CollectionSourceInclusionConditionUpdateMetafieldMetaobjectInput = {
+  /** The ID of the metafield definition. */
+  definitionId?: InputMaybe<Scalars['ID']['input']>;
+  /** The relationship between the metafield value and the condition value. */
+  relation?: InputMaybe<CollectionSourceInclusionConditionMetafieldMetaobjectRelation>;
+  /** The metaobject ID to match against. */
+  value?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** The input fields for updating a condition based on metaobject list reference metafield values. */
+export type CollectionSourceInclusionConditionUpdateMetafieldMetaobjectListInput = {
+  /** The ID of the metafield definition. */
+  definitionId?: InputMaybe<Scalars['ID']['input']>;
+  /** Whether to match any or all of the values. */
+  matchType?: InputMaybe<CollectionConditionMatchType>;
+  /** The relationship between the metafield value and the condition values. */
+  relation?: InputMaybe<CollectionSourceInclusionConditionMetafieldMetaobjectListRelation>;
+  /** The metaobject IDs to match against. */
+  values?: InputMaybe<Array<Scalars['ID']['input']>>;
+};
+
+/** The input fields for updating a condition based on string metafield values. */
+export type CollectionSourceInclusionConditionUpdateMetafieldStringInput = {
+  /** The ID of the metafield definition. */
+  definitionId?: InputMaybe<Scalars['ID']['input']>;
+  /** Whether to match any or all of the values. */
+  matchType?: InputMaybe<CollectionConditionMatchType>;
+  /** The relationship between the metafield value and the condition values. */
+  relation?: InputMaybe<CollectionSourceInclusionConditionMetafieldStringRelation>;
+  /** The string values to match against. */
+  values?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** The input fields for updating a condition based on string list metafield values. */
+export type CollectionSourceInclusionConditionUpdateMetafieldStringListInput = {
+  /** The ID of the metafield definition. */
+  definitionId?: InputMaybe<Scalars['ID']['input']>;
+  /** Whether to match any or all of the values. */
+  matchType?: InputMaybe<CollectionConditionMatchType>;
+  /** The relationship between the metafield value and the condition values. */
+  relation?: InputMaybe<CollectionSourceInclusionConditionMetafieldStringListRelation>;
+  /** The string values to match against. */
+  values?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** The input fields for updating a condition based on product categories. */
+export type CollectionSourceInclusionConditionUpdateProductCategoryInput = {
+  /** Whether to match any or all of the values. */
+  matchType?: InputMaybe<CollectionConditionMatchType>;
+  /** The relationship between the product category and the condition values. */
+  relation?: InputMaybe<CollectionSourceInclusionConditionProductCategoryRelation>;
+  /** The product category values to match against. */
+  values?: InputMaybe<Array<CollectionSourceInclusionConditionProductCategoryValueInput>>;
+};
+
+/** The input fields for updating a condition based on product status. */
+export type CollectionSourceInclusionConditionUpdateProductStatusInput = {
+  /** Whether to match any or all of the values. */
+  matchType?: InputMaybe<CollectionConditionMatchType>;
+  /** The relationship between the product status and the condition values. */
+  relation?: InputMaybe<CollectionSourceInclusionConditionProductStatusRelation>;
+  /** The product status values to match against. */
+  values?: InputMaybe<Array<ProductStatus>>;
+};
+
+/** The input fields for updating a condition based on product tags. */
+export type CollectionSourceInclusionConditionUpdateProductTagInput = {
+  /** Whether to match any or all of the values. */
+  matchType?: InputMaybe<CollectionConditionMatchType>;
+  /** The relationship between the product tag and the condition values. */
+  relation?: InputMaybe<CollectionSourceInclusionConditionProductTagRelation>;
+  /** The tag values to match against. */
+  values?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** The input fields for updating a condition based on product titles. */
+export type CollectionSourceInclusionConditionUpdateProductTitleInput = {
+  /** Whether to match any or all of the values. */
+  matchType?: InputMaybe<CollectionConditionMatchType>;
+  /** The relationship between the product title and the condition values. */
+  relation?: InputMaybe<CollectionSourceInclusionConditionProductTitleRelation>;
+  /** The title values to match against. */
+  values?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** The input fields for updating a condition based on product types. */
+export type CollectionSourceInclusionConditionUpdateProductTypeInput = {
+  /** Whether to match any or all of the values. */
+  matchType?: InputMaybe<CollectionConditionMatchType>;
+  /** The relationship between the product type and the condition values. */
+  relation?: InputMaybe<CollectionSourceInclusionConditionProductTypeRelation>;
+  /** The product type values to match against. */
+  values?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** The input fields for updating a condition based on product vendors. */
+export type CollectionSourceInclusionConditionUpdateProductVendorInput = {
+  /** Whether to match any or all of the values. */
+  matchType?: InputMaybe<CollectionConditionMatchType>;
+  /** The relationship between the product vendor and the condition values. */
+  relation?: InputMaybe<CollectionSourceInclusionConditionProductVendorRelation>;
+  /** The product vendor values to match against. */
+  values?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** The input fields for updating a condition based on variant compare at prices. */
+export type CollectionSourceInclusionConditionUpdateVariantCompareAtPriceInput = {
+  /** The relationship between the variant compare at price and the condition value. */
+  relation?: InputMaybe<CollectionSourceInclusionConditionVariantCompareAtPriceRelation>;
+  /** The variant compare at price to match against. Required for numeric relations and must be absent for IS_SET or IS_NOT_SET. */
+  value?: InputMaybe<MoneyInput>;
+};
+
+/** The input fields for updating a condition based on variant inventory quantities. */
+export type CollectionSourceInclusionConditionUpdateVariantInventoryInput = {
+  /** The relationship between the variant inventory and the condition value. */
+  relation?: InputMaybe<CollectionSourceInclusionConditionVariantInventoryRelation>;
+  /** The variant inventory quantity to match against. */
+  value?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** The input fields for updating a condition based on variant prices. */
+export type CollectionSourceInclusionConditionUpdateVariantPriceInput = {
+  /** The relationship between the variant price and the condition value. */
+  relation?: InputMaybe<CollectionSourceInclusionConditionVariantPriceRelation>;
+  /** The variant price to match against. */
+  value?: InputMaybe<MoneyInput>;
+};
+
+/** The input fields for updating a condition based on variant titles. */
+export type CollectionSourceInclusionConditionUpdateVariantTitleInput = {
+  /** Whether to match any or all of the values. */
+  matchType?: InputMaybe<CollectionConditionMatchType>;
+  /** The relationship between the variant title and the condition values. */
+  relation?: InputMaybe<CollectionSourceInclusionConditionVariantTitleRelation>;
+  /** The variant title values to match against. */
+  values?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** The input fields for updating a condition based on variant weights. */
+export type CollectionSourceInclusionConditionUpdateVariantWeightInput = {
+  /** The relationship between the variant weight and the condition value. */
+  relation?: InputMaybe<CollectionSourceInclusionConditionVariantWeightRelation>;
+  /** The variant weight to match against. */
+  value?: InputMaybe<WeightInput>;
+};
+
+/** A condition based on variant compare at prices for including products in a collection. */
+export type CollectionSourceInclusionConditionVariantCompareAtPrice = CollectionSourceInclusionCondition & {
+  __typename?: 'CollectionSourceInclusionConditionVariantCompareAtPrice';
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** The relationship between the variant compare at price and the condition values. */
+  relation: CollectionSourceInclusionConditionVariantCompareAtPriceRelation;
+  /** The variant compare at price to match against. Null when the relation is IS_SET or IS_NOT_SET. */
+  value?: Maybe<MoneyV2>;
+};
+
+/** The input fields for a condition based on variant compare at prices. */
+export type CollectionSourceInclusionConditionVariantCompareAtPriceInput = {
+  /** The relationship between the variant compare at price and the condition value. */
+  relation: CollectionSourceInclusionConditionVariantCompareAtPriceRelation;
+  /** The variant compare at price to match against. Required for numeric relations and must be absent for IS_SET or IS_NOT_SET. */
+  value?: InputMaybe<MoneyInput>;
+};
+
+/** The relation for comparing variant compare at prices. */
+export enum CollectionSourceInclusionConditionVariantCompareAtPriceRelation {
+  /** The variant compare at price equals the specified value. */
+  Equals = 'EQUALS',
+  /** The variant compare at price is greater than the specified value. */
+  GreaterThan = 'GREATER_THAN',
+  /** The variant does not have a compare at price set. */
+  IsNotSet = 'IS_NOT_SET',
+  /** The variant has a compare at price set (indicating a price reduction). */
+  IsSet = 'IS_SET',
+  /** The variant compare at price is less than the specified value. */
+  LessThan = 'LESS_THAN',
+  /** The variant compare at price does not equal the specified value. */
+  NotEquals = 'NOT_EQUALS'
+}
+
+/** A condition based on variant inventory quantities for including products in a collection. */
+export type CollectionSourceInclusionConditionVariantInventory = CollectionSourceInclusionCondition & {
+  __typename?: 'CollectionSourceInclusionConditionVariantInventory';
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** The relationship between the variant inventory and the condition values. */
+  relation: CollectionSourceInclusionConditionVariantInventoryRelation;
+  /** The variant inventory to match against. */
+  value: Scalars['Int']['output'];
+};
+
+/** The input fields for a condition based on variant inventory quantities. */
+export type CollectionSourceInclusionConditionVariantInventoryInput = {
+  /** The relationship between the variant inventory and the condition value. */
+  relation: CollectionSourceInclusionConditionVariantInventoryRelation;
+  /** The variant inventory quantity to match against. */
+  value: Scalars['Int']['input'];
+};
+
+/** The relation for comparing variant inventory quantities. */
+export enum CollectionSourceInclusionConditionVariantInventoryRelation {
+  /** The variant inventory equals the specified value. */
+  Equals = 'EQUALS',
+  /** The variant inventory is greater than the specified value. */
+  GreaterThan = 'GREATER_THAN',
+  /** The variant inventory is less than the specified value. */
+  LessThan = 'LESS_THAN'
+}
+
+/** A condition based on variant prices for including products in a collection. */
+export type CollectionSourceInclusionConditionVariantPrice = CollectionSourceInclusionCondition & {
+  __typename?: 'CollectionSourceInclusionConditionVariantPrice';
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** The relationship between the variant price and the condition values. */
+  relation: CollectionSourceInclusionConditionVariantPriceRelation;
+  /** The variant price to match against. */
+  value: MoneyV2;
+};
+
+/** The input fields for a condition based on variant prices. */
+export type CollectionSourceInclusionConditionVariantPriceInput = {
+  /** The relationship between the variant price and the condition value. */
+  relation: CollectionSourceInclusionConditionVariantPriceRelation;
+  /** The variant price to match against. */
+  value: MoneyInput;
+};
+
+/** The relation for comparing variant prices. */
+export enum CollectionSourceInclusionConditionVariantPriceRelation {
+  /** The variant price equals the specified value. */
+  Equals = 'EQUALS',
+  /** The variant price is greater than the specified value. */
+  GreaterThan = 'GREATER_THAN',
+  /** The variant price is less than the specified value. */
+  LessThan = 'LESS_THAN',
+  /** The variant price does not equal the specified value. */
+  NotEquals = 'NOT_EQUALS'
+}
+
+/** A condition based on variant titles for including products in a collection. */
+export type CollectionSourceInclusionConditionVariantTitle = CollectionSourceInclusionCondition & {
+  __typename?: 'CollectionSourceInclusionConditionVariantTitle';
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** Determines how many values a metafield must match against in order to satisfy this condition. Will be either at least one given value, or all of the given values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the variant title and the condition values. */
+  relation: CollectionSourceInclusionConditionVariantTitleRelation;
+  /** The variant title values to match against. */
+  values: Array<Scalars['String']['output']>;
+};
+
+/** The input fields for a condition based on variant titles. */
+export type CollectionSourceInclusionConditionVariantTitleInput = {
+  /** Whether to match any or all of the values. */
+  matchType: CollectionConditionMatchType;
+  /** The relationship between the variant title and the condition values. */
+  relation: CollectionSourceInclusionConditionVariantTitleRelation;
+  /** The variant title values to match against. */
+  values: Array<Scalars['String']['input']>;
+};
+
+/** The relation for comparing variant titles. */
+export enum CollectionSourceInclusionConditionVariantTitleRelation {
+  /** The variant title contains the specified value. */
+  Contains = 'CONTAINS',
+  /** The variant title does not contain the specified value. */
+  DoesNotContain = 'DOES_NOT_CONTAIN',
+  /** The variant title ends with the specified value. */
+  EndsWith = 'ENDS_WITH',
+  /** The variant title equals the specified value. */
+  Equals = 'EQUALS',
+  /** The variant title does not equal the specified value. */
+  NotEquals = 'NOT_EQUALS',
+  /** The variant title starts with the specified value. */
+  StartsWith = 'STARTS_WITH'
+}
+
+/** A condition based on variant weights for including products in a collection. */
+export type CollectionSourceInclusionConditionVariantWeight = CollectionSourceInclusionCondition & {
+  __typename?: 'CollectionSourceInclusionConditionVariantWeight';
+  /** The unique identifier for this condition. */
+  id: Scalars['ID']['output'];
+  /** The relationship between the variant weight and the condition values. */
+  relation: CollectionSourceInclusionConditionVariantWeightRelation;
+  /** The variant weight to match against. */
+  value: Weight;
+};
+
+/** The input fields for a condition based on variant weights. */
+export type CollectionSourceInclusionConditionVariantWeightInput = {
+  /** The relationship between the variant weight and the condition value. */
+  relation: CollectionSourceInclusionConditionVariantWeightRelation;
+  /** The variant weight to match against. */
+  value: WeightInput;
+};
+
+/** The relation for comparing variant weights. */
+export enum CollectionSourceInclusionConditionVariantWeightRelation {
+  /** The variant weight equals the specified value. */
+  Equals = 'EQUALS',
+  /** The variant weight is greater than the specified value. */
+  GreaterThan = 'GREATER_THAN',
+  /** The variant weight is less than the specified value. */
+  LessThan = 'LESS_THAN',
+  /** The variant weight does not equal the specified value. */
+  NotEquals = 'NOT_EQUALS'
+}
+
+/** Conditions that target variants cause either the entire product to be included when satisfied or only the matching variants. */
+export enum CollectionSourceTargetType {
+  /** The entire product is included if any variant satisfies the conditions. */
+  Products = 'PRODUCTS',
+  /** Individual variants are included if they satisfy the conditions. */
+  Variants = 'VARIANTS'
+}
+
+/** Whether a collection can be referenced as a sub-collection target by another collection's source. Use this to surface ineligible targets up front (with reasons). */
+export type CollectionSubCollectionEligibility = {
+  __typename?: 'CollectionSubCollectionEligibility';
+  /** Eligibility for use as an exclusion target of a sub-collection source. */
+  exclusion: CollectionSubCollectionEligibilityState;
+  /** Eligibility for use as the inclusion target of a sub-collection source. */
+  inclusion: CollectionSubCollectionEligibilityState;
+};
+
+/** Whether a collection is eligible for one role (inclusion or exclusion) in a sub-collection relationship, plus the reason it isn't if applicable. */
+export type CollectionSubCollectionEligibilityState = {
+  __typename?: 'CollectionSubCollectionEligibilityState';
+  /** Whether the collection can be used in this sub-collection role. */
+  eligible: Scalars['Boolean']['output'];
+  /** Stable identifier describing why the collection is ineligible. Null when `eligible` is true. Clients can map this to user-facing copy or use it as a feature flag. */
+  ineligibleReason?: Maybe<SubCollectionIneligibleReason>;
+};
+
+/**
+ * A collection source whose membership comes from one or more referenced collections (sub-collections).
+ *
+ * Sub-collection sources are always non-shareable. Sharing a sub-collection source across owners is not
+ * supported because the collection references are owner-bound.
+ */
+export type CollectionSubCollectionsSource = CollectionSource & Node & {
+  __typename?: 'CollectionSubCollectionsSource';
+  /** The app that created this source, if applicable. In the case of shareable sources, this app manages this source's conditions and selections exclusively. */
+  app?: Maybe<App>;
+  /** The referenced sub-collections that supply products to this source. */
+  collections: Array<Collection>;
+  /** An optional description of the source. */
+  description?: Maybe<Scalars['String']['output']>;
+  /** The unique identifier for this source. */
+  id: Scalars['ID']['output'];
+  /** The title of the source. */
+  title: Scalars['String']['output'];
+};
 
 /** The input fields for specifying the collection to unpublish and the sales channels to remove it from. */
 export type CollectionUnpublishInput = {
@@ -7889,6 +12487,53 @@ export type CollectionUnpublishPayload = {
   userErrors: Array<UserError>;
 };
 
+/** The input fields for updating a shareable collection source. */
+export type CollectionUpdateConditionsSourceInput = {
+  /** An optional description of the source. */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** The exclusion rules for the source. */
+  exclusion?: InputMaybe<CollectionUpdateSourceExclusionInput>;
+  /** The ID of the source to update. */
+  id: Scalars['ID']['input'];
+  /** The inclusion rules for the source. */
+  inclusion?: InputMaybe<CollectionUpdateSourceInclusionInput>;
+  /** The title of the source. */
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** The input fields required to update a collection. */
+export type CollectionUpdateInput = {
+  /** The description of the collection, in HTML format. */
+  descriptionHtml?: InputMaybe<Scalars['String']['input']>;
+  /** A unique human-friendly string for the collection. Automatically generated from the collection's title. */
+  handle?: InputMaybe<Scalars['String']['input']>;
+  /** Specifies the collection to update. */
+  id?: InputMaybe<Scalars['ID']['input']>;
+  /** The image associated with the collection. */
+  image?: InputMaybe<ImageInput>;
+  /** The metafields to associate with the collection. */
+  metafields?: InputMaybe<Array<MetafieldInput>>;
+  /**
+   * Indicates whether a redirect is required after a new handle has been provided.
+   * If true, then the old handle is redirected to the new one automatically.
+   */
+  redirectNewHandle?: InputMaybe<Scalars['Boolean']['input']>;
+  /** SEO information for the collection. */
+  seo?: InputMaybe<SeoInput>;
+  /** The order in which the collection's products are sorted. */
+  sortOrder?: InputMaybe<CollectionSortOrder>;
+  /** The sources to create for the collection. */
+  sourcesToCreate?: InputMaybe<Array<CollectionCreateSourceTargetInput>>;
+  /** The IDs of the sources to delete from the collection. */
+  sourcesToDelete?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** The sources to update for the collection. */
+  sourcesToUpdate?: InputMaybe<Array<CollectionUpdateSourceTargetInput>>;
+  /** The theme template used when viewing the collection in a store. */
+  templateSuffix?: InputMaybe<Scalars['String']['input']>;
+  /** The title of the collection. */
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
 /** Return type for `collectionUpdate` mutation. */
 export type CollectionUpdatePayload = {
   __typename?: 'CollectionUpdatePayload';
@@ -7900,12 +12545,84 @@ export type CollectionUpdatePayload = {
   userErrors: Array<UserError>;
 };
 
+/** The input fields for updating an exclusion condition in a collection source. */
+export type CollectionUpdateSourceExclusionConditionInput = {
+  /** The updated exclusion condition. */
+  condition: CollectionSourceExclusionConditionUpdateInput;
+  /** The ID of the exclusion condition to update. */
+  id: Scalars['ID']['input'];
+};
+
+/** The input fields for updating exclusion rules for a collection source. */
+export type CollectionUpdateSourceExclusionInput = {
+  /** The exclusion conditions to create for the source. */
+  conditionsToCreate?: InputMaybe<Array<CollectionSourceExclusionConditionInput>>;
+  /** The IDs of the exclusion conditions to delete from the source. */
+  conditionsToDelete?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** The exclusion conditions to update for the source. */
+  conditionsToUpdate?: InputMaybe<Array<CollectionUpdateSourceExclusionConditionInput>>;
+  /** Whether products must match all or any of the conditions to be excluded. */
+  matchType?: InputMaybe<CollectionConditionMatchType>;
+  /** The product selections to add to the source. */
+  selectionsToAdd?: InputMaybe<Array<CollectionExclusionProductSelectionInput>>;
+  /** The product selections to remove from the source. */
+  selectionsToRemove?: InputMaybe<Array<CollectionExclusionProductSelectionInput>>;
+};
+
+/** The input fields for updating a condition in a collection source. */
+export type CollectionUpdateSourceInclusionConditionInput = {
+  /** The updated condition. */
+  condition: CollectionSourceInclusionConditionUpdateInput;
+  /** The ID of the condition to update. */
+  id: Scalars['ID']['input'];
+};
+
+/** The input fields for updating inclusion rules for a collection source. */
+export type CollectionUpdateSourceInclusionInput = {
+  /** The conditions to create for the source. */
+  conditionsToCreate?: InputMaybe<Array<CollectionSourceInclusionConditionInput>>;
+  /** The IDs of the conditions to delete from the source. */
+  conditionsToDelete?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** The conditions to update for the source. */
+  conditionsToUpdate?: InputMaybe<Array<CollectionUpdateSourceInclusionConditionInput>>;
+  /** Whether products must match all or any of the conditions. */
+  matchType?: InputMaybe<CollectionConditionMatchType>;
+  /** The product selections to add to the source. */
+  selectionsToAdd?: InputMaybe<Array<CollectionInclusionProductSelectionInput>>;
+  /** The product selections to remove from the source. For sources that target variants, omitting variant IDs will remove all for the product. */
+  selectionsToRemove?: InputMaybe<Array<CollectionInclusionProductSelectionInput>>;
+};
+
+/** The input fields for updating a collection source - provide the one field that represents the type of source to update. */
+export type CollectionUpdateSourceTargetInput = {
+  /** An update to a shareable conditions-based source. */
+  condition?: InputMaybe<CollectionUpdateConditionsSourceInput>;
+  /** An update to a sub-collection source whose membership comes from one or more referenced collections. */
+  subCollections?: InputMaybe<CollectionUpdateSubCollectionsSourceInput>;
+};
+
+/** The input fields for updating a sub-collection source — a source whose membership comes from one or more referenced collections. */
+export type CollectionUpdateSubCollectionsSourceInput = {
+  /** The global IDs of the sub-collections whose products supply this source. When provided, it replaces the source's current referenced collections. */
+  collectionIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** An optional description of the source. */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** The ID of the source to update. */
+  id: Scalars['ID']['input'];
+  /** The title of the source. */
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
 /** The data type of a column. */
 export enum ColumnDataType {
   /** Represents an array of values. */
   Array = 'ARRAY',
   /** Represents a boolean value. */
   Boolean = 'BOOLEAN',
+  /** Represents a hex color value. */
+  Color = 'COLOR',
+  /** Represents a cumulative value. */
+  Cumulative = 'CUMULATIVE',
   /** Represents a duration in days. */
   DayDuration = 'DAY_DURATION',
   /** Represents a day of week value. */
@@ -7914,8 +12631,12 @@ export enum ColumnDataType {
   DayTimestamp = 'DAY_TIMESTAMP',
   /** Represents a decimal value. */
   Decimal = 'DECIMAL',
+  /** Represents an entity reference value. */
+  Entity = 'ENTITY',
   /** Represents a floating point value. */
   Float = 'FLOAT',
+  /** Represents a geographic coordinate value. */
+  GeoCoordinate = 'GEO_COORDINATE',
   /** Represents a duration in hours. */
   HourDuration = 'HOUR_DURATION',
   /** Represents an hour of day value. */
@@ -7938,18 +12659,26 @@ export enum ColumnDataType {
   MonthOfYear = 'MONTH_OF_YEAR',
   /** Represents a month-level timestamp value. */
   MonthTimestamp = 'MONTH_TIMESTAMP',
+  /** Represents a multiplier value. */
+  Multiplier = 'MULTIPLIER',
   /** Represents a percentage value. */
   Percent = 'PERCENT',
   /** Represents a quarter-level timestamp value. */
   QuarterTimestamp = 'QUARTER_TIMESTAMP',
+  /** Represents a rating value. */
+  Rating = 'RATING',
   /** Represents a duration in seconds. */
   SecondDuration = 'SECOND_DURATION',
   /** Represents a second-level timestamp value. */
   SecondTimestamp = 'SECOND_TIMESTAMP',
   /** Represents a string value. */
   String = 'STRING',
+  /** Represents a string identity value. */
+  StringIdentity = 'STRING_IDENTITY',
   /** Represents a timestamp value in seconds. */
   Timestamp = 'TIMESTAMP',
+  /** Represents a unitless scalar value. */
+  UnitlessScalar = 'UNITLESS_SCALAR',
   /** Represents an unspecified data type. */
   Unspecified = 'UNSPECIFIED',
   /** Represents a week of year value. */
@@ -8887,10 +13616,7 @@ export type CompanyContactRole = Node & {
   __typename?: 'CompanyContactRole';
   /** A globally-unique ID. */
   id: Scalars['ID']['output'];
-  /**
-   * The name of a role.
-   * For example, `admin` or `buyer`.
-   */
+  /** The name of a role. For example, `admin` or `buyer`. */
   name: Scalars['String']['output'];
   /** A note for the role. */
   note?: Maybe<Scalars['String']['output']>;
@@ -9127,7 +13853,7 @@ export type CompanyLocation = CommentEventSubject & HasEvents & HasMetafieldDefi
   /** The preferred locale of the company location. */
   locale?: Maybe<Scalars['String']['output']>;
   /**
-   * The market that includes the location's shipping address. If the shipping address is empty, then the value is the shop's primary market.
+   * The market that applies to the location's shipping address country. In cases where multiple markets match, this returns the most-specific country region market. If the shipping address is empty, then the value is the shop's backup region market.
    * @deprecated This `market` field will be removed in a future version of the API.
    */
   market: Market;
@@ -9399,7 +14125,11 @@ export type CompanyLocationAssignTaxExemptionsPayload = {
   userErrors: Array<BusinessCustomerUserError>;
 };
 
-/** A list of products with publishing and pricing information associated with company locations. */
+/**
+ * A list of products with publishing and pricing information associated with company locations.
+ *
+ * Company location catalogs can include an optional publication to control product visibility and a price list to customize pricing. When a publication isn't associated with the catalog, product availability is determined by the sales channel.
+ */
 export type CompanyLocationCatalog = Catalog & Node & {
   __typename?: 'CompanyLocationCatalog';
   /** The company locations associated with the catalog. */
@@ -9421,7 +14151,11 @@ export type CompanyLocationCatalog = Catalog & Node & {
 };
 
 
-/** A list of products with publishing and pricing information associated with company locations. */
+/**
+ * A list of products with publishing and pricing information associated with company locations.
+ *
+ * Company location catalogs can include an optional publication to control product visibility and a price list to customize pricing. When a publication isn't associated with the catalog, product availability is determined by the sales channel.
+ */
 export type CompanyLocationCatalogCompanyLocationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -9720,6 +14454,33 @@ export type CompanyUpdatePayload = {
   company?: Maybe<Company>;
   /** The list of errors that occurred from executing the mutation. */
   userErrors: Array<BusinessCustomerUserError>;
+};
+
+/** An option on the bundle parent product that is consolidated from multiple different components. */
+export type ComponentizedProductsBundleConsolidatedOption = {
+  __typename?: 'ComponentizedProductsBundleConsolidatedOption';
+  /** The name of the consolidated option. */
+  name: Scalars['String']['output'];
+  /** The selections of the consolidated option. */
+  selections: Array<ComponentizedProductsBundleConsolidatedOptionSelection>;
+};
+
+/** An option selection for a bundle consolidated option. */
+export type ComponentizedProductsBundleConsolidatedOptionSelection = {
+  __typename?: 'ComponentizedProductsBundleConsolidatedOptionSelection';
+  /** The component values that are included in the consolidated option selection. */
+  components: Array<ComponentizedProductsBundleConsolidatedOptionSelectionComponent>;
+  /** The value of the consolidated option on the bundle parent. */
+  value: Scalars['String']['output'];
+};
+
+/** A component that's included in a bundle consolidated option selection. */
+export type ComponentizedProductsBundleConsolidatedOptionSelectionComponent = {
+  __typename?: 'ComponentizedProductsBundleConsolidatedOptionSelectionComponent';
+  /** The ID of the component's option that's included in this consolidated option selection. */
+  optionId: Scalars['ID']['output'];
+  /** The value of the component's option value that's included in this consolidated option selection. */
+  value: Scalars['String']['output'];
 };
 
 /**
@@ -10748,6 +15509,8 @@ export enum CurrencyCode {
   Xaf = 'XAF',
   /** East Caribbean Dollar (XCD). */
   Xcd = 'XCD',
+  /** Caribbean Guilder (XCG). */
+  Xcg = 'XCG',
   /** West African CFA franc (XOF). */
   Xof = 'XOF',
   /** CFP Franc (XPF). */
@@ -10848,8 +15611,8 @@ export type CustomShippingPackageInput = {
 export type Customer = CommentEventSubject & HasEvents & HasMetafieldDefinitions & HasMetafields & HasStoreCreditAccounts & LegacyInteroperability & Node & {
   __typename?: 'Customer';
   /**
-   * A list of addresses associated with the customer. Limited to 250 addresses. Use `addresses_v2` for paginated access to all addresses.
-   * @deprecated Limited to 250 addresses. Use `addresses_v2` for paginated access to all addresses.
+   * A list of addresses associated with the customer. Limited to 250 addresses. Use `addressesV2` for paginated access to all addresses.
+   * @deprecated Limited to 250 addresses. Use `addressesV2` for paginated access to all addresses.
    */
   addresses: Array<MailingAddress>;
   /** The addresses associated with the customer. */
@@ -10902,6 +15665,8 @@ export type Customer = CommentEventSubject & HasEvents & HasMetafieldDefinitions
   hasTimelineComment: Scalars['Boolean']['output'];
   /** A globally-unique ID. */
   id: Scalars['ID']['output'];
+  /** The identity provider subject identifiers associated with this customer. */
+  identityProviderSubjects: Array<IdentityProviderSubject>;
   /** The image associated with the customer. */
   image: Image;
   /** The customer's last name. */
@@ -10919,7 +15684,7 @@ export type Customer = CommentEventSubject & HasEvents & HasMetafieldDefinitions
   /** The customer's locale. */
   locale: Scalars['String']['output'];
   /**
-   * The market that includes the customer’s default address.
+   * The market that applies to the customer’s default address country. In cases where multiple markets match, this returns the most-specific country region market.
    * @deprecated This `market` field will be removed in a future version of the API.
    */
   market?: Maybe<Market>;
@@ -10986,6 +15751,8 @@ export type Customer = CommentEventSubject & HasEvents & HasMetafieldDefinitions
   taxExempt: Scalars['Boolean']['output'];
   /** The list of tax exemptions applied to the customer. */
   taxExemptions: Array<TaxExemption>;
+  /** The customer's tax settings. */
+  taxSettings: TaxSettings;
   /**
    * The URL to unsubscribe the customer from the mailing list.
    * @deprecated Use `defaultEmailAddress.marketingUnsubscribeUrl` instead.
@@ -11530,10 +16297,7 @@ export type CustomerEmailMarketingConsentInput = {
   consentUpdatedAt?: InputMaybe<Scalars['DateTime']['input']>;
   /** The customer opt-in level at the time of subscribing to marketing material. */
   marketingOptInLevel?: InputMaybe<CustomerMarketingOptInLevel>;
-  /**
-   * The current marketing state associated with the customer's email.
-   *           If the customer doesn't have an email, then this field is `null`.
-   */
+  /** The marketing state to set. Accepted values: SUBSCRIBED, UNSUBSCRIBED, and PENDING. NOT_SUBSCRIBED, REDACTED, and INVALID are rejected if sent as input. */
   marketingState: CustomerEmailMarketingState;
   /** Identifies the location where the customer consented to receiving marketing material by email. */
   sourceLocationId?: InputMaybe<Scalars['ID']['input']>;
@@ -11601,9 +16365,13 @@ export enum CustomerEmailMarketingConsentUpdateUserErrorCode {
 
 /** The possible email marketing states for a customer. */
 export enum CustomerEmailMarketingState {
-  /** The customer’s email address marketing state is invalid. */
+  /** This value is internally-set and read-only. */
   Invalid = 'INVALID',
-  /** The customer isn't subscribed to email marketing. */
+  /**
+   * Default state for customers who have never subscribed to email marketing.
+   * This value cannot be set via the mutation; use UNSUBSCRIBED instead to indicate
+   * a customer has opted out.
+   */
   NotSubscribed = 'NOT_SUBSCRIBED',
   /** The customer is in the process of subscribing to email marketing. */
   Pending = 'PENDING',
@@ -11638,8 +16406,6 @@ export type CustomerIdentifierInput = {
 
 /** The input fields and values to use when creating or updating a customer. */
 export type CustomerInput = {
-  /** The addresses for a customer. */
-  addresses?: InputMaybe<Array<MailingAddressInput>>;
   /** The unique email address of the customer. */
   email?: InputMaybe<Scalars['String']['input']>;
   /**
@@ -11682,6 +16448,12 @@ export type CustomerInput = {
   taxExempt?: InputMaybe<Scalars['Boolean']['input']>;
   /** The list of tax exemptions to apply to the customer. */
   taxExemptions?: InputMaybe<Array<TaxExemption>>;
+  /**
+   * The marketing consent information when the customer consented to receiving marketing
+   *         material by WhatsApp. The `phone` field is required when creating a customer with WhatsApp
+   *         marketing consent information.
+   */
+  whatsAppMarketingConsent?: InputMaybe<CustomerMarketingConsentInput>;
 };
 
 /** Tracks a customer's path to purchase through their online store visits. The journey captures key moments like shop sessions that led to the order, helping merchants understand customer behavior and marketing attribution within a 30-day window. Includes the first and last sessions before an [`Order`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Order), the time between initial visit and conversion, and the customer's order position in their purchase history. */
@@ -11735,6 +16507,76 @@ export type CustomerJourneySummaryMomentsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   reverse?: InputMaybe<Scalars['Boolean']['input']>;
 };
+
+/** The marketing consent information for a [customer](https://shopify.dev/docs/api/admin-graphql/latest/objects/Customer) on a specific marketing channel. Channel-specific types like [`CustomerWhatsAppMarketingConsent`](https://shopify.dev/docs/api/admin-graphql/latest/objects/CustomerWhatsAppMarketingConsent) implement this interface. */
+export type CustomerMarketingConsent = {
+  /** The [source](https://shopify.dev/docs/api/admin-graphql/latest/enums/CustomerConsentCollectedFrom) from which the marketing consent was collected. */
+  collectedFrom?: Maybe<CustomerConsentCollectedFrom>;
+  /** The [marketing subscription opt-in level](https://shopify.dev/docs/api/admin-graphql/latest/enums/CustomerMarketingOptInLevel) that was set when the customer's marketing consent was last updated. Follows M3AAWG best practices guidelines. */
+  optInLevel?: Maybe<CustomerMarketingOptInLevel>;
+  /** The [location](https://shopify.dev/docs/api/admin-graphql/latest/objects/Location) where the customer consented to receive marketing material. */
+  sourceLocation?: Maybe<Location>;
+  /** The customer's current [marketing consent state](https://shopify.dev/docs/api/admin-graphql/latest/enums/CustomerMarketingConsentState) for this channel. */
+  state: CustomerMarketingConsentState;
+  /**
+   * The date and time when the marketing consent was updated.
+   *
+   * No date is provided if the customer has never updated their marketing consent for this channel.
+   */
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** An error from a customer marketing consent mutation, such as [`customerWhatsAppMarketingConsentUpdate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/customerWhatsAppMarketingConsentUpdate). */
+export type CustomerMarketingConsentError = DisplayableError & {
+  __typename?: 'CustomerMarketingConsentError';
+  /** The error code. */
+  code?: Maybe<CustomerMarketingConsentErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `CustomerMarketingConsentError`. */
+export enum CustomerMarketingConsentErrorCode {
+  /** The input value isn't included in the list. */
+  Inclusion = 'INCLUSION',
+  /** Unexpected internal error happened. */
+  InternalError = 'INTERNAL_ERROR',
+  /** The input value is invalid. */
+  Invalid = 'INVALID',
+  /** Missing a required argument. */
+  MissingArgument = 'MISSING_ARGUMENT'
+}
+
+/** The input fields for marketing consent information when a [customer](https://shopify.dev/docs/api/admin-graphql/latest/objects/Customer) consents to receive marketing material on a specific channel. Channel-specific consent mutations like [`customerWhatsAppMarketingConsentUpdate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/customerWhatsAppMarketingConsentUpdate) use this input. */
+export type CustomerMarketingConsentInput = {
+  /** The [marketing subscription opt-in level](https://shopify.dev/docs/api/admin-graphql/latest/enums/CustomerMarketingOptInLevel) that was set when the customer consented to receive marketing information. */
+  optInLevel?: InputMaybe<CustomerMarketingOptInLevel>;
+  /** Identifies the [location](https://shopify.dev/docs/api/admin-graphql/latest/objects/Location) where the customer consented to receiving marketing material. */
+  sourceLocationId?: InputMaybe<Scalars['ID']['input']>;
+  /** The [marketing consent state](https://shopify.dev/docs/api/admin-graphql/latest/enums/CustomerMarketingConsentState) to set for the customer on this channel. */
+  state: CustomerMarketingConsentState;
+  /**
+   * The date and time when the customer consented to receive marketing material.
+   * If no date is provided, then the date and time when the consent information was sent is used.
+   */
+  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+/** The valid marketing consent states for a customer on a specific marketing channel. The [`CustomerMarketingConsent`](https://shopify.dev/docs/api/admin-graphql/latest/interfaces/CustomerMarketingConsent) interface and channel-specific consent mutations use these values. */
+export enum CustomerMarketingConsentState {
+  /** The customer has never subscribed to marketing on this channel. This is the default state for any channel the customer hasn't interacted with. Read-only: can't be set as an input. */
+  NeverSubscribed = 'NEVER_SUBSCRIBED',
+  /** The customer is in the process of subscribing to marketing on this channel, for example, pending an opt-in confirmation. */
+  Pending = 'PENDING',
+  /** The customer's personal data is erased. This value is internally-set and read-only. */
+  Redacted = 'REDACTED',
+  /** The customer is subscribed to marketing on this channel. */
+  Subscribed = 'SUBSCRIBED',
+  /** The customer isn't currently subscribed to marketing on this channel but was previously subscribed. */
+  Unsubscribed = 'UNSUBSCRIBED'
+}
 
 /**
  * The possible values for the marketing subscription opt-in level enabled at the time the customer consented to receive marketing information.
@@ -11808,11 +16650,17 @@ export enum CustomerMergeErrorFieldType {
   Subscriptions = 'SUBSCRIPTIONS'
 }
 
-/** The input fields to override default customer merge rules. */
+/**
+ * The input fields to override default customer merge rules. These overrides are field-specific; they don't
+ * provide a general way to force a particular customer ID to survive the merge.
+ */
 export type CustomerMergeOverrideFields = {
   /** The ID of the customer whose default address will be kept. */
   customerIdOfDefaultAddressToKeep?: InputMaybe<Scalars['ID']['input']>;
-  /** The ID of the customer whose email will be kept. */
+  /**
+   * The ID of the customer whose email will be kept. The selected customer must have an email address. When
+   * this field is provided and valid, the selected customer is also the resulting customer after the merge.
+   */
   customerIdOfEmailToKeep?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the customer whose first name will be kept. */
   customerIdOfFirstNameToKeep?: InputMaybe<Scalars['ID']['input']>;
@@ -11831,13 +16679,16 @@ export type CustomerMergePayload = {
   __typename?: 'CustomerMergePayload';
   /** The asynchronous job for merging the customers. */
   job?: Maybe<Job>;
-  /** The ID of the customer resulting from the merge. */
+  /** The ID of the customer that's kept after the merge. Treat this ID as authoritative. */
   resultingCustomerId?: Maybe<Scalars['ID']['output']>;
   /** The list of errors that occurred from executing the mutation. */
   userErrors: Array<CustomerMergeUserError>;
 };
 
-/** A preview of the results of a customer merge request. */
+/**
+ * A preview of the results of a customer merge request. Use `resultingCustomerId` to check which customer
+ * would be kept before running `customerMerge`.
+ */
 export type CustomerMergePreview = {
   __typename?: 'CustomerMergePreview';
   /** The fields that can be used to override the default fields. */
@@ -11848,7 +16699,7 @@ export type CustomerMergePreview = {
   customerMergeErrors?: Maybe<Array<CustomerMergeError>>;
   /** The fields that will be kept if the two customers are merged. */
   defaultFields?: Maybe<CustomerMergePreviewDefaultFields>;
-  /** The resulting customer ID if the two customers are merged. */
+  /** The ID of the customer that would be kept if the two customers were merged. */
   resultingCustomerId?: Maybe<Scalars['ID']['output']>;
 };
 
@@ -11978,7 +16829,7 @@ export type CustomerMergeRequest = {
   customerMergeErrors: Array<CustomerMergeError>;
   /** The UUID of the merge job. */
   jobId?: Maybe<Scalars['ID']['output']>;
-  /** The ID of the customer resulting from the merge. */
+  /** The ID of the customer that was kept after the merge. Treat this ID as authoritative. */
   resultingCustomerId: Scalars['ID']['output'];
   /** The status of the customer merge request. */
   status: CustomerMergeRequestStatus;
@@ -12047,7 +16898,7 @@ export type CustomerMomentEdge = {
 };
 
 /** All possible instruments for CustomerPaymentMethods. */
-export type CustomerPaymentInstrument = CustomerCreditCard | CustomerPaypalBillingAgreement | CustomerShopPayAgreement;
+export type CustomerPaymentInstrument = BankAccount | CustomerCreditCard | CustomerPaypalBillingAgreement | CustomerShopPayAgreement;
 
 /** The billing address of a payment instrument. */
 export type CustomerPaymentInstrumentBillingAddress = {
@@ -12430,25 +17281,38 @@ export type CustomerPaypalBillingAgreement = {
 /** A phone number. */
 export type CustomerPhoneNumber = {
   __typename?: 'CustomerPhoneNumber';
-  /** The source from which the SMS marketing information for the customer was collected. */
+  /**
+   * The source from which the SMS marketing information for the customer was collected.
+   * @deprecated Use `smsMarketingConsent.collectedFrom` instead.
+   */
   marketingCollectedFrom?: Maybe<CustomerConsentCollectedFrom>;
   /**
    * The marketing subscription opt-in level, as described by the M3AAWG best practices guidelines,
    * received when the marketing consent was updated.
+   * @deprecated Use `smsMarketingConsent.optInLevel` instead.
    */
   marketingOptInLevel?: Maybe<CustomerMarketingOptInLevel>;
-  /** Whether the customer has subscribed to SMS marketing material. */
+  /**
+   * Whether the customer has subscribed to SMS marketing material.
+   * @deprecated Use `smsMarketingConsent.state` instead.
+   */
   marketingState: CustomerSmsMarketingState;
   /**
    * The date and time at which the marketing consent was updated.
    *
    * No date is provided if the email address never updated its marketing consent.
+   * @deprecated Use `smsMarketingConsent.updatedAt` instead.
    */
   marketingUpdatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** A customer's phone number. */
   phoneNumber: Scalars['String']['output'];
-  /** The location where the customer consented to receive marketing material by SMS. */
+  /**
+   * The location where the customer consented to receive marketing material by SMS.
+   * @deprecated Use `smsMarketingConsent.sourceLocation` instead.
+   */
   sourceLocation?: Maybe<Location>;
+  /** The [WhatsApp marketing consent](https://shopify.dev/docs/api/admin-graphql/latest/objects/CustomerWhatsAppMarketingConsent) information for the customer's phone number. Update with the [`customerWhatsAppMarketingConsentUpdate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/customerWhatsAppMarketingConsentUpdate) mutation. */
+  whatsAppMarketingConsent: CustomerWhatsAppMarketingConsent;
 };
 
 /** The valid tiers for the predicted spend of a customer with a shop. */
@@ -13067,6 +17931,42 @@ export type CustomerVisitProductInfoEdge = {
   node: CustomerVisitProductInfo;
 };
 
+/** The WhatsApp marketing consent information for a [customer's phone number](https://shopify.dev/docs/api/admin-graphql/latest/objects/CustomerPhoneNumber). Implements the [`CustomerMarketingConsent`](https://shopify.dev/docs/api/admin-graphql/latest/interfaces/CustomerMarketingConsent) interface. Use the [`customerWhatsAppMarketingConsentUpdate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/customerWhatsAppMarketingConsentUpdate) mutation to update it. */
+export type CustomerWhatsAppMarketingConsent = CustomerMarketingConsent & {
+  __typename?: 'CustomerWhatsAppMarketingConsent';
+  /** The [source](https://shopify.dev/docs/api/admin-graphql/latest/enums/CustomerConsentCollectedFrom) from which the marketing consent was collected. */
+  collectedFrom?: Maybe<CustomerConsentCollectedFrom>;
+  /** The [marketing subscription opt-in level](https://shopify.dev/docs/api/admin-graphql/latest/enums/CustomerMarketingOptInLevel) that was set when the customer's marketing consent was last updated. Follows M3AAWG best practices guidelines. */
+  optInLevel?: Maybe<CustomerMarketingOptInLevel>;
+  /** The [location](https://shopify.dev/docs/api/admin-graphql/latest/objects/Location) where the customer consented to receive marketing material. */
+  sourceLocation?: Maybe<Location>;
+  /** The customer's current [marketing consent state](https://shopify.dev/docs/api/admin-graphql/latest/enums/CustomerMarketingConsentState) for this channel. */
+  state: CustomerMarketingConsentState;
+  /**
+   * The date and time when the marketing consent was updated.
+   *
+   * No date is provided if the customer has never updated their marketing consent for this channel.
+   */
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** The input fields to update a customer's WhatsApp marketing consent information. */
+export type CustomerWhatsAppMarketingConsentUpdateInput = {
+  /** The ID of the [customer](https://shopify.dev/docs/api/admin-graphql/latest/objects/Customer) to update the WhatsApp marketing consent information for. The customer must have a unique phone number associated with their record. If not, then add the phone number using the [`customerUpdate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/customerUpdate) mutation first. */
+  customerId: Scalars['ID']['input'];
+  /** The marketing consent information when the customer consented to receiving marketing material by WhatsApp. */
+  whatsAppMarketingConsent: CustomerMarketingConsentInput;
+};
+
+/** Return type for `customerWhatsAppMarketingConsentUpdate` mutation. */
+export type CustomerWhatsAppMarketingConsentUpdatePayload = {
+  __typename?: 'CustomerWhatsAppMarketingConsentUpdatePayload';
+  /** The [customer phone number](https://shopify.dev/docs/api/admin-graphql/latest/objects/CustomerPhoneNumber) with the updated WhatsApp marketing consent information. */
+  customerPhoneNumber?: Maybe<CustomerPhoneNumber>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<CustomerMarketingConsentError>;
+};
+
 /** A shop's data sale opt out page. */
 export type DataSaleOptOutPage = {
   __typename?: 'DataSaleOptOutPage';
@@ -13132,6 +18032,8 @@ export type DelegateAccessToken = {
   accessToken: Scalars['String']['output'];
   /** The date and time when the delegate access token was created. */
   createdAt: Scalars['DateTime']['output'];
+  /** The number of seconds until the delegate access token expires. */
+  expiresIn?: Maybe<Scalars['Int']['output']>;
 };
 
 /** Return type for `delegateAccessTokenCreate` mutation. */
@@ -13281,6 +18183,236 @@ export type DeliveryBrandedPromise = {
   handle: Scalars['String']['output'];
   /** The name of the branded promise.  For example: `Shop Promise`. */
   name: Scalars['String']['output'];
+};
+
+/**
+ * A shipping option with rates calculated by a carrier service.
+ *
+ * Carrier-calculated options fetch real-time rates from carriers(e.g., UPS, FedEx) at checkout
+ * instead of using merchant-defined fixed prices.
+ */
+export type DeliveryCarrierCalculatedOptionDefinition = DeliveryOptionDefinition & {
+  __typename?: 'DeliveryCarrierCalculatedOptionDefinition';
+  /** The currency used for all money values in this shipping option. */
+  currency: CurrencyCode;
+  /** Optional description shown to buyers. */
+  description?: Maybe<Scalars['String']['output']>;
+  /** The cart subtotal required for free shipping. Null if no threshold is set. */
+  freeDeliveryMinimumValue?: Maybe<MoneyV2>;
+  /** A globally unique ID for this shipping option. */
+  id: Scalars['ID']['output'];
+  /** Collections that any rate group in this shipping option applies to. */
+  includedCollections?: Maybe<CollectionConnection>;
+  /** Origin locations that any rate group in this shipping option applies to. */
+  includedLocations?: Maybe<LocationConnection>;
+  /** Whether this shipping option is active and shown to buyers. */
+  isActive: Scalars['Boolean']['output'];
+  /** The rate groups for this carrier-calculated shipping option. */
+  rateGroups?: Maybe<DeliveryCarrierCalculatedRateGroupConnection>;
+};
+
+
+/**
+ * A shipping option with rates calculated by a carrier service.
+ *
+ * Carrier-calculated options fetch real-time rates from carriers(e.g., UPS, FedEx) at checkout
+ * instead of using merchant-defined fixed prices.
+ */
+export type DeliveryCarrierCalculatedOptionDefinitionIncludedCollectionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * A shipping option with rates calculated by a carrier service.
+ *
+ * Carrier-calculated options fetch real-time rates from carriers(e.g., UPS, FedEx) at checkout
+ * instead of using merchant-defined fixed prices.
+ */
+export type DeliveryCarrierCalculatedOptionDefinitionIncludedLocationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * A shipping option with rates calculated by a carrier service.
+ *
+ * Carrier-calculated options fetch real-time rates from carriers(e.g., UPS, FedEx) at checkout
+ * instead of using merchant-defined fixed prices.
+ */
+export type DeliveryCarrierCalculatedOptionDefinitionRateGroupsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** The input fields for creating a carrier-calculated shipping option. */
+export type DeliveryCarrierCalculatedOptionDefinitionCreateInput = {
+  /** The currency used for all money values in this shipping option. */
+  currency: CurrencyCode;
+  /** Optional description shown to buyers. */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** The cart subtotal required for free shipping. Currency must match the shipping option's currency. */
+  freeDeliveryMinimumValue?: InputMaybe<MoneyInput>;
+  /** Whether this shipping option is active and shown to buyers. Defaults to true. */
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The rate groups to create for this shipping option. At this time, only a single rate group is supported for carrier calculated shipping options. */
+  rateGroups: Array<DeliveryCarrierCalculatedRateGroupCreateInput>;
+};
+
+/** The input fields for updating a carrier-calculated shipping option. */
+export type DeliveryCarrierCalculatedOptionDefinitionUpdateInput = {
+  /** The currency used for all money values in this shipping option. */
+  currency?: InputMaybe<CurrencyCode>;
+  /** Description shown to buyers. */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** The cart subtotal required for free shipping. Null clears the existing threshold. Currency must match the shipping option's currency. */
+  freeDeliveryMinimumValue?: InputMaybe<MoneyInput>;
+  /** The ID of the carrier-calculated shipping option to update. */
+  id: Scalars['ID']['input'];
+  /** Whether this shipping option is active and shown to buyers. */
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Rate groups to create for this shipping option. At this time, only a single rate group is supported for carrier calculated shipping options. */
+  rateGroupsToCreate?: InputMaybe<Array<DeliveryCarrierCalculatedRateGroupCreateInput>>;
+  /** The IDs of rate groups to delete from this shipping option. */
+  rateGroupsToDelete?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** Rate groups to update for this shipping option. Only the existing single rate group is supported. */
+  rateGroupsToUpdate?: InputMaybe<Array<DeliveryCarrierCalculatedRateGroupUpdateInput>>;
+};
+
+/**
+ * A rate group for a carrier-calculated shipping option.
+ *
+ * Sets the carrier service, rate adjustments,
+ * and carrier-provided services offered at checkout.
+ */
+export type DeliveryCarrierCalculatedRateGroup = DeliveryOptionDefinitionRateGroup & {
+  __typename?: 'DeliveryCarrierCalculatedRateGroup';
+  /** The flat amount added to or subtracted from carrier rates. */
+  absoluteAdjustment?: Maybe<MoneyV2>;
+  /**
+   * Whether new services from this carrier are automatically included at checkout.
+   * When true, buyers see any service that isn't excluded.
+   * When false, buyers see only included services.
+   */
+  autoIncludeNewServices: Scalars['Boolean']['output'];
+  /** The carrier service that provides rates for this rate group. */
+  carrierService: DeliveryCarrierService;
+  /** Conditions that limit this rate group to specific collections or origin locations. */
+  conditions: DeliveryRateGroupConditions;
+  /** A globally unique ID. */
+  id: Scalars['ID']['output'];
+  /**
+   * The percentage added to or subtracted from carrier rates.
+   * Applied after `absoluteAdjustment`. A value of 10 means +10%.
+   */
+  percentageAdjustment?: Maybe<Scalars['Int']['output']>;
+  /** Carrier-provided services included or excluded for this rate group. */
+  serviceConfiguration: Array<DeliveryCarrierCalculatedRateGroupService>;
+};
+
+/** An auto-generated type for paginating through multiple DeliveryCarrierCalculatedRateGroups. */
+export type DeliveryCarrierCalculatedRateGroupConnection = {
+  __typename?: 'DeliveryCarrierCalculatedRateGroupConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<DeliveryCarrierCalculatedRateGroupEdge>;
+  /** A list of nodes that are contained in DeliveryCarrierCalculatedRateGroupEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<DeliveryCarrierCalculatedRateGroup>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** The input fields for creating a rate group for a carrier-calculated shipping option. */
+export type DeliveryCarrierCalculatedRateGroupCreateInput = {
+  /** The flat amount added to or subtracted from carrier rates. */
+  absoluteAdjustment?: InputMaybe<MoneyInput>;
+  /**
+   * Whether new services from this carrier are automatically included at checkout.
+   * When omitted, defaults to true. Set to false to offer only explicitly
+   * included services for carriers that support service discovery.
+   */
+  autoIncludeNewServices?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The ID of the carrier service to use for this rate group. */
+  carrierServiceId: Scalars['ID']['input'];
+  /** Collection and origin location conditions for this rate group. */
+  conditions?: InputMaybe<DeliveryRateConditionsCreateInput>;
+  /** The percentage added to or subtracted from carrier rates. */
+  percentageAdjustment?: InputMaybe<Scalars['Int']['input']>;
+  /**
+   * Carrier-provided services to include or exclude.
+   * Services not listed follow the default behavior based on `autoIncludeNewServices`.
+   */
+  serviceConfiguration?: InputMaybe<Array<DeliveryCarrierCalculatedRateGroupServiceInput>>;
+};
+
+/** An auto-generated type which holds one DeliveryCarrierCalculatedRateGroup and a cursor during pagination. */
+export type DeliveryCarrierCalculatedRateGroupEdge = {
+  __typename?: 'DeliveryCarrierCalculatedRateGroupEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of DeliveryCarrierCalculatedRateGroupEdge. */
+  node: DeliveryCarrierCalculatedRateGroup;
+};
+
+/**
+ * A carrier-provided service within a carrier-calculated rate group.
+ *
+ * Represents an individual service that the merchant has explicitly included or excluded.
+ */
+export type DeliveryCarrierCalculatedRateGroupService = {
+  __typename?: 'DeliveryCarrierCalculatedRateGroupService';
+  /** The name of the carrier-provided service. */
+  name: Scalars['String']['output'];
+  /** Whether this service is included or excluded at checkout. */
+  status: DeliveryCarrierCalculatedRateGroupServiceStatus;
+};
+
+/** The input fields for including or excluding a carrier-provided service in a rate group. */
+export type DeliveryCarrierCalculatedRateGroupServiceInput = {
+  /** The name of the carrier-provided service. */
+  name: Scalars['String']['input'];
+  /** Whether this service is included or excluded at checkout. */
+  status: DeliveryCarrierCalculatedRateGroupServiceStatus;
+};
+
+/** Whether a carrier-provided service is included at checkout. */
+export enum DeliveryCarrierCalculatedRateGroupServiceStatus {
+  /** The service is excluded at checkout. */
+  Excluded = 'EXCLUDED',
+  /** The service is included at checkout. */
+  Included = 'INCLUDED'
+}
+
+/** The input fields for updating a rate group for a carrier-calculated shipping option. */
+export type DeliveryCarrierCalculatedRateGroupUpdateInput = {
+  /** The flat amount added to or subtracted from carrier rates. */
+  absoluteAdjustment?: InputMaybe<MoneyInput>;
+  /**
+   * Whether new services from this carrier are automatically included at checkout.
+   * When true, buyers see any service that isn't excluded.
+   * When false, buyers see only included services.
+   */
+  autoIncludeNewServices?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The ID of the carrier service that provides rates for this shipping option. */
+  carrierServiceId?: InputMaybe<Scalars['ID']['input']>;
+  /** Collection and origin location conditions for this rate group. */
+  conditions?: InputMaybe<DeliveryRateConditionsUpdateInput>;
+  /** The ID of the rate group to update */
+  id: Scalars['ID']['input'];
+  /** The percentage added to or subtracted from carrier rates. */
+  percentageAdjustment?: InputMaybe<Scalars['Int']['input']>;
+  /** Carrier-provided services to include or exclude. Replaces the existing configuration. */
+  serviceConfiguration?: InputMaybe<Array<DeliveryCarrierCalculatedRateGroupServiceInput>>;
 };
 
 /**
@@ -13974,6 +19106,8 @@ export enum DeliveryCustomizationErrorCode {
   InvalidMetafields = 'INVALID_METAFIELDS',
   /** Maximum delivery customizations are already enabled. */
   MaximumActiveDeliveryCustomizations = 'MAXIMUM_ACTIVE_DELIVERY_CUSTOMIZATIONS',
+  /** The maximum number of delivery customizations per shop has been reached. */
+  MaximumDeliveryCustomizations = 'MAXIMUM_DELIVERY_CUSTOMIZATIONS',
   /** Either function_id or function_handle must be provided. */
   MissingFunctionIdentifier = 'MISSING_FUNCTION_IDENTIFIER',
   /** Only one of function_id or function_handle can be provided, not both. */
@@ -14005,25 +19139,203 @@ export type DeliveryCustomizationUpdatePayload = {
   userErrors: Array<DeliveryCustomizationError>;
 };
 
-/** Whether the shop is blocked from converting to full multi-location delivery profiles mode. If the shop is blocked, then the blocking reasons are also returned. */
-export type DeliveryLegacyModeBlocked = {
-  __typename?: 'DeliveryLegacyModeBlocked';
-  /** Whether the shop can convert to full multi-location delivery profiles mode. */
-  blocked: Scalars['Boolean']['output'];
-  /** The reasons why the shop is blocked from converting to full multi-location delivery profiles mode. */
-  reasons?: Maybe<Array<DeliveryLegacyModeBlockedReason>>;
+/**
+ * A fixed-price shipping rate.
+ *
+ * Flat rates charge the same price regardless of cart value or weight,
+ * and may include optional transit time estimates.
+ */
+export type DeliveryFlatRate = DeliveryRate & {
+  __typename?: 'DeliveryFlatRate';
+  /** A globally unique ID. */
+  id: Scalars['ID']['output'];
+  /** The fixed price charged for this rate. */
+  price: MoneyV2;
+  /** The maximum transit time estimate in seconds. */
+  transitTimeMaxSeconds?: Maybe<Scalars['Int']['output']>;
+  /** The minimum transit time estimate in seconds. */
+  transitTimeMinSeconds?: Maybe<Scalars['Int']['output']>;
 };
 
-/** Reasons the shop is blocked from converting to full multi-location delivery profiles mode. */
-export enum DeliveryLegacyModeBlockedReason {
-  /**
-   * Multi-Location mode is disabled. The shop can't convert to full multi-location delivery profiles mode.
-   * @deprecated All shops are now using multi-location mode.
-   */
-  MultiLocationDisabled = 'MULTI_LOCATION_DISABLED',
-  /** There are no locations for this store that can fulfill online orders. */
-  NoLocationsFulfillingOnlineOrders = 'NO_LOCATIONS_FULFILLING_ONLINE_ORDERS'
-}
+/** The input fields for creating a flat rate. */
+export type DeliveryFlatRateCreateInput = {
+  /** The fixed price charged for this rate. */
+  price: MoneyInput;
+  /** The maximum estimated transit time in seconds. */
+  transitTimeMaxSeconds?: InputMaybe<Scalars['Int']['input']>;
+  /** The minimum estimated transit time in seconds. */
+  transitTimeMinSeconds?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/**
+ * A flat rate group for a shipping option.
+ *
+ * Contains one fixed-price rate and optional collection or origin location conditions.
+ */
+export type DeliveryFlatRateGroup = DeliveryOptionDefinitionRateGroup & {
+  __typename?: 'DeliveryFlatRateGroup';
+  /** Conditions that limit this rate group to specific collections or origin locations. */
+  conditions: DeliveryRateGroupConditions;
+  /** A globally unique ID. */
+  id: Scalars['ID']['output'];
+  /** The fixed-price rate and optional transit time. */
+  rate: DeliveryFlatRate;
+};
+
+/** An auto-generated type for paginating through multiple DeliveryFlatRateGroups. */
+export type DeliveryFlatRateGroupConnection = {
+  __typename?: 'DeliveryFlatRateGroupConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<DeliveryFlatRateGroupEdge>;
+  /** A list of nodes that are contained in DeliveryFlatRateGroupEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<DeliveryFlatRateGroup>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** The input fields for creating a flat rate group. */
+export type DeliveryFlatRateGroupCreateInput = {
+  /** Collection and origin location conditions for this rate group. */
+  conditions?: InputMaybe<DeliveryRateConditionsCreateInput>;
+  /** The fixed-price rate and optional transit time. */
+  rate: DeliveryFlatRateCreateInput;
+};
+
+/** An auto-generated type which holds one DeliveryFlatRateGroup and a cursor during pagination. */
+export type DeliveryFlatRateGroupEdge = {
+  __typename?: 'DeliveryFlatRateGroupEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of DeliveryFlatRateGroupEdge. */
+  node: DeliveryFlatRateGroup;
+};
+
+/** The input fields for updating a flat rate group. */
+export type DeliveryFlatRateGroupUpdateInput = {
+  /** Collection and origin location conditions for this rate group. */
+  conditions?: InputMaybe<DeliveryRateConditionsUpdateInput>;
+  /** The globally unique ID of the flat rate group to update. */
+  id: Scalars['ID']['input'];
+  /** Updates to the fixed-price rate and optional transit time. */
+  rate?: InputMaybe<DeliveryFlatRateUpdateInput>;
+};
+
+/**
+ * A shipping option with fixed-price rates.
+ *
+ * Flat rate options charge the same price regardless of cart value or weight.
+ */
+export type DeliveryFlatRateOptionDefinition = DeliveryOptionDefinition & {
+  __typename?: 'DeliveryFlatRateOptionDefinition';
+  /** The currency used for all money values in this shipping option. */
+  currency: CurrencyCode;
+  /** Optional description shown to buyers. */
+  description?: Maybe<Scalars['String']['output']>;
+  /** The cart subtotal required for free shipping. Null if no threshold is set. */
+  freeDeliveryMinimumValue?: Maybe<MoneyV2>;
+  /** A globally unique ID for this shipping option. */
+  id: Scalars['ID']['output'];
+  /** Collections that any rate group in this shipping option applies to. */
+  includedCollections?: Maybe<CollectionConnection>;
+  /** Origin locations that any rate group in this shipping option applies to. */
+  includedLocations?: Maybe<LocationConnection>;
+  /** Whether this shipping option is active and shown to buyers. */
+  isActive: Scalars['Boolean']['output'];
+  /** The name shown to buyers for this shipping option. */
+  name: Scalars['String']['output'];
+  /** The flat rate groups for this shipping option. */
+  rateGroups?: Maybe<DeliveryFlatRateGroupConnection>;
+};
+
+
+/**
+ * A shipping option with fixed-price rates.
+ *
+ * Flat rate options charge the same price regardless of cart value or weight.
+ */
+export type DeliveryFlatRateOptionDefinitionIncludedCollectionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * A shipping option with fixed-price rates.
+ *
+ * Flat rate options charge the same price regardless of cart value or weight.
+ */
+export type DeliveryFlatRateOptionDefinitionIncludedLocationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * A shipping option with fixed-price rates.
+ *
+ * Flat rate options charge the same price regardless of cart value or weight.
+ */
+export type DeliveryFlatRateOptionDefinitionRateGroupsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** The input fields for creating a flat rate shipping option. */
+export type DeliveryFlatRateOptionDefinitionCreateInput = {
+  /** The currency used for all money values in this shipping option. */
+  currency: CurrencyCode;
+  /** Optional description shown to buyers. */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** The cart subtotal required for free shipping. Currency must match the shipping option's currency. */
+  freeDeliveryMinimumValue?: InputMaybe<MoneyInput>;
+  /** Whether this shipping option is active and shown to buyers. Defaults to true. */
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The name shown to buyers for this shipping option. */
+  name: Scalars['String']['input'];
+  /** The flat rate groups for this shipping option. */
+  rateGroups?: InputMaybe<Array<DeliveryFlatRateGroupCreateInput>>;
+};
+
+/** The input fields for updating a flat rate shipping option. */
+export type DeliveryFlatRateOptionDefinitionUpdateInput = {
+  /** The currency used for all money values in this shipping option. */
+  currency?: InputMaybe<CurrencyCode>;
+  /** Optional description shown to buyers. */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** The cart subtotal required for free shipping. Null clears the threshold. Currency must match the shipping option's currency. */
+  freeDeliveryMinimumValue?: InputMaybe<MoneyInput>;
+  /** The globally unique ID of the flat rate shipping option to update. */
+  id: Scalars['ID']['input'];
+  /** Whether this shipping option is active and shown to buyers. */
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The name shown to buyers for this shipping option. */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** Rate groups to create for this shipping option. */
+  rateGroupsToCreate?: InputMaybe<Array<DeliveryFlatRateGroupCreateInput>>;
+  /** The IDs of rate groups to delete from this shipping option. */
+  rateGroupsToDelete?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** Rate groups to update for this shipping option. */
+  rateGroupsToUpdate?: InputMaybe<Array<DeliveryFlatRateGroupUpdateInput>>;
+};
+
+/** The input fields for updating a flat rate. */
+export type DeliveryFlatRateUpdateInput = {
+  /** The fixed price charged for this rate. */
+  price?: InputMaybe<MoneyInput>;
+  /** The maximum estimated transit time in seconds. */
+  transitTimeMaxSeconds?: InputMaybe<Scalars['Int']['input']>;
+  /** The minimum estimated transit time in seconds. */
+  transitTimeMinSeconds?: InputMaybe<Scalars['Int']['input']>;
+};
 
 /** Local pickup settings associated with a location. */
 export type DeliveryLocalPickupSettings = {
@@ -14306,6 +19618,96 @@ export enum DeliveryMethodType {
   Shipping = 'SHIPPING'
 }
 
+/** A shipping option shown to buyers at checkout. Implemented by concrete option types. */
+export type DeliveryOptionDefinition = {
+  /** The currency used for all money values in this shipping option. */
+  currency: CurrencyCode;
+  /** Optional description shown to buyers. */
+  description?: Maybe<Scalars['String']['output']>;
+  /** The cart subtotal required for free shipping. Null if no threshold is set. */
+  freeDeliveryMinimumValue?: Maybe<MoneyV2>;
+  /** A globally unique ID for this shipping option. */
+  id: Scalars['ID']['output'];
+  /** Collections that any rate group in this shipping option applies to. */
+  includedCollections?: Maybe<CollectionConnection>;
+  /** Origin locations that any rate group in this shipping option applies to. */
+  includedLocations?: Maybe<LocationConnection>;
+  /** Whether this shipping option is active and shown to buyers. */
+  isActive: Scalars['Boolean']['output'];
+};
+
+
+/** A shipping option shown to buyers at checkout. Implemented by concrete option types. */
+export type DeliveryOptionDefinitionIncludedCollectionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/** A shipping option shown to buyers at checkout. Implemented by concrete option types. */
+export type DeliveryOptionDefinitionIncludedLocationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** An auto-generated type for paginating through multiple DeliveryOptionDefinitions. */
+export type DeliveryOptionDefinitionConnection = {
+  __typename?: 'DeliveryOptionDefinitionConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<DeliveryOptionDefinitionEdge>;
+  /** A list of nodes that are contained in DeliveryOptionDefinitionEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<DeliveryOptionDefinition>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** The input fields for creating a shipping option. Provide exactly one option type. */
+export type DeliveryOptionDefinitionCreateInput = {
+  /** A carrier-calculated shipping option. */
+  carrierCalculated?: InputMaybe<DeliveryCarrierCalculatedOptionDefinitionCreateInput>;
+  /** A flat rate shipping option. */
+  flatRate?: InputMaybe<DeliveryFlatRateOptionDefinitionCreateInput>;
+  /** A value-based shipping option. */
+  valueBased?: InputMaybe<DeliveryValueBasedOptionDefinitionCreateInput>;
+  /** A weight-based shipping option. */
+  weightBased?: InputMaybe<DeliveryWeightBasedOptionDefinitionCreateInput>;
+};
+
+/** An auto-generated type which holds one DeliveryOptionDefinition and a cursor during pagination. */
+export type DeliveryOptionDefinitionEdge = {
+  __typename?: 'DeliveryOptionDefinitionEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of DeliveryOptionDefinitionEdge. */
+  node: DeliveryOptionDefinition;
+};
+
+/** A delivery rate group within an option definition. */
+export type DeliveryOptionDefinitionRateGroup = {
+  /** Conditions that scope this rate group to specific collections or origin locations. */
+  conditions: DeliveryRateGroupConditions;
+  /** A globally-unique ID. */
+  id: Scalars['ID']['output'];
+};
+
+/** The input fields for updating a shipping option. Provide exactly one option type. */
+export type DeliveryOptionDefinitionUpdateInput = {
+  /** A carrier-calculated shipping option to update. */
+  carrierCalculated?: InputMaybe<DeliveryCarrierCalculatedOptionDefinitionUpdateInput>;
+  /** A flat rate shipping option to update. */
+  flatRate?: InputMaybe<DeliveryFlatRateOptionDefinitionUpdateInput>;
+  /** A value-based shipping option to update. */
+  valueBased?: InputMaybe<DeliveryValueBasedOptionDefinitionUpdateInput>;
+  /** A weight-based shipping option to update. */
+  weightBased?: InputMaybe<DeliveryWeightBasedOptionDefinitionUpdateInput>;
+};
+
 /**
  * A participant defines carrier-calculated rates for shipping services
  * with a possible merchant-defined fixed fee or a percentage-of-rate fee.
@@ -14387,15 +19789,12 @@ export type DeliveryProfile = Node & {
   __typename?: 'DeliveryProfile';
   /** The number of active shipping rates for the profile. */
   activeMethodDefinitionsCount: Scalars['Int']['output'];
+  /** Whether this delivery profile covers every shippable product variant in the shop. Rates from a profile with `coversAllItems: true` apply to all items at checkout, overriding any explicit product or variant assignments. */
+  coversAllItems: Scalars['Boolean']['output'];
   /** Whether this is the default profile. */
   default: Scalars['Boolean']['output'];
   /** A globally-unique ID. */
   id: Scalars['ID']['output'];
-  /**
-   * Whether this shop has enabled legacy compatibility mode for delivery profiles.
-   * @deprecated Legacy mode profiles are no longer supported.
-   */
-  legacyMode: Scalars['Boolean']['output'];
   /** The number of locations without rates defined. */
   locationsWithoutRatesCount: Scalars['Int']['output'];
   /** The name of the delivery profile. */
@@ -14518,6 +19917,14 @@ export type DeliveryProfileEdge = {
 export type DeliveryProfileInput = {
   /** The list of condition IDs to delete. */
   conditionsToDelete?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /**
+   * Whether this delivery profile covers all items in the shop. This field is only supported on
+   * app-owned shipping profiles. Set it to `true` to make the profile cover all shippable items,
+   * or `false` to disable this behavior. When omitted
+   * on create, the profile is created with `coversAllItems: false`. When omitted on update, the
+   * existing value is preserved.
+   */
+  coversAllItems?: InputMaybe<Scalars['Boolean']['input']>;
   /**
    * The list of location groups to be created in the delivery profile.
    *
@@ -14789,6 +20196,42 @@ export type DeliveryProvinceInput = {
   code: Scalars['String']['input'];
 };
 
+/**
+ * A shipping rate with a price and optional transit time.
+ *
+ * Rates define the price charged to buyers for a shipping option.
+ */
+export type DeliveryRate = {
+  /** The price charged for this rate. */
+  price: MoneyV2;
+  /** The maximum transit time estimate in seconds. */
+  transitTimeMaxSeconds?: Maybe<Scalars['Int']['output']>;
+  /** The minimum transit time estimate in seconds. */
+  transitTimeMinSeconds?: Maybe<Scalars['Int']['output']>;
+};
+
+/** The input fields for conditions that limit a rate group to specific collections or origin locations. */
+export type DeliveryRateConditionsCreateInput = {
+  /** Collection IDs to add. The rate group applies only to products in these collections. */
+  collectionsToAdd?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** Origin location IDs to add. The rate group applies only to shipments from these locations. */
+  originLocationsToAdd?: InputMaybe<Array<Scalars['ID']['input']>>;
+};
+
+/** The input fields for conditions that limit a rate group to specific collections or origin locations. */
+export type DeliveryRateConditionsUpdateInput = {
+  /** Collection IDs to add. The rate group applies only to products in these collections. */
+  collectionsToAdd?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** Collection IDs to remove. */
+  collectionsToRemove?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** Origin location IDs to add. The rate group applies only to shipments from these locations. */
+  originLocationsToAdd?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** Origin location IDs to remove. */
+  originLocationsToRemove?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** Whether to remove all collection conditions so the rate group applies to all products. */
+  resetToAllProducts?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 /** The merchant-defined rate of the [DeliveryMethodDefinition](https://shopify.dev/api/admin-graphql/latest/objects/DeliveryMethodDefinition). */
 export type DeliveryRateDefinition = Node & {
   __typename?: 'DeliveryRateDefinition';
@@ -14806,33 +20249,57 @@ export type DeliveryRateDefinitionInput = {
   price: MoneyInput;
 };
 
-/** A rate provided by a merchant-defined rate or a participant. */
-export type DeliveryRateProvider = DeliveryParticipant | DeliveryRateDefinition;
+/**
+ * Conditions that limit a rate group to specific collections or origin locations.
+ *
+ * When conditions are set, the rate group applies only to matching shipments.
+ */
+export type DeliveryRateGroupConditions = {
+  __typename?: 'DeliveryRateGroupConditions';
+  /** Collections this rate group applies to. Null means the rate group applies to all products. */
+  collections?: Maybe<CollectionConnection>;
+  /** The number of collections this rate group applies to. Null when it applies to all products. */
+  collectionsCount?: Maybe<Count>;
+  /** Origin locations this rate group applies to. */
+  originLocations: LocationConnection;
+  /** The number of origin locations this rate group applies to. */
+  originLocationsCount: Count;
+};
+
 
 /**
- * The `DeliverySetting` object enables you to manage shop-wide shipping settings.
- * You can enable legacy compatibility mode for the multi-location delivery profiles feature
- * if the legacy mode isn't blocked.
+ * Conditions that limit a rate group to specific collections or origin locations.
+ *
+ * When conditions are set, the rate group applies only to matching shipments.
  */
-export type DeliverySetting = {
-  __typename?: 'DeliverySetting';
-  /** Whether the shop is blocked from converting to full multi-location delivery profiles mode. If the shop is blocked, then the blocking reasons are also returned. Note: this field is effectively deprecated and will be removed in a future version of the API. */
-  legacyModeBlocked: DeliveryLegacyModeBlocked;
-  /** Enables legacy compatability mode for the multi-location delivery profiles feature. Note: this field is effectively deprecated and will be removed in a future version of the API. */
-  legacyModeProfiles: Scalars['Boolean']['output'];
+export type DeliveryRateGroupConditionsCollectionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
-/** The input fields for shop-level delivery settings. */
-export type DeliverySettingInput = {
-  /** Whether legacy compatability mode is enabled for the multi-location delivery profiles feature. Note: this field is effectively deprecated and will be removed in a future version of the API. */
-  legacyModeProfiles?: InputMaybe<Scalars['Boolean']['input']>;
+
+/**
+ * Conditions that limit a rate group to specific collections or origin locations.
+ *
+ * When conditions are set, the rate group applies only to matching shipments.
+ */
+export type DeliveryRateGroupConditionsOriginLocationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
 };
+
+/** A rate provided by a merchant-defined rate or a participant. */
+export type DeliveryRateProvider = DeliveryParticipant | DeliveryRateDefinition;
 
 /** Return type for `deliverySettingUpdate` mutation. */
 export type DeliverySettingUpdatePayload = {
   __typename?: 'DeliverySettingUpdatePayload';
-  /** The updated delivery shop level settings. */
-  setting?: Maybe<DeliverySetting>;
   /** The list of errors that occurred from executing the mutation. */
   userErrors: Array<UserError>;
 };
@@ -14858,6 +20325,518 @@ export type DeliveryUpdateConditionInput = {
   operator?: InputMaybe<DeliveryConditionOperator>;
 };
 
+/**
+ * A shipping option with rates based on cart value.
+ *
+ * Value-based options charge different rates depending on cart value,
+ * using tiers that define price thresholds (e.g., "$5 shipping under $50, $2 shipping over $50").
+ */
+export type DeliveryValueBasedOptionDefinition = DeliveryOptionDefinition & {
+  __typename?: 'DeliveryValueBasedOptionDefinition';
+  /** The currency used for all money values in this shipping option. */
+  currency: CurrencyCode;
+  /** Optional description shown to buyers. */
+  description?: Maybe<Scalars['String']['output']>;
+  /** The cart subtotal required for free shipping. Null if no threshold is set. */
+  freeDeliveryMinimumValue?: Maybe<MoneyV2>;
+  /** A globally unique ID for this shipping option. */
+  id: Scalars['ID']['output'];
+  /** Collections that any rate group in this shipping option applies to. */
+  includedCollections?: Maybe<CollectionConnection>;
+  /** Origin locations that any rate group in this shipping option applies to. */
+  includedLocations?: Maybe<LocationConnection>;
+  /** Whether this shipping option is active and shown to buyers. */
+  isActive: Scalars['Boolean']['output'];
+  /** The name shown to buyers for this shipping option. */
+  name: Scalars['String']['output'];
+  /** The rate groups for this value-based shipping option. */
+  rateGroups?: Maybe<DeliveryValueBasedRateGroupConnection>;
+};
+
+
+/**
+ * A shipping option with rates based on cart value.
+ *
+ * Value-based options charge different rates depending on cart value,
+ * using tiers that define price thresholds (e.g., "$5 shipping under $50, $2 shipping over $50").
+ */
+export type DeliveryValueBasedOptionDefinitionIncludedCollectionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * A shipping option with rates based on cart value.
+ *
+ * Value-based options charge different rates depending on cart value,
+ * using tiers that define price thresholds (e.g., "$5 shipping under $50, $2 shipping over $50").
+ */
+export type DeliveryValueBasedOptionDefinitionIncludedLocationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * A shipping option with rates based on cart value.
+ *
+ * Value-based options charge different rates depending on cart value,
+ * using tiers that define price thresholds (e.g., "$5 shipping under $50, $2 shipping over $50").
+ */
+export type DeliveryValueBasedOptionDefinitionRateGroupsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** The input fields for creating a value-based shipping option. */
+export type DeliveryValueBasedOptionDefinitionCreateInput = {
+  /** The currency used for all money values in this shipping option. */
+  currency: CurrencyCode;
+  /** Optional description shown to buyers. */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** The cart subtotal required for free shipping. Currency must match the shipping option's currency. */
+  freeDeliveryMinimumValue?: InputMaybe<MoneyInput>;
+  /** Whether this shipping option is active and shown to buyers. Defaults to true. */
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The name shown to buyers for this shipping option. */
+  name: Scalars['String']['input'];
+  /** Rate groups to create for this shipping option. */
+  rateGroups: Array<DeliveryValueBasedRateGroupCreateInput>;
+};
+
+/** The input fields for updating a value-based shipping option. */
+export type DeliveryValueBasedOptionDefinitionUpdateInput = {
+  /** The currency used for all money values in this shipping option. */
+  currency?: InputMaybe<CurrencyCode>;
+  /** Description shown to buyers. */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** The cart subtotal required for free shipping. Null clears the threshold. Currency must match the shipping option's currency. */
+  freeDeliveryMinimumValue?: InputMaybe<MoneyInput>;
+  /** The ID of the value-based shipping option to update. */
+  id: Scalars['ID']['input'];
+  /** Whether this shipping option is active and shown to buyers. */
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The name shown to buyers for this shipping option. */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** Rate groups to create for this shipping option. */
+  rateGroupsToCreate?: InputMaybe<Array<DeliveryValueBasedRateGroupCreateInput>>;
+  /** The IDs of rate groups to delete from this shipping option. */
+  rateGroupsToDelete?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** Rate groups to update for this shipping option. */
+  rateGroupsToUpdate?: InputMaybe<Array<DeliveryValueBasedRateGroupUpdateInput>>;
+};
+
+/**
+ * A value-based shipping rate.
+ *
+ * Defines price, optional transit time estimates, and the cart-value range for this rate.
+ */
+export type DeliveryValueBasedRate = DeliveryRate & {
+  __typename?: 'DeliveryValueBasedRate';
+  /** A globally unique ID. */
+  id: Scalars['ID']['output'];
+  /** The maximum cart value (inclusive) for this rate. Null means no upper limit. */
+  maxValue?: Maybe<MoneyV2>;
+  /** The minimum cart value (inclusive) for this rate. */
+  minValue: MoneyV2;
+  /** The price charged for this rate. */
+  price: MoneyV2;
+  /** The maximum transit time estimate in seconds. */
+  transitTimeMaxSeconds?: Maybe<Scalars['Int']['output']>;
+  /** The minimum transit time estimate in seconds. */
+  transitTimeMinSeconds?: Maybe<Scalars['Int']['output']>;
+};
+
+/** An auto-generated type for paginating through multiple DeliveryValueBasedRates. */
+export type DeliveryValueBasedRateConnection = {
+  __typename?: 'DeliveryValueBasedRateConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<DeliveryValueBasedRateEdge>;
+  /** A list of nodes that are contained in DeliveryValueBasedRateEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<DeliveryValueBasedRate>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** The input fields for creating a value-based rate. */
+export type DeliveryValueBasedRateCreateInput = {
+  /** The maximum cart value (inclusive) for this rate. Omit for no upper limit. */
+  maxValue?: InputMaybe<MoneyInput>;
+  /** The minimum cart value (inclusive) for this rate. */
+  minValue: MoneyInput;
+  /** The price charged for this rate. */
+  price: MoneyInput;
+  /** The maximum transit time estimate in seconds. */
+  transitTimeMaxSeconds?: InputMaybe<Scalars['Int']['input']>;
+  /** The minimum transit time estimate in seconds. */
+  transitTimeMinSeconds?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** An auto-generated type which holds one DeliveryValueBasedRate and a cursor during pagination. */
+export type DeliveryValueBasedRateEdge = {
+  __typename?: 'DeliveryValueBasedRateEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of DeliveryValueBasedRateEdge. */
+  node: DeliveryValueBasedRate;
+};
+
+/**
+ * A rate group for a value-based shipping option.
+ *
+ * Contains rates that define price tiers based on cart value.
+ */
+export type DeliveryValueBasedRateGroup = DeliveryOptionDefinitionRateGroup & {
+  __typename?: 'DeliveryValueBasedRateGroup';
+  /** Conditions that limit this rate group to specific collections or origin locations. */
+  conditions: DeliveryRateGroupConditions;
+  /** A globally unique ID. */
+  id: Scalars['ID']['output'];
+  /** The value-based rates in this rate group. */
+  rates: DeliveryValueBasedRateConnection;
+};
+
+
+/**
+ * A rate group for a value-based shipping option.
+ *
+ * Contains rates that define price tiers based on cart value.
+ */
+export type DeliveryValueBasedRateGroupRatesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** An auto-generated type for paginating through multiple DeliveryValueBasedRateGroups. */
+export type DeliveryValueBasedRateGroupConnection = {
+  __typename?: 'DeliveryValueBasedRateGroupConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<DeliveryValueBasedRateGroupEdge>;
+  /** A list of nodes that are contained in DeliveryValueBasedRateGroupEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<DeliveryValueBasedRateGroup>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** The input fields for creating a rate group for a value-based shipping option. */
+export type DeliveryValueBasedRateGroupCreateInput = {
+  /** Collection and origin location conditions for this rate group. */
+  conditions: DeliveryRateConditionsCreateInput;
+  /** The rates to create in this rate group. */
+  rates: Array<DeliveryValueBasedRateCreateInput>;
+};
+
+/** An auto-generated type which holds one DeliveryValueBasedRateGroup and a cursor during pagination. */
+export type DeliveryValueBasedRateGroupEdge = {
+  __typename?: 'DeliveryValueBasedRateGroupEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of DeliveryValueBasedRateGroupEdge. */
+  node: DeliveryValueBasedRateGroup;
+};
+
+/** The input fields for updating a rate group for a value-based shipping option. */
+export type DeliveryValueBasedRateGroupUpdateInput = {
+  /** Collection and origin location conditions for this rate group. */
+  conditions?: InputMaybe<DeliveryRateConditionsUpdateInput>;
+  /** The ID of the rate group to update. */
+  id: Scalars['ID']['input'];
+  /** Rates to create within this rate group. */
+  ratesToCreate?: InputMaybe<Array<DeliveryValueBasedRateCreateInput>>;
+  /** IDs of rates to delete from this rate group. */
+  ratesToDelete?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** Rates to update within this rate group. */
+  ratesToUpdate?: InputMaybe<Array<DeliveryValueBasedRateUpdateInput>>;
+};
+
+/** The input fields for updating a value-based rate. */
+export type DeliveryValueBasedRateUpdateInput = {
+  /** The ID of the rate to update. */
+  id: Scalars['ID']['input'];
+  /** The maximum cart value (inclusive) for this rate. Set to null for no upper limit. */
+  maxValue?: InputMaybe<MoneyInput>;
+  /** The minimum cart value for this rate. */
+  minValue?: InputMaybe<MoneyInput>;
+  /** The price charged for this rate. */
+  price?: InputMaybe<MoneyInput>;
+  /** The maximum transit time estimate in seconds. */
+  transitTimeMaxSeconds?: InputMaybe<Scalars['Int']['input']>;
+  /** The minimum transit time estimate in seconds. */
+  transitTimeMinSeconds?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/**
+ * A shipping option with rates based on package weight.
+ *
+ * Rates contain tiers that define package-weight thresholds. Checkout selects the
+ * appropriate tier using the package weight of the shipping allocation, or the
+ * combined package weight when allocations are grouped for weight conditions.
+ */
+export type DeliveryWeightBasedOptionDefinition = DeliveryOptionDefinition & {
+  __typename?: 'DeliveryWeightBasedOptionDefinition';
+  /** The currency used for all money values in this shipping option. */
+  currency: CurrencyCode;
+  /** Optional description shown to buyers. */
+  description?: Maybe<Scalars['String']['output']>;
+  /** The cart subtotal required for free shipping. Null if no threshold is set. */
+  freeDeliveryMinimumValue?: Maybe<MoneyV2>;
+  /** A globally unique ID for this shipping option. */
+  id: Scalars['ID']['output'];
+  /** Collections that any rate group in this shipping option applies to. */
+  includedCollections?: Maybe<CollectionConnection>;
+  /** Origin locations that any rate group in this shipping option applies to. */
+  includedLocations?: Maybe<LocationConnection>;
+  /** Whether this shipping option is active and shown to buyers. */
+  isActive: Scalars['Boolean']['output'];
+  /** The name shown to buyers for this shipping option. */
+  name: Scalars['String']['output'];
+  /** The rate groups for this weight-based shipping option. */
+  rateGroups?: Maybe<DeliveryWeightBasedRateGroupConnection>;
+};
+
+
+/**
+ * A shipping option with rates based on package weight.
+ *
+ * Rates contain tiers that define package-weight thresholds. Checkout selects the
+ * appropriate tier using the package weight of the shipping allocation, or the
+ * combined package weight when allocations are grouped for weight conditions.
+ */
+export type DeliveryWeightBasedOptionDefinitionIncludedCollectionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * A shipping option with rates based on package weight.
+ *
+ * Rates contain tiers that define package-weight thresholds. Checkout selects the
+ * appropriate tier using the package weight of the shipping allocation, or the
+ * combined package weight when allocations are grouped for weight conditions.
+ */
+export type DeliveryWeightBasedOptionDefinitionIncludedLocationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * A shipping option with rates based on package weight.
+ *
+ * Rates contain tiers that define package-weight thresholds. Checkout selects the
+ * appropriate tier using the package weight of the shipping allocation, or the
+ * combined package weight when allocations are grouped for weight conditions.
+ */
+export type DeliveryWeightBasedOptionDefinitionRateGroupsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** The input fields for creating a weight-based shipping option. */
+export type DeliveryWeightBasedOptionDefinitionCreateInput = {
+  /** The currency used for all money values in this shipping option. */
+  currency: CurrencyCode;
+  /** Optional description shown to buyers. */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** The cart subtotal required for free shipping. Currency must match the shipping option's currency. */
+  freeDeliveryMinimumValue?: InputMaybe<MoneyInput>;
+  /** Whether this shipping option is active and shown to buyers. Defaults to true. */
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The name shown to buyers for this shipping option. */
+  name: Scalars['String']['input'];
+  /** The weight-based rate groups for this shipping option. At this time, only a single rate group is supported for weight-based shipping options. */
+  rateGroups: Array<DeliveryWeightBasedRateGroupCreateInput>;
+};
+
+/** The input fields for updating a weight-based shipping option. */
+export type DeliveryWeightBasedOptionDefinitionUpdateInput = {
+  /** The currency used for all money values in this shipping option. */
+  currency?: InputMaybe<CurrencyCode>;
+  /** Optional description shown to buyers. */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** The cart subtotal required for free shipping. Null clears the threshold. Currency must match the shipping option's currency. */
+  freeDeliveryMinimumValue?: InputMaybe<MoneyInput>;
+  /** The globally unique ID of the weight-based shipping option to update. */
+  id: Scalars['ID']['input'];
+  /** Whether this shipping option is active and shown to buyers. */
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The name shown to buyers for this shipping option. */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** Rate groups to create for this shipping option. At this time, only a single rate group is supported for weight-based shipping options. */
+  rateGroupsToCreate?: InputMaybe<Array<DeliveryWeightBasedRateGroupCreateInput>>;
+  /** The IDs of rate groups to delete from this shipping option. */
+  rateGroupsToDelete?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** Rate groups to update for this shipping option. Only the existing single rate group is supported. */
+  rateGroupsToUpdate?: InputMaybe<Array<DeliveryWeightBasedRateGroupUpdateInput>>;
+};
+
+/**
+ * A weight-based shipping rate.
+ *
+ * Weight-based rates charge different prices depending on package weight, which can
+ * include packaging weight in addition to item weight, and may include optional
+ * transit time estimates.
+ */
+export type DeliveryWeightBasedRate = DeliveryRate & {
+  __typename?: 'DeliveryWeightBasedRate';
+  /** A globally unique ID. */
+  id: Scalars['ID']['output'];
+  /** The maximum package weight for this rate tier. */
+  maxWeight?: Maybe<Weight>;
+  /** The minimum package weight for this rate tier. */
+  minWeight: Weight;
+  /** The price charged for this rate. */
+  price: MoneyV2;
+  /** The maximum transit time estimate in seconds. */
+  transitTimeMaxSeconds?: Maybe<Scalars['Int']['output']>;
+  /** The minimum transit time estimate in seconds. */
+  transitTimeMinSeconds?: Maybe<Scalars['Int']['output']>;
+};
+
+/** An auto-generated type for paginating through multiple DeliveryWeightBasedRates. */
+export type DeliveryWeightBasedRateConnection = {
+  __typename?: 'DeliveryWeightBasedRateConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<DeliveryWeightBasedRateEdge>;
+  /** A list of nodes that are contained in DeliveryWeightBasedRateEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<DeliveryWeightBasedRate>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** The input fields for creating a weight-based rate. */
+export type DeliveryWeightBasedRateCreateInput = {
+  /** The maximum package weight for this rate tier. If omitted, the tier has no upper weight limit. */
+  maxWeight?: InputMaybe<WeightInput>;
+  /** The minimum package weight for this rate tier. */
+  minWeight: WeightInput;
+  /** The price charged for this rate tier. */
+  price: MoneyInput;
+  /** The maximum estimated transit time in seconds. */
+  transitTimeMaxSeconds?: InputMaybe<Scalars['Int']['input']>;
+  /** The minimum estimated transit time in seconds. */
+  transitTimeMinSeconds?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** An auto-generated type which holds one DeliveryWeightBasedRate and a cursor during pagination. */
+export type DeliveryWeightBasedRateEdge = {
+  __typename?: 'DeliveryWeightBasedRateEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of DeliveryWeightBasedRateEdge. */
+  node: DeliveryWeightBasedRate;
+};
+
+/**
+ * A rate group for a weight-based shipping option.
+ *
+ * Contains rates that define price tiers based on package weight.
+ */
+export type DeliveryWeightBasedRateGroup = DeliveryOptionDefinitionRateGroup & {
+  __typename?: 'DeliveryWeightBasedRateGroup';
+  /** Conditions that limit this rate group to specific collections or origin locations. */
+  conditions: DeliveryRateGroupConditions;
+  /** A globally unique ID. */
+  id: Scalars['ID']['output'];
+  /** The weight-based rates in this rate group. */
+  rates: DeliveryWeightBasedRateConnection;
+};
+
+
+/**
+ * A rate group for a weight-based shipping option.
+ *
+ * Contains rates that define price tiers based on package weight.
+ */
+export type DeliveryWeightBasedRateGroupRatesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** An auto-generated type for paginating through multiple DeliveryWeightBasedRateGroups. */
+export type DeliveryWeightBasedRateGroupConnection = {
+  __typename?: 'DeliveryWeightBasedRateGroupConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<DeliveryWeightBasedRateGroupEdge>;
+  /** A list of nodes that are contained in DeliveryWeightBasedRateGroupEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<DeliveryWeightBasedRateGroup>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** The input fields for creating a weight-based rate group. */
+export type DeliveryWeightBasedRateGroupCreateInput = {
+  /** Collection and origin location conditions for this rate group. */
+  conditions: DeliveryRateConditionsCreateInput;
+  /** The weight-based rates for this rate group. */
+  rates: Array<DeliveryWeightBasedRateCreateInput>;
+};
+
+/** An auto-generated type which holds one DeliveryWeightBasedRateGroup and a cursor during pagination. */
+export type DeliveryWeightBasedRateGroupEdge = {
+  __typename?: 'DeliveryWeightBasedRateGroupEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of DeliveryWeightBasedRateGroupEdge. */
+  node: DeliveryWeightBasedRateGroup;
+};
+
+/** The input fields for updating a weight-based rate group. */
+export type DeliveryWeightBasedRateGroupUpdateInput = {
+  /** Collection and origin location conditions for this rate group. */
+  conditions?: InputMaybe<DeliveryRateConditionsUpdateInput>;
+  /** The ID of the rate group to update. */
+  id: Scalars['ID']['input'];
+  /** Rates to create in this rate group. */
+  ratesToCreate?: InputMaybe<Array<DeliveryWeightBasedRateCreateInput>>;
+  /** IDs of rates to delete from this rate group. */
+  ratesToDelete?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** Rates to update in this rate group. */
+  ratesToUpdate?: InputMaybe<Array<DeliveryWeightBasedRateUpdateInput>>;
+};
+
+/** The input fields for updating a weight-based rate. */
+export type DeliveryWeightBasedRateUpdateInput = {
+  /** The globally unique ID of the weight-based rate to update. */
+  id: Scalars['ID']['input'];
+  /** The maximum package weight for this rate tier. Null means no upper weight limit. */
+  maxWeight?: InputMaybe<WeightInput>;
+  /** The minimum package weight for this rate tier. */
+  minWeight?: InputMaybe<WeightInput>;
+  /** The price charged for this rate tier. */
+  price?: InputMaybe<MoneyInput>;
+  /** The maximum estimated transit time in seconds. */
+  transitTimeMaxSeconds?: InputMaybe<Scalars['Int']['input']>;
+  /** The minimum estimated transit time in seconds. */
+  transitTimeMinSeconds?: InputMaybe<Scalars['Int']['input']>;
+};
+
 /** The input fields for a weight-based condition of a delivery method definition. */
 export type DeliveryWeightConditionInput = {
   /** The weight value to compare the weight of an order to. */
@@ -14880,7 +20859,7 @@ export type DeliveryZone = Node & {
 /** Configuration of the deposit. */
 export type DepositConfiguration = DepositPercentage;
 
-/** The input fields configuring the deposit for a B2B buyer. */
+/** The input fields configuring the deposit requirement. */
 export type DepositInput = {
   /** The percentage of the order total that should be paid as a deposit. Must be between 1 and 99, inclusive. */
   percentage: Scalars['Float']['input'];
@@ -15174,6 +21153,12 @@ export type DiscountAutomaticApp = {
    * expiration, or pending activation.
    */
   status: DiscountStatus;
+  /**
+   * A list of searchable keywords that are associated with the discount.
+   * For example, a merchant might apply the `loyalty` tag to discounts
+   * that are associated with their loyalty program.
+   */
+  tags: Array<Scalars['String']['output']>;
   /** The discount's name that displays to merchants in the Shopify admin and to customers. */
   title: Scalars['String']['output'];
   /** The date and time when the discount was updated. */
@@ -15211,7 +21196,9 @@ export type DiscountAutomaticAppInput = {
    * The
    * [discount classes](https://help.shopify.com/manual/discounts/combining-discounts/discount-combinations)
    * that you can use in combination with
-   * [Shopify discount types](https://help.shopify.com/manual/discounts/discount-types).
+   * [Shopify discount types](https://help.shopify.com/manual/discounts/discount-types),
+   * and the product discount tags that determine which product discounts can apply
+   * together on the same cart line.
    */
   combinesWith?: InputMaybe<DiscountCombinesWithInput>;
   /**
@@ -15246,6 +21233,22 @@ export type DiscountAutomaticAppInput = {
   recurringCycleLimit?: InputMaybe<Scalars['Int']['input']>;
   /** The date and time when the discount becomes active and is available to customers. */
   startsAt?: InputMaybe<Scalars['DateTime']['input']>;
+  /**
+   * A list of searchable keywords that are associated with the discount.
+   *
+   * Use these tags on product discounts to determine which other product discounts can
+   * apply to the same cart line when you configure
+   * `productDiscountsWithTagsOnSameCartLine` in `combinesWith`.
+   *
+   * For example, you can apply a `loyalty` tag to discounts
+   * that are associated with a loyalty program.
+   *
+   * Updating `tags` overwrites any existing tags that were previously added to the discount.
+   * To add new tags without overwriting existing tags, use the
+   * [`tagsAdd`](https://shopify.dev/api/admin-graphql/latest/mutations/tagsadd)
+   * mutation.
+   */
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
   /** The discount's name that displays to merchants in the Shopify admin and to customers. */
   title?: InputMaybe<Scalars['String']['input']>;
 };
@@ -15346,6 +21349,12 @@ export type DiscountAutomaticBasic = {
    * rules or limitations.
    */
   summary: Scalars['String']['output'];
+  /**
+   * A list of searchable keywords that are associated with the discount.
+   * For example, a merchant might apply the `loyalty` tag to discounts
+   * that are associated with their loyalty program.
+   */
+  tags: Array<Scalars['String']['output']>;
   /** The discount's name that displays to merchants in the Shopify admin and to customers. */
   title: Scalars['String']['output'];
   /** The date and time when the discount was updated. */
@@ -15379,9 +21388,11 @@ export type DiscountAutomaticBasicCreatePayload = {
 export type DiscountAutomaticBasicInput = {
   /**
    * The
-   * [discount class](https://help.shopify.com/manual/discounts/combining-discounts/discount-combinations)
+   * [discount classes](https://help.shopify.com/manual/discounts/combining-discounts/discount-combinations)
    * that you can use in combination with
-   * [Shopify discount types](https://help.shopify.com/manual/discounts/discount-types).
+   * [Shopify discount types](https://help.shopify.com/manual/discounts/discount-types),
+   * and the product discount tags that determine which product discounts can apply
+   * together on the same cart line.
    */
   combinesWith?: InputMaybe<DiscountCombinesWithInput>;
   /**
@@ -15408,6 +21419,22 @@ export type DiscountAutomaticBasicInput = {
   recurringCycleLimit?: InputMaybe<Scalars['Int']['input']>;
   /** The date and time when the discount becomes active and is available to customers. */
   startsAt?: InputMaybe<Scalars['DateTime']['input']>;
+  /**
+   * A list of searchable keywords that are associated with the discount.
+   *
+   * Use these tags on product discounts to determine which other product discounts can
+   * apply to the same cart line when you configure
+   * `productDiscountsWithTagsOnSameCartLine` in `combinesWith`.
+   *
+   * For example, you can apply a `loyalty` tag to discounts
+   * that are associated with a loyalty program.
+   *
+   * Updating `tags` overwrites any existing tags that were previously added to the discount.
+   * To add new tags without overwriting existing tags, use the
+   * [`tagsAdd`](https://shopify.dev/api/admin-graphql/latest/mutations/tagsadd)
+   * mutation.
+   */
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
   /** The discount's name that displays to merchants in the Shopify admin and to customers. */
   title?: InputMaybe<Scalars['String']['input']>;
 };
@@ -15511,6 +21538,12 @@ export type DiscountAutomaticBxgy = HasEvents & Node & {
    * rules or limitations.
    */
   summary: Scalars['String']['output'];
+  /**
+   * A list of searchable keywords that are associated with the discount.
+   * For example, a merchant might apply the `loyalty` tag to discounts
+   * that are associated with their loyalty program.
+   */
+  tags: Array<Scalars['String']['output']>;
   /** The discount's name that displays to merchants in the Shopify admin and to customers. */
   title: Scalars['String']['output'];
   /** The date and time when the discount was updated. */
@@ -15579,9 +21612,11 @@ export type DiscountAutomaticBxgyCreatePayload = {
 export type DiscountAutomaticBxgyInput = {
   /**
    * The
-   * [discount class](https://help.shopify.com/manual/discounts/combining-discounts/discount-combinations)
+   * [discount classes](https://help.shopify.com/manual/discounts/combining-discounts/discount-combinations)
    * that you can use in combination with
-   * [Shopify discount types](https://help.shopify.com/manual/discounts/discount-types).
+   * [Shopify discount types](https://help.shopify.com/manual/discounts/discount-types),
+   * and the product discount tags that determine which product discounts can apply
+   * together on the same cart line.
    */
   combinesWith?: InputMaybe<DiscountCombinesWithInput>;
   /**
@@ -15601,6 +21636,22 @@ export type DiscountAutomaticBxgyInput = {
   endsAt?: InputMaybe<Scalars['DateTime']['input']>;
   /** The date and time when the discount becomes active and is available to customers. */
   startsAt?: InputMaybe<Scalars['DateTime']['input']>;
+  /**
+   * A list of searchable keywords that are associated with the discount.
+   *
+   * Use these tags on product discounts to determine which other product discounts can
+   * apply to the same cart line when you configure
+   * `productDiscountsWithTagsOnSameCartLine` in `combinesWith`.
+   *
+   * For example, you can apply a `loyalty` tag to discounts
+   * that are associated with a loyalty program.
+   *
+   * Updating `tags` overwrites any existing tags that were previously added to the discount.
+   * To add new tags without overwriting existing tags, use the
+   * [`tagsAdd`](https://shopify.dev/api/admin-graphql/latest/mutations/tagsadd)
+   * mutation.
+   */
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
   /** The discount's name that displays to merchants in the Shopify admin and to customers. */
   title?: InputMaybe<Scalars['String']['input']>;
   /** The maximum number of times that the discount can be applied to an order. */
@@ -15769,6 +21820,12 @@ export type DiscountAutomaticFreeShipping = {
    * rules or limitations.
    */
   summary: Scalars['String']['output'];
+  /**
+   * A list of searchable keywords that are associated with the discount.
+   * For example, a merchant might apply the `loyalty` tag to discounts
+   * that are associated with their loyalty program.
+   */
+  tags: Array<Scalars['String']['output']>;
   /** The discount's name that displays to merchants in the Shopify admin and to customers. */
   title: Scalars['String']['output'];
   /** The total sales from orders where the discount was used. */
@@ -15837,6 +21894,22 @@ export type DiscountAutomaticFreeShippingInput = {
   recurringCycleLimit?: InputMaybe<Scalars['Int']['input']>;
   /** The date and time when the discount becomes active and is available to customers. */
   startsAt?: InputMaybe<Scalars['DateTime']['input']>;
+  /**
+   * A list of searchable keywords that are associated with the discount.
+   *
+   * Use these tags on product discounts to determine which other product discounts can
+   * apply to the same cart line when you configure
+   * `productDiscountsWithTagsOnSameCartLine` in `combinesWith`.
+   *
+   * For example, you can apply a `loyalty` tag to discounts
+   * that are associated with a loyalty program.
+   *
+   * Updating `tags` overwrites any existing tags that were previously added to the discount.
+   * To add new tags without overwriting existing tags, use the
+   * [`tagsAdd`](https://shopify.dev/api/admin-graphql/latest/mutations/tagsadd)
+   * mutation.
+   */
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
   /** The discount's name that displays to merchants in the Shopify admin and to customers. */
   title?: InputMaybe<Scalars['String']['input']>;
 };
@@ -15965,6 +22038,24 @@ export type DiscountAutomaticNodeEdge = {
   cursor: Scalars['String']['output'];
   /** The item at the end of DiscountAutomaticNodeEdge. */
   node: DiscountAutomaticNode;
+};
+
+/** Return type for `discountBulkTagsAdd` mutation. */
+export type DiscountBulkTagsAddPayload = {
+  __typename?: 'DiscountBulkTagsAddPayload';
+  /** The asynchronous job that adds the tags. */
+  job?: Maybe<Job>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<DiscountUserError>;
+};
+
+/** Return type for `discountBulkTagsRemove` mutation. */
+export type DiscountBulkTagsRemovePayload = {
+  __typename?: 'DiscountBulkTagsRemovePayload';
+  /** The asynchronous job that removes the tags. */
+  job?: Maybe<Job>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<DiscountUserError>;
 };
 
 /** All buyers are eligible for the discount. */
@@ -16134,6 +22225,12 @@ export type DiscountCodeApp = {
    * expiration, or pending activation.
    */
   status: DiscountStatus;
+  /**
+   * A list of searchable keywords that are associated with the discount.
+   * For example, a merchant might apply the `loyalty` tag to discounts
+   * that are associated with their loyalty program.
+   */
+  tags: Array<Scalars['String']['output']>;
   /** The discount's name that displays to merchants in the Shopify admin and to customers. */
   title: Scalars['String']['output'];
   /** The total sales from orders where the discount was used. */
@@ -16141,8 +22238,8 @@ export type DiscountCodeApp = {
   /** The date and time when the discount was updated. */
   updatedAt: Scalars['DateTime']['output'];
   /**
-   * The maximum number of times that a customer can use the discount.
-   * For discounts with unlimited usage, specify `null`.
+   * The maximum number of times the discount can be redeemed.
+   * For unlimited usage, specify `null`.
    */
   usageLimit?: Maybe<Scalars['Int']['output']>;
 };
@@ -16202,7 +22299,9 @@ export type DiscountCodeAppInput = {
    * The
    * [discount classes](https://help.shopify.com/manual/discounts/combining-discounts/discount-combinations)
    * that you can use in combination with
-   * [Shopify discount types](https://help.shopify.com/manual/discounts/discount-types).
+   * [Shopify discount types](https://help.shopify.com/manual/discounts/discount-types),
+   * and the product discount tags that determine which product discounts can apply
+   * together on the same cart line.
    */
   combinesWith?: InputMaybe<DiscountCombinesWithInput>;
   /**
@@ -16225,11 +22324,27 @@ export type DiscountCodeAppInput = {
   recurringCycleLimit?: InputMaybe<Scalars['Int']['input']>;
   /** The date and time when the discount becomes active and is available to customers. */
   startsAt?: InputMaybe<Scalars['DateTime']['input']>;
+  /**
+   * A list of searchable keywords that are associated with the discount.
+   *
+   * Use these tags on product discounts to determine which other product discounts can
+   * apply to the same cart line when you configure
+   * `productDiscountsWithTagsOnSameCartLine` in `combinesWith`.
+   *
+   * For example, you can apply a `loyalty` tag to discounts
+   * that are associated with a loyalty program.
+   *
+   * Updating `tags` overwrites any existing tags that were previously added to the discount.
+   * To add new tags without overwriting existing tags, use the
+   * [`tagsAdd`](https://shopify.dev/api/admin-graphql/latest/mutations/tagsadd)
+   * mutation.
+   */
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
   /** The discount's name that displays to merchants in the Shopify admin and to customers. */
   title?: InputMaybe<Scalars['String']['input']>;
   /**
-   * The maximum number of times that a customer can use the discount.
-   * For discounts with unlimited usage, specify `null`.
+   * The maximum number of times the discount can be redeemed.
+   * For unlimited usage, specify `null`.
    */
   usageLimit?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -16372,6 +22487,12 @@ export type DiscountCodeBasic = {
    * rules or limitations.
    */
   summary: Scalars['String']['output'];
+  /**
+   * A list of searchable keywords that are associated with the discount.
+   * For example, a merchant might apply the `loyalty` tag to discounts
+   * that are associated with their loyalty program.
+   */
+  tags: Array<Scalars['String']['output']>;
   /** The discount's name that displays to merchants in the Shopify admin and to customers. */
   title: Scalars['String']['output'];
   /** The total sales from orders where the discount was used. */
@@ -16379,8 +22500,8 @@ export type DiscountCodeBasic = {
   /** The date and time when the discount was updated. */
   updatedAt: Scalars['DateTime']['output'];
   /**
-   * The maximum number of times that a customer can use the discount.
-   * For discounts with unlimited usage, specify `null`.
+   * The maximum number of times the discount can be redeemed.
+   * For unlimited usage, specify `null`.
    */
   usageLimit?: Maybe<Scalars['Int']['output']>;
 };
@@ -16442,9 +22563,11 @@ export type DiscountCodeBasicInput = {
   code?: InputMaybe<Scalars['String']['input']>;
   /**
    * The
-   * [discount class](https://help.shopify.com/manual/discounts/combining-discounts/discount-combinations)
+   * [discount classes](https://help.shopify.com/manual/discounts/combining-discounts/discount-combinations)
    * that you can use in combination with
-   * [Shopify discount types](https://help.shopify.com/manual/discounts/discount-types).
+   * [Shopify discount types](https://help.shopify.com/manual/discounts/discount-types),
+   * and the product discount tags that determine which product discounts can apply
+   * together on the same cart line.
    */
   combinesWith?: InputMaybe<DiscountCombinesWithInput>;
   /**
@@ -16465,11 +22588,27 @@ export type DiscountCodeBasicInput = {
   recurringCycleLimit?: InputMaybe<Scalars['Int']['input']>;
   /** The date and time when the discount becomes active and is available to customers. */
   startsAt?: InputMaybe<Scalars['DateTime']['input']>;
+  /**
+   * A list of searchable keywords that are associated with the discount.
+   *
+   * Use these tags on product discounts to determine which other product discounts can
+   * apply to the same cart line when you configure
+   * `productDiscountsWithTagsOnSameCartLine` in `combinesWith`.
+   *
+   * For example, you can apply a `loyalty` tag to discounts
+   * that are associated with a loyalty program.
+   *
+   * Updating `tags` overwrites any existing tags that were previously added to the discount.
+   * To add new tags without overwriting existing tags, use the
+   * [`tagsAdd`](https://shopify.dev/api/admin-graphql/latest/mutations/tagsadd)
+   * mutation.
+   */
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
   /** The discount's name that displays to merchants in the Shopify admin and to customers. */
   title?: InputMaybe<Scalars['String']['input']>;
   /**
-   * The maximum number of times that a customer can use the discount.
-   * For discounts with unlimited usage, specify `null`.
+   * The maximum number of times the discount can be redeemed.
+   * For unlimited usage, specify `null`.
    */
   usageLimit?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -16602,6 +22741,12 @@ export type DiscountCodeBxgy = {
    * rules or limitations.
    */
   summary: Scalars['String']['output'];
+  /**
+   * A list of searchable keywords that are associated with the discount.
+   * For example, a merchant might apply the `loyalty` tag to discounts
+   * that are associated with their loyalty program.
+   */
+  tags: Array<Scalars['String']['output']>;
   /** The discount's name that displays to merchants in the Shopify admin and to customers. */
   title: Scalars['String']['output'];
   /** The total sales from orders where the discount was used. */
@@ -16609,8 +22754,8 @@ export type DiscountCodeBxgy = {
   /** The date and time when the discount was updated. */
   updatedAt: Scalars['DateTime']['output'];
   /**
-   * The maximum number of times that a customer can use the discount.
-   * For discounts with unlimited usage, specify `null`.
+   * The maximum number of times the discount can be redeemed.
+   * For unlimited usage, specify `null`.
    */
   usageLimit?: Maybe<Scalars['Int']['output']>;
   /** The maximum number of times that the discount can be applied to an order. */
@@ -16678,9 +22823,11 @@ export type DiscountCodeBxgyInput = {
   code?: InputMaybe<Scalars['String']['input']>;
   /**
    * The
-   * [discount class](https://help.shopify.com/manual/discounts/combining-discounts/discount-combinations)
+   * [discount classes](https://help.shopify.com/manual/discounts/combining-discounts/discount-combinations)
    * that you can use in combination with
-   * [Shopify discount types](https://help.shopify.com/manual/discounts/discount-types).
+   * [Shopify discount types](https://help.shopify.com/manual/discounts/discount-types),
+   * and the product discount tags that determine which product discounts can apply
+   * together on the same cart line.
    */
   combinesWith?: InputMaybe<DiscountCombinesWithInput>;
   /**
@@ -16699,11 +22846,27 @@ export type DiscountCodeBxgyInput = {
   endsAt?: InputMaybe<Scalars['DateTime']['input']>;
   /** The date and time when the discount becomes active and is available to customers. */
   startsAt?: InputMaybe<Scalars['DateTime']['input']>;
+  /**
+   * A list of searchable keywords that are associated with the discount.
+   *
+   * Use these tags on product discounts to determine which other product discounts can
+   * apply to the same cart line when you configure
+   * `productDiscountsWithTagsOnSameCartLine` in `combinesWith`.
+   *
+   * For example, you can apply a `loyalty` tag to discounts
+   * that are associated with a loyalty program.
+   *
+   * Updating `tags` overwrites any existing tags that were previously added to the discount.
+   * To add new tags without overwriting existing tags, use the
+   * [`tagsAdd`](https://shopify.dev/api/admin-graphql/latest/mutations/tagsadd)
+   * mutation.
+   */
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
   /** The discount's name that displays to merchants in the Shopify admin and to customers. */
   title?: InputMaybe<Scalars['String']['input']>;
   /**
-   * The maximum number of times that a customer can use the discount.
-   * For discounts with unlimited usage, specify `null`.
+   * The maximum number of times the discount can be redeemed.
+   * For unlimited usage, specify `null`.
    */
   usageLimit?: InputMaybe<Scalars['Int']['input']>;
   /** The maximum number of times that the discount can be applied to an order. */
@@ -16864,6 +23027,12 @@ export type DiscountCodeFreeShipping = {
    * rules or limitations.
    */
   summary: Scalars['String']['output'];
+  /**
+   * A list of searchable keywords that are associated with the discount.
+   * For example, a merchant might apply the `loyalty` tag to discounts
+   * that are associated with their loyalty program.
+   */
+  tags: Array<Scalars['String']['output']>;
   /** The discount's name that displays to merchants in the Shopify admin and to customers. */
   title: Scalars['String']['output'];
   /** The total sales from orders where the discount was used. */
@@ -16871,8 +23040,8 @@ export type DiscountCodeFreeShipping = {
   /** The date and time when the discount was updated. */
   updatedAt: Scalars['DateTime']['output'];
   /**
-   * The maximum number of times that a customer can use the discount.
-   * For discounts with unlimited usage, specify `null`.
+   * The maximum number of times the discount can be redeemed.
+   * For unlimited usage, specify `null`.
    */
   usageLimit?: Maybe<Scalars['Int']['output']>;
 };
@@ -16970,11 +23139,27 @@ export type DiscountCodeFreeShippingInput = {
   recurringCycleLimit?: InputMaybe<Scalars['Int']['input']>;
   /** The date and time when the discount becomes active and is available to customers. */
   startsAt?: InputMaybe<Scalars['DateTime']['input']>;
+  /**
+   * A list of searchable keywords that are associated with the discount.
+   *
+   * Use these tags on product discounts to determine which other product discounts can
+   * apply to the same cart line when you configure
+   * `productDiscountsWithTagsOnSameCartLine` in `combinesWith`.
+   *
+   * For example, you can apply a `loyalty` tag to discounts
+   * that are associated with a loyalty program.
+   *
+   * Updating `tags` overwrites any existing tags that were previously added to the discount.
+   * To add new tags without overwriting existing tags, use the
+   * [`tagsAdd`](https://shopify.dev/api/admin-graphql/latest/mutations/tagsadd)
+   * mutation.
+   */
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
   /** The discount's name that displays to merchants in the Shopify admin and to customers. */
   title?: InputMaybe<Scalars['String']['input']>;
   /**
-   * The maximum number of times that a customer can use the discount.
-   * For discounts with unlimited usage, specify `null`.
+   * The maximum number of times the discount can be redeemed.
+   * For unlimited usage, specify `null`.
    */
   usageLimit?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -17174,6 +23359,29 @@ export type DiscountCombinesWith = {
    */
   productDiscounts: Scalars['Boolean']['output'];
   /**
+   * Controls which product discounts can apply together on the same cart line. By
+   * default, only one product discount applies per line. Available only on a Shopify
+   * Plus plan and requires the `productDiscounts` field to be set to `true`.
+   *
+   * For discounts to apply together, they must match tags in both directions. Each
+   * discount has two tag sets: the tags that identify the discount, and the tags that
+   * it agrees to apply with. Use the `tags` field on the discount input to set the
+   * discount's own tags. This field returns the tags that this discount agrees to
+   * apply with. Two discounts apply together only if each one allows at least one tag
+   * that the other is tagged with. Any number of product discounts can apply to the
+   * same line if this two-way match holds for every pair in the group.
+   *
+   * Example: Discount A is tagged with `LOYALTY` and allows `SEASONAL`, and Discount B
+   * is tagged with `SEASONAL` and allows `LOYALTY`. They apply together. To add a
+   * third discount, it must meet the same mutual-match rule with both A and B.
+   *
+   * Buy X Get Y discounts stack only on the customer-gets products (GY), not the
+   * customer-buys products (BX). See
+   * [Limitations for discount combinations](https://help.shopify.com/manual/discounts/discount-combinations#considerations)
+   * for details.
+   */
+  productDiscountsWithTagsOnSameCartLine?: Maybe<Array<Scalars['String']['output']>>;
+  /**
    * Whether the discount combines with the
    * [shipping discount](https://help.shopify.com/manual/discounts/combining-discounts/discount-combinations)
    * class.
@@ -17196,6 +23404,29 @@ export type DiscountCombinesWithInput = {
    */
   productDiscounts?: InputMaybe<Scalars['Boolean']['input']>;
   /**
+   * Controls which product discounts can apply together on the same cart line. By
+   * default, only one product discount applies per line. Available only on a Shopify
+   * Plus plan and requires the `productDiscounts` field to be set to `true`.
+   *
+   * For discounts to apply together, they must match tags in both directions. Each
+   * discount has two tag sets: the tags that identify the discount, and the tags that
+   * it agrees to apply with. Use the `tags` field on the discount input to set the
+   * discount's own tags. Use this field to set the tags that the discount can apply
+   * with. Two discounts apply together only if each one allows at least one tag that
+   * the other is tagged with. Any number of product discounts can apply to the same
+   * line if this two-way match holds for every pair in the group.
+   *
+   * Example: Discount A is tagged with `LOYALTY` and allows `SEASONAL`, and Discount B
+   * is tagged with `SEASONAL` and allows `LOYALTY`. They apply together. To add a
+   * third discount, it must meet the same mutual-match rule with both A and B.
+   *
+   * Buy X Get Y discounts stack only on the customer-gets products (GY), not the
+   * customer-buys products (BX). See
+   * [Limitations for discount combinations](https://help.shopify.com/manual/discounts/discount-combinations#considerations)
+   * for details.
+   */
+  productDiscountsWithTagsOnSameCartLine?: InputMaybe<ProductDiscountsWithTagsOnSameCartLineInput>;
+  /**
    * Whether the discount combines
    * with the
    * [shipping discount](https://help.shopify.com/manual/discounts/combining-discounts/discount-combinations)
@@ -17205,7 +23436,7 @@ export type DiscountCombinesWithInput = {
 };
 
 /** The type used to define which buyers can use the discount. */
-export type DiscountContext = DiscountBuyerSelectionAll | DiscountCustomerSegments | DiscountCustomers;
+export type DiscountContext = DiscountBuyerSelectionAll | DiscountCustomerSegments | DiscountCustomers | DiscountMarkets;
 
 /** The input fields for the buyers who can use this discount. */
 export type DiscountContextInput = {
@@ -17215,6 +23446,8 @@ export type DiscountContextInput = {
   customerSegments?: InputMaybe<DiscountCustomerSegmentsInput>;
   /** The list of customer IDs to add or remove from the list of customers. */
   customers?: InputMaybe<DiscountCustomersInput>;
+  /** The list of market IDs to add or remove from the list of markets. */
+  markets?: InputMaybe<DiscountMarketsInput>;
 };
 
 /**
@@ -17228,7 +23461,10 @@ export type DiscountCountries = {
   __typename?: 'DiscountCountries';
   /** The codes for the countries where the discount can be applied. */
   countries: Array<CountryCode>;
-  /** Whether the discount is applicable to countries that haven't been defined in the shop's shipping zones. */
+  /**
+   * Whether the discount is applicable to countries that haven't been defined in the shop's shipping zones.
+   * @deprecated This field is being retired. Discounts that set `includeRestOfWorld: true` will be converted to an explicit list of countries, and `countries` will then return every country where the discount applies.
+   */
   includeRestOfWorld: Scalars['Boolean']['output'];
 };
 
@@ -17236,8 +23472,6 @@ export type DiscountCountries = {
 export type DiscountCountriesInput = {
   /** The country codes to add to the list of countries where the discount applies. */
   add?: InputMaybe<Array<CountryCode>>;
-  /** Whether the discount code is applicable to countries that haven't been defined in the shop's shipping zones. */
-  includeRestOfWorld?: InputMaybe<Scalars['Boolean']['input']>;
   /** The country codes to remove from the list of countries where the discount applies. */
   remove?: InputMaybe<Array<CountryCode>>;
 };
@@ -17382,7 +23616,7 @@ export type DiscountCustomerSegmentsInput = {
 };
 
 /** The type used for targeting a set of customers who are eligible for the discount. For example, the discount might be available to all customers or it might only be available to a specific set of customers. You can define the set of customers by targeting a list of customer segments, or by targeting a list of specific customers. */
-export type DiscountCustomerSelection = DiscountCustomerAll | DiscountCustomerSegments | DiscountCustomers;
+export type DiscountCustomerSelection = DiscountCustomerAll | DiscountCustomerSegments | DiscountCustomerSelectionUnknown | DiscountCustomers;
 
 /** The input fields for the customers who can use this discount. */
 export type DiscountCustomerSelectionInput = {
@@ -17392,6 +23626,13 @@ export type DiscountCustomerSelectionInput = {
   customerSegments?: InputMaybe<DiscountCustomerSegmentsInput>;
   /** The list of customer IDs to add or remove from the list of customers. */
   customers?: InputMaybe<DiscountCustomersInput>;
+};
+
+/** An unrecognized customer selection type. Use the `context` field on the parent discount type instead. */
+export type DiscountCustomerSelectionUnknown = {
+  __typename?: 'DiscountCustomerSelectionUnknown';
+  /** The underlying customer selection type. */
+  customerSelectionType: Scalars['String']['output'];
 };
 
 /**
@@ -17444,6 +23685,8 @@ export enum DiscountErrorCode {
   Blank = 'BLANK',
   /** The attribute selection contains conflicting settings. */
   Conflict = 'CONFLICT',
+  /** Discounts and condition types are not compatible with each other. */
+  DiscountNotCompatibleWithConditionTypes = 'DISCOUNT_NOT_COMPATIBLE_WITH_CONDITION_TYPES',
   /** The input value is already present. */
   Duplicate = 'DUPLICATE',
   /** The end date should be after the start date. */
@@ -17468,6 +23711,14 @@ export enum DiscountErrorCode {
   InvalidCombinesWithForDiscountClass = 'INVALID_COMBINES_WITH_FOR_DISCOUNT_CLASS',
   /** The discountClass is invalid for the price rule. */
   InvalidDiscountClassForPriceRule = 'INVALID_DISCOUNT_CLASS_FOR_PRICE_RULE',
+  /** The `productDiscounts` field can't be set to false when `productDiscountsWithTagsOnSameCartLine` tags exist on the discount. */
+  InvalidProductDiscountsFalseWithExistingTagsOnSameCartLine = 'INVALID_PRODUCT_DISCOUNTS_FALSE_WITH_EXISTING_TAGS_ON_SAME_CART_LINE',
+  /** The `productDiscountsWithTagsOnSameCartLine` field is only valid for discounts with the PRODUCT discount class. */
+  InvalidProductDiscountsWithTagsOnSameCartLineForDiscountClass = 'INVALID_PRODUCT_DISCOUNTS_WITH_TAGS_ON_SAME_CART_LINE_FOR_DISCOUNT_CLASS',
+  /** The `productDiscountsWithTagsOnSameCartLine` field can only be specified when `productDiscounts` is true. */
+  InvalidProductDiscountsWithTagsOnSameCartLineWithoutProductDiscounts = 'INVALID_PRODUCT_DISCOUNTS_WITH_TAGS_ON_SAME_CART_LINE_WITHOUT_PRODUCT_DISCOUNTS',
+  /** The tag title exceeds the maximum length of 255 characters. */
+  InvalidTagLength = 'INVALID_TAG_LENGTH',
   /** The input value should be less than the maximum value allowed. */
   LessThan = 'LESS_THAN',
   /** The input value should be less than or equal to the maximum value allowed. */
@@ -17486,6 +23737,8 @@ export enum DiscountErrorCode {
   MultipleRecurringCycleLimitForNonSubscriptionItems = 'MULTIPLE_RECURRING_CYCLE_LIMIT_FOR_NON_SUBSCRIPTION_ITEMS',
   /** The input value needs to be blank. */
   Present = 'PRESENT',
+  /** The shop's plan does not allow setting `productDiscountsWithTagsOnSameCartLine`. */
+  ProductDiscountsWithTagsOnSameCartLineNotEntitled = 'PRODUCT_DISCOUNTS_WITH_TAGS_ON_SAME_CART_LINE_NOT_ENTITLED',
   /** Recurring cycle limit must be a valid integer greater than or equal to 0. */
   RecurringCycleLimitNotAValidInteger = 'RECURRING_CYCLE_LIMIT_NOT_A_VALID_INTEGER',
   /** The input value is already taken. */
@@ -17494,6 +23747,10 @@ export enum DiscountErrorCode {
   TooLong = 'TOO_LONG',
   /** Too many arguments provided. */
   TooManyArguments = 'TOO_MANY_ARGUMENTS',
+  /** The number of tags in `productDiscountsWithTagsOnSameCartLine` exceeds the maximum of 10. */
+  TooManyProductDiscountsWithTagsOnSameCartLine = 'TOO_MANY_PRODUCT_DISCOUNTS_WITH_TAGS_ON_SAME_CART_LINE',
+  /** The number of tags exceeds the maximum of 5. */
+  TooManyTags = 'TOO_MANY_TAGS',
   /** The input value is too short. */
   TooShort = 'TOO_SHORT',
   /** The value is outside of the allowed range. */
@@ -17516,6 +23773,33 @@ export type DiscountItemsInput = {
    * that the discount applies to.
    */
   products?: InputMaybe<DiscountProductsInput>;
+};
+
+/** Markets where the discount is available. */
+export type DiscountMarkets = {
+  __typename?: 'DiscountMarkets';
+  /** The list of markets where the discount is available. */
+  markets: MarketConnection;
+  /** The number of markets where the discount is available. */
+  marketsCount: Scalars['Int']['output'];
+};
+
+
+/** Markets where the discount is available. */
+export type DiscountMarketsMarketsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** The input fields for the markets where the discount is available. */
+export type DiscountMarketsInput = {
+  /** The list of market IDs to add. */
+  add?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** The list of market IDs to remove. */
+  remove?: InputMaybe<Array<Scalars['ID']['input']>>;
 };
 
 /**
@@ -17987,6 +24271,14 @@ export enum DiscountStatus {
   Scheduled = 'SCHEDULED'
 }
 
+/** The set of valid sort keys for the DiscountTag query. */
+export enum DiscountTagSortKeys {
+  /** Sort by the `id` value. */
+  Id = 'ID',
+  /** Sort by the `title` value. */
+  Title = 'TITLE'
+}
+
 /** The type of line (line item or shipping line) on an order that the subscription discount is applicable towards. */
 export enum DiscountTargetType {
   /** The discount applies onto line items. */
@@ -18074,6 +24366,8 @@ export enum DisputeStatus {
   ChargeRefunded = 'CHARGE_REFUNDED',
   Lost = 'LOST',
   NeedsResponse = 'NEEDS_RESPONSE',
+  /** A dispute that was prevented from becoming a formal chargeback. */
+  Prevented = 'PREVENTED',
   UnderReview = 'UNDER_REVIEW',
   Won = 'WON'
 }
@@ -18159,6 +24453,18 @@ export type DraftOrder = CommentEventSubject & HasEvents & HasLocalizationExtens
   allVariantPricesOverridden: Scalars['Boolean']['output'];
   /** Whether discount codes are allowed during checkout of this draft order. */
   allowDiscountCodesInCheckout: Scalars['Boolean']['output'];
+  /**
+   * The amount due later.
+   * When there are payment terms, this is the total price minus the deposit amount (if any).
+   * When there are no payment terms, this is 0.
+   */
+  amountDueLaterSet: MoneyBag;
+  /**
+   * The amount due now.
+   * When there are payment terms this is the value of the deposit (0 by default).
+   * When there are no payment terms, this is the total price.
+   */
+  amountDueNowSet: MoneyBag;
   /** Whether any variant prices have been overridden. */
   anyVariantPricesOverridden: Scalars['Boolean']['output'];
   /** The custom order-level discount applied. */
@@ -18182,6 +24488,8 @@ export type DraftOrder = CommentEventSubject & HasEvents & HasLocalizationExtens
   customer?: Maybe<Customer>;
   /** A default [cursor](https://shopify.dev/api/usage/pagination-graphql) that returns the single next record, sorted ascending by ID. */
   defaultCursor: Scalars['String']['output'];
+  /** The portion required to be paid at checkout. */
+  deposit?: Maybe<DepositConfiguration>;
   /** All discount codes applied. */
   discountCodes: Array<Scalars['String']['output']>;
   /** The email address of the customer, which is used to send notifications. */
@@ -18697,7 +25005,10 @@ export type DraftOrderDiscountNotAppliedWarning = DraftOrderWarning & {
   field: Scalars['String']['output'];
   /** The warning message. */
   message: Scalars['String']['output'];
-  /** The price rule that can't be applied. */
+  /**
+   * The price rule that can't be applied.
+   * @deprecated Use discountCode and discountTitle instead. This field will be removed in 2026-10.
+   */
   priceRule?: Maybe<PriceRule>;
 };
 
@@ -18738,6 +25049,8 @@ export type DraftOrderInput = {
   billingAddress?: InputMaybe<MailingAddressInput>;
   /** The extra information added to the draft order on behalf of the customer. */
   customAttributes?: InputMaybe<Array<AttributeInput>>;
+  /** The input fields configuring the deposit requirement. */
+  deposit?: InputMaybe<DepositInput>;
   /**
    * The list of discount codes that will be attempted to be applied to the draft order.
    * If the draft isn't eligible for any given discount code it will be skipped during calculation.
@@ -18778,14 +25091,8 @@ export type DraftOrderInput = {
   /** The shipping line object, which details the shipping method used. */
   shippingLine?: InputMaybe<ShippingLineInput>;
   /**
-   * The source of the checkout.
-   * To use this field for sales attribution, you must register the channels that your app is managing.
-   * You can register the channels that your app is managing by completing
-   * [this Google Form](https://docs.google.com/forms/d/e/1FAIpQLScmVTZRQNjOJ7RD738mL1lGeFjqKVe_FM2tO9xsm21QEo5Ozg/viewform?usp=sf_link).
-   * After you've submitted your request, you need to wait for your request to be processed by Shopify.
-   * You can find a list of your channels in the Partner Dashboard, in your app's Marketplace extension.
-   * You need to specify the handle as the `source_name` value in your request.
-   * The handle is the channel that the order was placed from.
+   * The source channel that the order is attributed to. Set this to the handle of an order attribution definition configured for your sales channel app, such as `youtube` or `channel:amazon-us`.
+   * To set up order attribution for your app, follow the [order attribution guide](https://shopify.dev/docs/apps/build/sales-channels/order-attribution).
    */
   sourceName?: InputMaybe<Scalars['String']['input']>;
   /** A comma separated list of tags that have been added to the draft order. */
@@ -19251,6 +25558,8 @@ export type EmailInput = {
 /** The shop's entitlements. */
 export type EntitlementsType = {
   __typename?: 'EntitlementsType';
+  /** The shop's B2B entitlements. */
+  b2b: B2BType;
   /** Represents the markets for the shop. */
   markets: MarketsType;
 };
@@ -19371,6 +25680,8 @@ export type EventBridgeWebhookSubscriptionInput = {
   metafieldNamespaces?: InputMaybe<Array<Scalars['String']['input']>>;
   /** A list of identifiers specifying metafields to include in the webhook payload. */
   metafields?: InputMaybe<Array<HasMetafieldsMetafieldIdentifierInput>>;
+  /** A human-readable name for the webhook subscription. */
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** Return type for `eventBridgeWebhookSubscriptionUpdate` mutation. */
@@ -19826,7 +26137,8 @@ export type FileCreateInput = {
    */
   filename?: InputMaybe<Scalars['String']['input']>;
   /**
-   * An external URL (for images only) or a
+   * The source URL of the file. An external URL can be used for images, generic files, or external videos.
+   * Videos and 3D models require a
    * [staged upload URL](https://shopify.dev/api/admin-graphql/latest/mutations/stageduploadscreate).
    */
   originalSource: Scalars['String']['input'];
@@ -19969,7 +26281,8 @@ export type FileSetInput = {
   /** The ID of an existing file. */
   id?: InputMaybe<Scalars['ID']['input']>;
   /**
-   * An external URL (for images only) or a
+   * The source URL of the file. An external URL can be used for images, generic files, or external videos.
+   * Videos and 3D models require a
    * [staged upload URL](https://shopify.dev/api/admin-graphql/latest/mutations/stageduploadscreate).
    */
   originalSource?: InputMaybe<Scalars['String']['input']>;
@@ -20016,7 +26329,7 @@ export type FileUpdateInput = {
   id: Scalars['ID']['input'];
   /**
    * The source from which to update a media image or generic file.
-   * An external URL (for images only) or a
+   * This can be an external URL or a
    * [staged upload URL](https://shopify.dev/api/admin-graphql/latest/mutations/stageduploadscreate).
    */
   originalSource?: InputMaybe<Scalars['String']['input']>;
@@ -20069,6 +26382,8 @@ export enum FilesErrorCode {
   InvalidImageSourceUrl = 'INVALID_IMAGE_SOURCE_URL',
   /** Search query isn't supported. */
   InvalidQuery = 'INVALID_QUERY',
+  /** Media cannot be modified. It is currently being modified by another operation. */
+  MediaCannotBeModified = 'MEDIA_CANNOT_BE_MODIFIED',
   /** Cannot create file with custom filename which does not match original source extension. */
   MismatchedFilenameAndOriginalSource = 'MISMATCHED_FILENAME_AND_ORIGINAL_SOURCE',
   /** At least one argument is required. */
@@ -20190,6 +26505,8 @@ export type FlowGenerateSignaturePayload = {
   payload?: Maybe<Scalars['String']['output']>;
   /** The generated signature. */
   signature?: Maybe<Scalars['String']['output']>;
+  /** The target URL corresponding to the requested payload schema: action runtime URL, validation URL, or custom configuration page preview URL. */
+  targetUrl?: Maybe<Scalars['URL']['output']>;
   /** The list of errors that occurred from executing the mutation. */
   userErrors: Array<UserError>;
 };
@@ -20242,6 +26559,8 @@ export type Fulfillment = LegacyInteroperability & Node & {
   requiresShipping: Scalars['Boolean']['output'];
   /** Fulfillment service associated with the fulfillment. */
   service?: Maybe<FulfillmentService>;
+  /** The optional shipping label for this fulfillment. */
+  shippingLabel?: Maybe<ShippingLabel>;
   /** The status of the fulfillment. */
   status: FulfillmentStatus;
   /** Sum of all line item quantities for the fulfillment. */
@@ -20964,7 +27283,10 @@ export type FulfillmentOrder = Node & {
    *     status, and the shop's location properties might be undergoing edits (for example, in the Shopify admin).
    */
   assignedLocation: FulfillmentOrderAssignedLocation;
-  /** ID of the channel that created the order. */
+  /**
+   * ID of the channel that created the order.
+   * @deprecated Use [`order.attribution.handle`](https://shopify.dev/docs/api/admin-graphql/latest/objects/OrderAttribution#field-OrderAttribution.fields.handle) instead.
+   */
   channelId?: Maybe<Scalars['ID']['output']>;
   /** Date and time when the fulfillment order was created. */
   createdAt: Scalars['DateTime']['output'];
@@ -21007,6 +27329,8 @@ export type FulfillmentOrder = Node & {
    * This date and time might not match the date and time when the order was created.
    */
   orderProcessedAt: Scalars['DateTime']['output'];
+  /** The total weight of all line items in the fulfillment order that aren't yet fulfilled. */
+  remainingLineItemsWeight?: Maybe<Weight>;
   /** The request status of the fulfillment order. */
   requestStatus: FulfillmentOrderRequestStatus;
   /** The status of the fulfillment order. */
@@ -21917,6 +28241,8 @@ export enum FulfillmentOrderAction {
   Move = 'MOVE',
   /** Releases the fulfillment hold on the fulfillment order. The corresponding mutation for this action is `fulfillmentOrderReleaseHold`. */
   ReleaseHold = 'RELEASE_HOLD',
+  /** Report the progress of the fulfillment order, marking as in progress if it's not already in progress. */
+  ReportProgress = 'REPORT_PROGRESS',
   /** Sends a cancellation request to the fulfillment service of a fulfillment order. The corresponding mutation for this action is `fulfillmentOrderSubmitCancellationRequest`. */
   RequestCancellation = 'REQUEST_CANCELLATION',
   /** Sends a request for fulfilling selected line items in a fulfillment order to a fulfillment service. The corresponding mutation for this action is `fulfillmentOrderSubmitFulfillmentRequest`. */
@@ -22006,6 +28332,23 @@ export enum FulfillmentOrderAssignmentStatus {
   FulfillmentUnsubmitted = 'FULFILLMENT_UNSUBMITTED'
 }
 
+/** Represents an error that occurs while cancelling a fulfillment order. */
+export type FulfillmentOrderCancelError = DisplayableError & {
+  __typename?: 'FulfillmentOrderCancelError';
+  /** The error code. */
+  code?: Maybe<FulfillmentOrderCancelErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `FulfillmentOrderCancelError`. */
+export enum FulfillmentOrderCancelErrorCode {
+  /** Cannot cancel fulfillment order with reported progress. Mark as unfulfilled first. */
+  FulfillmentOrderHasManuallyReportedProgress = 'FULFILLMENT_ORDER_HAS_MANUALLY_REPORTED_PROGRESS'
+}
+
 /** Return type for `fulfillmentOrderCancel` mutation. */
 export type FulfillmentOrderCancelPayload = {
   __typename?: 'FulfillmentOrderCancelPayload';
@@ -22014,7 +28357,7 @@ export type FulfillmentOrderCancelPayload = {
   /** The fulfillment order that was created to replace the canceled fulfillment order. */
   replacementFulfillmentOrder?: Maybe<FulfillmentOrder>;
   /** The list of errors that occurred from executing the mutation. */
-  userErrors: Array<UserError>;
+  userErrors: Array<FulfillmentOrderCancelError>;
 };
 
 /** Return type for `fulfillmentOrderClose` mutation. */
@@ -22198,6 +28541,8 @@ export type FulfillmentOrderLineItem = Node & {
   remainingQuantity: Scalars['Int']['output'];
   /** Whether physical shipping is required for the variant. */
   requiresShipping: Scalars['Boolean']['output'];
+  /** The shipping line associated with this line item. */
+  shippingLine?: Maybe<ShippingLine>;
   /** The variant SKU number. */
   sku?: Maybe<Scalars['String']['output']>;
   /** The total number of units to be fulfilled. */
@@ -22271,6 +28616,7 @@ export type FulfillmentOrderLineItemsInput = {
   /**
    * The fulfillment order line items to be fulfilled.
    * If left blank, all line items of the fulfillment order will be fulfilled.
+   * Accepts a maximum of 512 line items.
    */
   fulfillmentOrderLineItems?: InputMaybe<Array<FulfillmentOrderLineItemInput>>;
 };
@@ -22483,6 +28829,23 @@ export enum FulfillmentOrderMergeUserErrorCode {
   InvalidLineItemQuantity = 'INVALID_LINE_ITEM_QUANTITY'
 }
 
+/** Represents a user error that occurs while moving a fulfillment order. */
+export type FulfillmentOrderMoveFulfillmentOrderMoveUserError = DisplayableError & {
+  __typename?: 'FulfillmentOrderMoveFulfillmentOrderMoveUserError';
+  /** The error code. */
+  code?: Maybe<FulfillmentOrderMoveFulfillmentOrderMoveUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `FulfillmentOrderMoveFulfillmentOrderMoveUserError`. */
+export enum FulfillmentOrderMoveFulfillmentOrderMoveUserErrorCode {
+  /** Cannot move a fulfillment order that has progress reported. */
+  CannotMoveFulfillmentOrderWithReportedProgress = 'CANNOT_MOVE_FULFILLMENT_ORDER_WITH_REPORTED_PROGRESS'
+}
+
 /** Return type for `fulfillmentOrderMove` mutation. */
 export type FulfillmentOrderMovePayload = {
   __typename?: 'FulfillmentOrderMovePayload';
@@ -22503,7 +28866,7 @@ export type FulfillmentOrderMovePayload = {
   /** This field is deprecated. */
   remainingFulfillmentOrder?: Maybe<FulfillmentOrder>;
   /** The list of errors that occurred from executing the mutation. */
-  userErrors: Array<UserError>;
+  userErrors: Array<FulfillmentOrderMoveFulfillmentOrderMoveUserError>;
 };
 
 /** Return type for `fulfillmentOrderOpen` mutation. */
@@ -22591,6 +28954,50 @@ export enum FulfillmentOrderReleaseHoldUserErrorCode {
   FulfillmentOrderNotFound = 'FULFILLMENT_ORDER_NOT_FOUND',
   /** The app doesn't have access to release the fulfillment hold. */
   InvalidAccess = 'INVALID_ACCESS'
+}
+
+/** The input fields for the progress report for the fulfillment order. */
+export type FulfillmentOrderReportProgressInput = {
+  /** Additional information for the progress report. */
+  reasonNotes?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Return type for `fulfillmentOrderReportProgress` mutation. */
+export type FulfillmentOrderReportProgressPayload = {
+  __typename?: 'FulfillmentOrderReportProgressPayload';
+  /** The fulfillment order on which a mark as in progress update has been specified. */
+  fulfillmentOrder?: Maybe<FulfillmentOrder>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<FulfillmentOrderReportProgressUserError>;
+};
+
+/** An error that occurs during the execution of `FulfillmentOrderReportProgress`. */
+export type FulfillmentOrderReportProgressUserError = DisplayableError & {
+  __typename?: 'FulfillmentOrderReportProgressUserError';
+  /** The error code. */
+  code?: Maybe<FulfillmentOrderReportProgressUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `FulfillmentOrderReportProgressUserError`. */
+export enum FulfillmentOrderReportProgressUserErrorCode {
+  /** The fulfillment order contains picked items. */
+  FulfillmentOrderContainsPickedItems = 'FULFILLMENT_ORDER_CONTAINS_PICKED_ITEMS',
+  /** Progress cannot be reported for a fulfillment order with this delivery method. */
+  FulfillmentOrderInvalidDeliveryMethod = 'FULFILLMENT_ORDER_INVALID_DELIVERY_METHOD',
+  /** The fulfillment order is not assigned to the requesting fulfillment service. */
+  FulfillmentOrderInvalidFulfillmentServiceOwnership = 'FULFILLMENT_ORDER_INVALID_FULFILLMENT_SERVICE_OWNERSHIP',
+  /** The fulfillment order could not be found. */
+  FulfillmentOrderNotFound = 'FULFILLMENT_ORDER_NOT_FOUND',
+  /** The fulfillment order status is invalid. */
+  FulfillmentOrderStatusInvalid = 'FULFILLMENT_ORDER_STATUS_INVALID',
+  /** The action is not supported for the fulfillment order. */
+  FulfillmentOrderUnsupportedAction = 'FULFILLMENT_ORDER_UNSUPPORTED_ACTION',
+  /** Marketplace apps are not eligible to report progress on fulfillment orders. */
+  MarketplaceAppNotEligible = 'MARKETPLACE_APP_NOT_ELIGIBLE'
 }
 
 /** The request status of a fulfillment order. */
@@ -22962,14 +29369,6 @@ export type FulfillmentService = {
   inventoryManagement: Scalars['Boolean']['output'];
   /** Location associated with the fulfillment service. */
   location?: Maybe<Location>;
-  /**
-   * Whether the fulfillment service can stock inventory alongside other locations.
-   * @deprecated Fulfillment services are all migrating to permit SKU sharing.
-   * Setting permits SKU sharing to false [is no longer supported](https://shopify.dev/changelog/setting-permitsskusharing-argument-to-false-when-creating-a-fulfillment-service-returns-an-error).
-   * As of API version `2026-04` this field will be removed.
-   *
-   */
-  permitsSkuSharing: Scalars['Boolean']['output'];
   /** Whether the fulfillment service requires products to be physically shipped. */
   requiresShippingMethod: Scalars['Boolean']['output'];
   /** The name of the fulfillment service as seen by merchants. */
@@ -23057,11 +29456,11 @@ export type FulfillmentTrackingInfo = {
    *
    * For tracking company names from the list below
    * Shopify will automatically build tracking URLs for all provided tracking numbers,
-   * which will make the tracking numbers clickable in the interface.
+   * which will make the tracking numbers clickable in the interface. This doesn't mean
+   * that Shopify automatically updates the fulfillment's `shipment_status` field in Admin.
    *
-   * Additionally, for the tracking companies listed on the
-   * [Shipping Carriers help page](https://help.shopify.com/manual/shipping/understanding-shipping/shipping-carriers#integrated-shipping-carriers)
-   * Shopify will automatically update the fulfillment's `shipment_status` field during the fulfillment process.
+   * For tracking companies whose `shipment_status` field is updated automatically, see the
+   * [Shipping Carriers help page](https://help.shopify.com/manual/shipping/understanding-shipping/shipping-carriers#integrated-shipping-carriers).
    *
    * ### Supported tracking companies
    *
@@ -23079,6 +29478,7 @@ export type FulfillmentTrackingInfo = {
    *   * Bonshaw
    *   * BPost
    *   * BPost International
+   *   * Better Trucks
    *   * Canada Post
    *   * Canpar
    *   * CDL Last Mile
@@ -23153,9 +29553,11 @@ export type FulfillmentTrackingInfo = {
    *   * Sendle
    *   * SF Express
    *   * SFC Fulfillment
+   *   * ShipBob
    *   * SHREE NANDAN COURIER
    *   * Singapore Post
    *   * Southwest Air Cargo
+   *   * SpeedX
    *   * StarTrack
    *   * Step Forward Freight
    *   * Swiss Post
@@ -23164,6 +29566,7 @@ export type FulfillmentTrackingInfo = {
    *   * TNT
    *   * Toll IPEC
    *   * United Delivery Service
+   *   * Uni Uni
    *   * UPS
    *   * USPS
    *   * Venipak
@@ -23267,12 +29670,12 @@ export type FulfillmentTrackingInput = {
    * If you specify a tracking company name from
    * [the list](https://shopify.dev/api/admin-graphql/latest/objects/FulfillmentTrackingInfo#supported-tracking-companies),
    * Shopify will automatically build tracking URLs for all provided tracking numbers,
-   * which will make the tracking numbers clickable in the interface.
+   * which will make the tracking numbers clickable in the interface. This doesn't mean
+   * that Shopify automatically updates the fulfillment's `shipment_status` field in Admin.
    * The same tracking company will be applied to all tracking numbers specified.
    *
-   * Additionally, for the tracking companies listed on the
-   * [Shipping Carriers help page](https://help.shopify.com/manual/shipping/understanding-shipping/shipping-carriers#integrated-shipping-carriers)
-   * Shopify will automatically update the fulfillment's `shipment_status` field during the fulfillment process.
+   * For tracking companies whose `shipment_status` field is updated automatically, see the
+   * [Shipping Carriers help page](https://help.shopify.com/manual/shipping/understanding-shipping/shipping-carriers#integrated-shipping-carriers).
    *
    * > Note:
    * > Send the tracking company name exactly as written in
@@ -23379,6 +29782,17 @@ export type FulfillmentV2Input = {
   trackingInfo?: InputMaybe<FulfillmentTrackingInput>;
 };
 
+/** Trace information for a single country-language product feed sync triggered by [`channelFullSync`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/channelFullSync). */
+export type FullSyncTraceInfo = {
+  __typename?: 'FullSyncTraceInfo';
+  /** The country of the product feed that was triggered. */
+  country: CountryCode;
+  /** The language of the product feed that was triggered. */
+  language: LanguageCode;
+  /** The operation ID of a successfully initiated product full sync operation. This field is set to nil when the full sync operation isn't successfully initiated. */
+  operationId?: Maybe<Scalars['ID']['output']>;
+};
+
 /** The App Bridge information for a Shopify Function. */
 export type FunctionsAppBridge = {
   __typename?: 'FunctionsAppBridge';
@@ -23439,6 +29853,8 @@ export type GiftCard = Node & {
   balance: MoneyV2;
   /** The date and time at which the gift card was created. */
   createdAt: Scalars['DateTime']['output'];
+  /** The strategy used to convert the gift card's balance when it's redeemed in a currency other than the one it was issued in. */
+  crossCurrencyRedemptionStrategy: GiftCardCrossCurrencyRedemptionStrategy;
   /** The customer who will receive the gift card. */
   customer?: Maybe<Customer>;
   /** The date and time at which the gift card was deactivated. */
@@ -23451,8 +29867,12 @@ export type GiftCard = Node & {
   id: Scalars['ID']['output'];
   /** The initial value of the gift card. */
   initialValue: MoneyV2;
+  /** Whether the gift card is redeemable in any active market currency. */
+  isRedeemable: Scalars['Boolean']['output'];
   /** The final four characters of the gift card code. */
   lastCharacters: Scalars['String']['output'];
+  /** The line item from an order that initiated the creation of this gift card. This value is `null` if the gift card was issued manually. */
+  lineItem?: Maybe<LineItem>;
   /** The gift card code. Everything but the final four characters is masked. */
   maskedCode: Scalars['String']['output'];
   /** The note associated with the gift card, which isn't visible to the customer. */
@@ -23485,14 +29905,71 @@ export type GiftCardTransactionsArgs = {
   reverse?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+/** A cash out transaction where the gift card balance was redeemed for cash. */
+export type GiftCardCashOutTransaction = GiftCardTransaction & HasMetafields & Node & {
+  __typename?: 'GiftCardCashOutTransaction';
+  /** The amount of the transaction. */
+  amount: MoneyV2;
+  /** The gift card that the transaction belongs to. */
+  giftCard: GiftCard;
+  /** A globally-unique ID. */
+  id: Scalars['ID']['output'];
+  /**
+   * A [custom field](https://shopify.dev/docs/apps/build/custom-data),
+   * including its `namespace` and `key`, that's associated with a Shopify resource
+   * for the purposes of adding and storing additional information.
+   */
+  metafield?: Maybe<Metafield>;
+  /**
+   * A list of [custom fields](https://shopify.dev/docs/apps/build/custom-data)
+   * that a merchant associates with a Shopify resource.
+   */
+  metafields: MetafieldConnection;
+  /** A note about the transaction. */
+  note?: Maybe<Scalars['String']['output']>;
+  /** The date and time when the transaction was processed. */
+  processedAt: Scalars['DateTime']['output'];
+};
+
+
+/** A cash out transaction where the gift card balance was redeemed for cash. */
+export type GiftCardCashOutTransactionMetafieldArgs = {
+  key: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** A cash out transaction where the gift card balance was redeemed for cash. */
+export type GiftCardCashOutTransactionMetafieldsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  keys?: InputMaybe<Array<Scalars['String']['input']>>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 /** Represents information about the configuration of gift cards on the shop. */
 export type GiftCardConfiguration = {
   __typename?: 'GiftCardConfiguration';
+  /** The default expiration configuration of gift cards on the shop. This field is null if the shop hasn't set a default expiration for gift cards. */
+  expirationConfiguration?: Maybe<GiftCardExpirationConfiguration>;
   /** The issue limit for gift cards in the default shop currency. */
   issueLimit: MoneyV2;
   /** The purchase limit for gift cards in the default shop currency. */
   purchaseLimit: MoneyV2;
 };
+
+/** The supported units for gift card expiration. */
+export enum GiftCardConfigurationExpirationUnit {
+  /** Gift cards expire in days. */
+  Days = 'DAYS',
+  /** Gift cards expire in months. */
+  Months = 'MONTHS',
+  /** Gift cards expire in years. */
+  Years = 'YEARS'
+}
 
 /** An auto-generated type for paginating through multiple GiftCards. */
 export type GiftCardConnection = {
@@ -23512,12 +29989,14 @@ export type GiftCardCreateInput = {
    * It isn't case sensitive. If not provided, then a random code will be generated.
    */
   code?: InputMaybe<Scalars['String']['input']>;
+  /** The strategy used to convert the gift card's balance when it's redeemed in a currency other than the one it was issued in. When not provided, defaults to `MARKET_FX` for gift cards issued in the shop's currency, and `NONE` for gift cards issued in a different currency. */
+  crossCurrencyRedemptionStrategy?: InputMaybe<GiftCardCrossCurrencyRedemptionStrategy>;
   /** The ID of the customer who will receive the gift card. Requires `write_customers` access_scope. */
   customerId?: InputMaybe<Scalars['ID']['input']>;
   /** The date at which the gift card will expire. If not provided, then the gift card will never expire. */
   expiresOn?: InputMaybe<Scalars['Date']['input']>;
-  /** The initial value of the gift card. */
-  initialValue: Scalars['Decimal']['input'];
+  /** The initial amount of the gift card. */
+  initialAmount?: InputMaybe<MoneyInput>;
   /** The note associated with the gift card, which isn't visible to the customer. */
   note?: InputMaybe<Scalars['String']['input']>;
   /** The recipient attributes of the gift card. */
@@ -23604,6 +30083,16 @@ export type GiftCardCreditTransactionMetafieldsArgs = {
   namespace?: InputMaybe<Scalars['String']['input']>;
   reverse?: InputMaybe<Scalars['Boolean']['input']>;
 };
+
+/** The strategy used to convert the gift card's balance when it is redeemed in a currency other than the one it was issued in. */
+export enum GiftCardCrossCurrencyRedemptionStrategy {
+  /** The gift card is redeemed using the automatic or manual exchange rate configured in the market's currency setting when converting from shop currency. Only applicable for gift cards issued in the shop currency. */
+  MarketFx = 'MARKET_FX',
+  /** The gift card can only be redeemed in the currency it was issued in. It cannot be used for purchases in other currencies. */
+  None = 'NONE',
+  /** The gift card is redeemed using standard spot exchange rates between the redemption currency and the gift card currency. */
+  SpotFx = 'SPOT_FX'
+}
 
 /** Return type for `giftCardDeactivate` mutation. */
 export type GiftCardDeactivatePayload = {
@@ -23727,6 +30216,279 @@ export enum GiftCardErrorCode {
   /** The input value is too short. */
   TooShort = 'TOO_SHORT'
 }
+
+/** Represents the default expiration configuration of gift cards on the shop. */
+export type GiftCardExpirationConfiguration = {
+  __typename?: 'GiftCardExpirationConfiguration';
+  /** The unit for the default gift card expiration. */
+  expirationUnit: GiftCardConfigurationExpirationUnit;
+  /** The value for the default gift card expiration. */
+  expirationValue: Scalars['Int']['output'];
+};
+
+/**
+ * The input fields for creating or updating a gift card product with the
+ * [`giftCardProductSet`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/giftCardProductSet)
+ * mutation.
+ *
+ * For list fields like
+ * [`variants`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/giftCardProductSet#arguments-input.fields.variants),
+ * the mutation creates new entries, updates existing ones, and deletes any entries not included
+ * in the input. All other fields update only when explicitly provided, leaving omitted fields
+ * unchanged.
+ */
+export type GiftCardProductSetInput = {
+  /** The IDs of collections that this product will be a member of. */
+  collections?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /**
+   * Whether gift cards fulfilled from this product are redeemable in any payment currency supported by the store.
+   *
+   * > Note
+   * > This value can't be changed after the product is created.
+   */
+  crossCurrencyRedeemable?: InputMaybe<Scalars['Boolean']['input']>;
+  /**
+   * The description of the product, with HTML tags.
+   * For example, the description might include bold `<strong></strong>` and italic `<i></i>` text.
+   */
+  descriptionHtml?: InputMaybe<Scalars['String']['input']>;
+  /**
+   * The files to associate with the product.
+   *
+   * Complexity cost: 1.9 per file.
+   */
+  files?: InputMaybe<Array<FileSetInput>>;
+  /** The [theme template](https://shopify.dev/docs/storefronts/themes/architecture/templates) that's used when customers view a gift card in a store. */
+  giftCardTemplateSuffix?: InputMaybe<Scalars['String']['input']>;
+  /**
+   * A unique, human-readable string that's used to identify the product in URLs. A handle can contain letters, hyphens (`-`), and numbers, but no spaces.
+   * If no handle is explicitly provided, then the title is used to construct the product's handle.
+   * For example, if a product is titled "Black Sunglasses" and no handle is provided, then the handle `black-sunglasses` is generated (unless that handle
+   * is already taken, in which case a suffix is added to make the handle unique).
+   */
+  handle?: InputMaybe<Scalars['String']['input']>;
+  /**
+   * The issuance currency for gift cards fulfilled from this product.
+   *
+   * > Note
+   * > This value can't be changed after the product is created.
+   */
+  issuanceCurrency?: InputMaybe<CurrencyCode>;
+  /**
+   * The metafields to associate with this product.
+   *
+   * Complexity cost: 0.4 per metafield.
+   */
+  metafields?: InputMaybe<Array<MetafieldInput>>;
+  /** List of custom product options and option values (maximum of 3 per product). */
+  productOptions?: InputMaybe<Array<OptionSetInput>>;
+  /**
+   * The [product type](https://help.shopify.com/manual/products/details/product-type)
+   * that merchants define.
+   */
+  productType?: InputMaybe<Scalars['String']['input']>;
+  /**
+   * Whether a redirect is required after a new handle has been provided.
+   * If `true`, then the old handle is redirected to the new one automatically.
+   */
+  redirectNewHandle?: InputMaybe<Scalars['Boolean']['input']>;
+  /**
+   * The [SEO title and description](https://help.shopify.com/manual/promoting-marketing/seo/adding-keywords)
+   * that are associated with a product.
+   */
+  seo?: InputMaybe<SeoInput>;
+  /** The status of the product. */
+  status?: InputMaybe<ProductStatus>;
+  /**
+   * A list of searchable keywords that are
+   * associated with the product. For example, a merchant might apply the `sports`
+   * and `summer` tags to products that are associated with sportwear for summer.
+   *
+   * Updating `tags` overwrites any existing tags that were previously added to the product.
+   * To add new tags without overwriting existing tags, use the
+   * [`tagsAdd`](https://shopify.dev/api/admin-graphql/latest/mutations/tagsadd)
+   * mutation.
+   */
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** The [theme template](https://shopify.dev/docs/storefronts/themes/architecture/templates) that's used when customers view a product in a store. */
+  templateSuffix?: InputMaybe<Scalars['String']['input']>;
+  /**
+   * The name for the product that displays to customers. If no handle is explicitly provided, then the title is used to construct the product's handle.
+   * For example, if a product is titled "Black Sunglasses" and no handle is provided, then the handle `black-sunglasses` is generated.
+   */
+  title?: InputMaybe<Scalars['String']['input']>;
+  /**
+   * A list of variants associated with the gift card product.
+   *
+   * Complexity cost: 0.2 per variant.
+   */
+  variants?: InputMaybe<Array<GiftCardProductVariantSetInput>>;
+  /** The name of the product's vendor. */
+  vendor?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Return type for `giftCardProductSet` mutation. */
+export type GiftCardProductSetPayload = {
+  __typename?: 'GiftCardProductSetPayload';
+  /** The gift card product object. */
+  product?: Maybe<Product>;
+  /** The product set operation, returned when run in asynchronous mode. */
+  productSetOperation?: Maybe<ProductSetOperation>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<GiftCardProductSetUserError>;
+};
+
+/** Defines errors for GiftCardProductSet mutation. */
+export type GiftCardProductSetUserError = DisplayableError & {
+  __typename?: 'GiftCardProductSetUserError';
+  /** The error code. */
+  code?: Maybe<GiftCardProductSetUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `GiftCardProductSetUserError`. */
+export enum GiftCardProductSetUserErrorCode {
+  /** An option cannot have both metafield linked and nonlinked option values. */
+  CannotCombineLinkedAndNonlinkedOptionValues = 'CANNOT_COMBINE_LINKED_AND_NONLINKED_OPTION_VALUES',
+  /** The metafield violates a capability restriction. */
+  CapabilityViolation = 'CAPABILITY_VIOLATION',
+  /** Duplicated metafield value for linked option. */
+  DuplicatedMetafieldValue = 'DUPLICATED_METAFIELD_VALUE',
+  /** Duplicated option name. */
+  DuplicatedOptionName = 'DUPLICATED_OPTION_NAME',
+  /** Duplicated option value. */
+  DuplicatedOptionValue = 'DUPLICATED_OPTION_VALUE',
+  /** Duplicated value. */
+  DuplicatedValue = 'DUPLICATED_VALUE',
+  /** Cannot link multiple options to the same metafield. */
+  DuplicateLinkedOption = 'DUPLICATE_LINKED_OPTION',
+  /** Something went wrong, please try again. */
+  GenericError = 'GENERIC_ERROR',
+  /** Gift card products can only be created after they have been activated. */
+  GiftCardsNotActivated = 'GIFT_CARDS_NOT_ACTIVATED',
+  /** The product gift_card attribute cannot be changed after creation. */
+  GiftCardAttributeCannotBeChanged = 'GIFT_CARD_ATTRIBUTE_CANNOT_BE_CHANGED',
+  /** Handle already in use. Please provide a new handle. */
+  HandleNotUnique = 'HANDLE_NOT_UNIQUE',
+  /** The id field is not allowed if identifier is provided. */
+  IdNotAllowed = 'ID_NOT_ALLOWED',
+  /** The identifier value does not match the value of the corresponding field in the input. */
+  InputMismatch = 'INPUT_MISMATCH',
+  /** Input is not valid. */
+  InvalidInput = 'INVALID_INPUT',
+  /** Metafield is not valid. */
+  InvalidMetafield = 'INVALID_METAFIELD',
+  /** Invalid metafield value for linked option. */
+  InvalidMetafieldValueForLinkedOption = 'INVALID_METAFIELD_VALUE_FOR_LINKED_OPTION',
+  /** Product is not valid. */
+  InvalidProduct = 'INVALID_PRODUCT',
+  /** Product variant is not valid. */
+  InvalidVariant = 'INVALID_VARIANT',
+  /** Error processing request in the background job. */
+  JobError = 'JOB_ERROR',
+  /** No valid metafield definition found for linked option. */
+  LinkedMetafieldDefinitionNotFound = 'LINKED_METAFIELD_DEFINITION_NOT_FOUND',
+  /** Linked options are currently not supported for this shop. */
+  LinkedOptionsNotSupportedForShop = 'LINKED_OPTIONS_NOT_SUPPORTED_FOR_SHOP',
+  /** The input argument `metafields` (if present) must contain the `customId` value. */
+  MetafieldMismatch = 'METAFIELD_MISMATCH',
+  /** The input field corresponding to the identifier is required. */
+  MissingFieldRequired = 'MISSING_FIELD_REQUIRED',
+  /** Resource matching the identifier was not found. */
+  NotFound = 'NOT_FOUND',
+  /** Options over limit. */
+  OptionsOverLimit = 'OPTIONS_OVER_LIMIT',
+  /** Option does not exist. */
+  OptionDoesNotExist = 'OPTION_DOES_NOT_EXIST',
+  /** Each option must have at least one option value specified. */
+  OptionValuesMissing = 'OPTION_VALUES_MISSING',
+  /** Option values over limit. */
+  OptionValuesOverLimit = 'OPTION_VALUES_OVER_LIMIT',
+  /** Option value does not exist. */
+  OptionValueDoesNotExist = 'OPTION_VALUE_DOES_NOT_EXIST',
+  /** Product does not exist. */
+  ProductDoesNotExist = 'PRODUCT_DOES_NOT_EXIST',
+  /** The specified product is not a gift card. The giftCardProductSet mutation can only be used with gift card products. */
+  ProductMustBeGiftCard = 'PRODUCT_MUST_BE_GIFT_CARD',
+  /** Must specify product options when updating variants. */
+  ProductOptionsInputMissing = 'PRODUCT_OPTIONS_INPUT_MISSING',
+  /** Product is suspended. */
+  ProductSuspended = 'PRODUCT_SUSPENDED',
+  /** Product variant does not exist. */
+  ProductVariantDoesNotExist = 'PRODUCT_VARIANT_DOES_NOT_EXIST',
+  /** Must specify variants when updating options. */
+  VariantsInputMissing = 'VARIANTS_INPUT_MISSING',
+  /** Number of product variants exceeds shop limit. */
+  VariantsOverLimit = 'VARIANTS_OVER_LIMIT'
+}
+
+/**
+ * The gift card configuration settings for a
+ * [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product),
+ * including the
+ * [`issuanceCurrency`](https://shopify.dev/docs/api/admin-graphql/latest/objects/GiftCardProductSettings#field-GiftCardProductSettings.fields.issuanceCurrency)
+ * and whether the gift card can be redeemed across currencies via
+ * [`crossCurrencyRedeemable`](https://shopify.dev/docs/api/admin-graphql/latest/objects/GiftCardProductSettings#field-GiftCardProductSettings.fields.crossCurrencyRedeemable).
+ * Configure these settings when creating a gift card product with the
+ * [`giftCardProductSet`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/giftCardProductSet)
+ * mutation.
+ */
+export type GiftCardProductSettings = {
+  __typename?: 'GiftCardProductSettings';
+  /** Whether the gift card can be redeemed in currencies other than the issuance currency. */
+  crossCurrencyRedeemable: Scalars['Boolean']['output'];
+  /**
+   * The currency in which the gift card fulfilled by this product is issued.
+   * When this field isn't set the gift card will be issued in the shop's currency, the return value of this field will be `null`.
+   * When this field is set the gift card product can only be purchased in the issuance currency. A checkout violation will prevent purchases if the checkout currency doesn't match the issuance currency.
+   * Extra care should be taken to only publish a gift card product with an issuance currency in markets where that currency can be guaranteed.
+   */
+  issuanceCurrency?: Maybe<CurrencyCode>;
+};
+
+/**
+ * The input fields for specifying a gift card product variant to create or update with the
+ * [`giftCardProductSet`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/giftCardProductSet)
+ * mutation.
+ *
+ * Include an
+ * [`id`](https://shopify.dev/docs/api/admin-graphql/latest/input-objects/GiftCardProductSetVariantInput#field-GiftCardProductSetVariantInput.fields.id)
+ * to update an existing variant, or omit it to create a new one. Gift card variant defaults are
+ * applied automatically, meaning variants are set to non-taxable, don't require shipping, and their inventory is untracked.
+ */
+export type GiftCardProductVariantSetInput = {
+  /** The value of the barcode associated with the product. */
+  barcode?: InputMaybe<Scalars['String']['input']>;
+  /**
+   * The file to associate with the variant.
+   *
+   * Complexity cost: 0.6 per variant file.
+   *
+   * Any file specified here must also be specified in the `files` input for the product.
+   */
+  file?: InputMaybe<FileSetInput>;
+  /** Specifies the product variant to update or create a new variant if absent. */
+  id?: InputMaybe<Scalars['ID']['input']>;
+  /**
+   * Additional customizable information about the product variant.
+   *
+   * Complexity cost: 0.4 per variant metafield.
+   */
+  metafields?: InputMaybe<Array<MetafieldInput>>;
+  /** The custom properties that a shop owner uses to define product variants. */
+  optionValues: Array<VariantOptionValueInput>;
+  /** The order of the product variant in the list of product variants. The first position in the list is 1. */
+  position?: InputMaybe<Scalars['Int']['input']>;
+  /** The price of the variant. */
+  price?: InputMaybe<Scalars['Money']['input']>;
+  /** Indicates whether the product variant is created as published or unpublished. This option is only available for new product variants. */
+  published?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The SKU for the variant. Case-sensitive string. */
+  sku?: InputMaybe<Scalars['String']['input']>;
+};
 
 /** Represents a recipient who will receive the issued gift card. */
 export type GiftCardRecipient = {
@@ -23957,6 +30719,8 @@ export enum GiftCardTransactionUserErrorCode {
 
 /** The input fields to update a gift card. */
 export type GiftCardUpdateInput = {
+  /** The strategy used to convert the gift card's balance when it's redeemed in a currency other than the one it was issued in. */
+  crossCurrencyRedemptionStrategy?: InputMaybe<GiftCardCrossCurrencyRedemptionStrategy>;
   /** The ID of the customer who will receive the gift card. The ID can't be changed if the gift card already has an assigned customer ID. */
   customerId?: InputMaybe<Scalars['ID']['input']>;
   /** The date at which the gift card will expire. If set to `null`, then the gift card will never expire. */
@@ -24157,6 +30921,21 @@ export type HasStoreCreditAccountsStoreCreditAccountsArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   query?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Represents a customer's identity provider subject identifier. */
+export type IdentityProviderSubject = Node & {
+  __typename?: 'IdentityProviderSubject';
+  /** The date and time when the provider subject was created. */
+  createdAt: Scalars['DateTime']['output'];
+  /** A globally-unique ID for the provider subject. */
+  id: Scalars['ID']['output'];
+  /** The merchant-configured name of the third-party identity provider. */
+  providerName?: Maybe<Scalars['String']['output']>;
+  /** The unique subject identifier assigned to the customer by the authentication provider. */
+  subject: Scalars['String']['output'];
+  /** The date and time when the provider subject was last updated. */
+  updatedAt: Scalars['DateTime']['output'];
 };
 
 /** Represents an image resource. */
@@ -24442,6 +31221,14 @@ export type InventoryAdjustQuantitiesUserError = DisplayableError & {
 export enum InventoryAdjustQuantitiesUserErrorCode {
   /** The quantities couldn't be adjusted. Try again. */
   AdjustQuantitiesFailed = 'ADJUST_QUANTITIES_FAILED',
+  /** The changeFromQuantity argument no longer matches the persisted quantity. */
+  ChangeFromQuantityStale = 'CHANGE_FROM_QUANTITY_STALE',
+  /** This request is currently in progress, please try again. */
+  IdempotencyConcurrentRequest = 'IDEMPOTENCY_CONCURRENT_REQUEST',
+  /** The same idempotency key cannot be used with different operation parameters. */
+  IdempotencyKeyParameterMismatch = 'IDEMPOTENCY_KEY_PARAMETER_MISMATCH',
+  /** A previous request with this idempotency key failed. Retry with a new idempotency key. */
+  IdempotencyPreviousAttemptFailed = 'IDEMPOTENCY_PREVIOUS_ATTEMPT_FAILED',
   /** Internal (gid://shopify/) ledger documents are not allowed to be adjusted via API. */
   InternalLedgerDocument = 'INTERNAL_LEDGER_DOCUMENT',
   /** A ledger document URI is not allowed when adjusting available. */
@@ -24469,7 +31256,9 @@ export enum InventoryAdjustQuantitiesUserErrorCode {
   /** All changes must have the same ledger document URI or, in the case of adjusting available, no ledger document URI. */
   MaxOneLedgerDocument = 'MAX_ONE_LEDGER_DOCUMENT',
   /** The specified inventory item is not allowed to be adjusted via API. Example: if the inventory item is a parent bundle. */
-  NonMutableInventoryItem = 'NON_MUTABLE_INVENTORY_ITEM'
+  NonMutableInventoryItem = 'NON_MUTABLE_INVENTORY_ITEM',
+  /** The service is temporarily unavailable. Try again later. */
+  ServiceUnavailable = 'SERVICE_UNAVAILABLE'
 }
 
 /**
@@ -24510,6 +31299,16 @@ export type InventoryAdjustmentGroupChangesArgs = {
   inventoryItemIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   locationIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   quantityNames?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** The input fields required to adjust the available quantity of a product variant at a location. */
+export type InventoryAdjustmentInput = {
+  /** The adjustment of the available quantity at the location. If the value is `null`, then the product variant is no longer stocked at the location. */
+  adjustment?: InputMaybe<Scalars['Int']['input']>;
+  /** The quantity to compare against before applying the delta. This field is mandatory- you must explicitly pass in a value (even if it's `null`), or else you will get an error. */
+  changeFromQuantity?: InputMaybe<Scalars['Int']['input']>;
+  /** The ID of the location where the available quantity should be adjusted. */
+  locationId: Scalars['ID']['input'];
 };
 
 /** The input fields to specify whether the inventory item should be activated or not at the specified location. */
@@ -24603,6 +31402,17 @@ export type InventoryChange = {
 
 /** The input fields for the change to be made to an inventory item at a location. */
 export type InventoryChangeInput = {
+  /**
+   * The quantity currently expected at this location, before the delta is applied.
+   *
+   * This field enables a compare-and-swap (CAS) safety check. If the location’s current quantity doesn't match the value you provide, then the mutation fails with a `CHANGE_FROM_QUANTITY_STALE` error. This prevents unintended overwrites when the request is based on stale inventory data.
+   *
+   * To skip the CAS check, pass `null`. Use this only when your system is the source of truth for this inventory and you don’t need to protect against concurrent updates.
+   * This field is mandatory: you must explicitly pass in a value, even if that value is `null`, or the mutation returns an error.
+   *
+   * For more information, refer to the [compare and swap documentation](https://shopify.dev/docs/apps/build/orders-fulfillment/inventory-management-apps/manage-quantities-states#compare-and-swap).
+   */
+  changeFromQuantity?: InputMaybe<Scalars['Int']['input']>;
   /** The amount by which the inventory quantity will be changed. */
   delta: Scalars['Int']['input'];
   /** Specifies the inventory item to which the change will be applied. */
@@ -24677,8 +31487,13 @@ export type InventoryItem = LegacyInteroperability & Node & {
   unitCost?: Maybe<MoneyV2>;
   /** The date and time when the inventory item was updated. */
   updatedAt: Scalars['DateTime']['output'];
-  /** The variant that owns this inventory item. */
+  /**
+   * The variant that owns this inventory item.
+   * @deprecated Use `variants` instead.
+   */
   variant: ProductVariant;
+  /** A paginated list of the variants that reference this inventory item. */
+  variants?: Maybe<ProductVariantConnection>;
 };
 
 
@@ -24702,6 +31517,7 @@ export type InventoryItemCountryHarmonizedSystemCodesArgs = {
  * Learn more about [inventory object relationships](https://shopify.dev/docs/apps/build/orders-fulfillment/inventory-management-apps/manage-quantities-states#inventory-object-relationships).
  */
 export type InventoryItemInventoryLevelArgs = {
+  includeInactive?: InputMaybe<Scalars['Boolean']['input']>;
   locationId: Scalars['ID']['input'];
 };
 
@@ -24715,9 +31531,23 @@ export type InventoryItemInventoryLevelsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  includeInactive?: InputMaybe<Scalars['Boolean']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   query?: InputMaybe<Scalars['String']['input']>;
   reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * A [product variant's](https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductVariant) inventory information across all locations. The inventory item connects the product variant to its [inventory levels](https://shopify.dev/docs/api/admin-graphql/latest/objects/InventoryLevel) at different locations, tracking stock keeping unit (SKU), whether quantities are tracked, shipping requirements, and customs information for the product.
+ *
+ * Learn more about [inventory object relationships](https://shopify.dev/docs/apps/build/orders-fulfillment/inventory-management-apps/manage-quantities-states#inventory-object-relationships).
+ */
+export type InventoryItemVariantsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** An auto-generated type for paginating through multiple InventoryItems. */
@@ -24803,6 +31633,8 @@ export type InventoryLevel = Node & {
   deactivationAlert?: Maybe<Scalars['String']['output']>;
   /** A globally-unique ID. */
   id: Scalars['ID']['output'];
+  /** Whether the inventory level is active. */
+  isActive: Scalars['Boolean']['output'];
   /** Inventory item associated with the inventory level. */
   item: InventoryItem;
   /** The location associated with the inventory level. */
@@ -24812,7 +31644,10 @@ export type InventoryLevel = Node & {
    * [name](https://shopify.dev/docs/apps/fulfillment/inventory-management-apps#inventory-states).
    */
   quantities: Array<InventoryQuantity>;
-  /** Scheduled changes for the requested quantity names. */
+  /**
+   * Scheduled changes for the requested quantity names.
+   * @deprecated Scheduled changes will be phased out in a future version.
+   */
   scheduledChanges: InventoryScheduledChangeConnection;
   /** The date and time when the inventory level was updated. */
   updatedAt: Scalars['DateTime']['output'];
@@ -24924,8 +31759,16 @@ export type InventoryMoveQuantitiesUserError = DisplayableError & {
 
 /** Possible error codes that can be returned by `InventoryMoveQuantitiesUserError`. */
 export enum InventoryMoveQuantitiesUserErrorCode {
+  /** The changeFromQuantity argument no longer matches the persisted quantity. */
+  ChangeFromQuantityStale = 'CHANGE_FROM_QUANTITY_STALE',
   /** The quantities can't be moved between different locations. */
   DifferentLocations = 'DIFFERENT_LOCATIONS',
+  /** This request is currently in progress, please try again. */
+  IdempotencyConcurrentRequest = 'IDEMPOTENCY_CONCURRENT_REQUEST',
+  /** The same idempotency key cannot be used with different operation parameters. */
+  IdempotencyKeyParameterMismatch = 'IDEMPOTENCY_KEY_PARAMETER_MISMATCH',
+  /** A previous request with this idempotency key failed. Retry with a new idempotency key. */
+  IdempotencyPreviousAttemptFailed = 'IDEMPOTENCY_PREVIOUS_ATTEMPT_FAILED',
   /** Internal (gid://shopify/) ledger documents are not allowed to be adjusted via API. */
   InternalLedgerDocument = 'INTERNAL_LEDGER_DOCUMENT',
   /** A ledger document URI is not allowed when adjusting available. */
@@ -24957,7 +31800,9 @@ export enum InventoryMoveQuantitiesUserErrorCode {
   /** The specified inventory item is not allowed to be adjusted via API. Example: if the inventory item is a parent bundle. */
   NonMutableInventoryItem = 'NON_MUTABLE_INVENTORY_ITEM',
   /** The quantity names for each change can't be the same. */
-  SameQuantityName = 'SAME_QUANTITY_NAME'
+  SameQuantityName = 'SAME_QUANTITY_NAME',
+  /** The service is temporarily unavailable. Try again later. */
+  ServiceUnavailable = 'SERVICE_UNAVAILABLE'
 }
 
 /**
@@ -24978,6 +31823,17 @@ export type InventoryMoveQuantityChange = {
 
 /** The input fields representing the change to be made to an inventory item at a location. */
 export type InventoryMoveQuantityTerminalInput = {
+  /**
+   * The quantity currently expected at this location, before the move is applied.
+   *
+   * This field enables a compare-and-swap (CAS) safety check. If the location’s current quantity doesn't match the value you provide, then the mutation fails with a `CHANGE_FROM_QUANTITY_STALE` error. This helps prevent unintended overwrites when the request is based on stale inventory data.
+   *
+   * To skip the CAS check, pass `null`. Use this only when your system is the source of truth for this inventory and you don’t need to protect against concurrent updates.
+   * This field is mandatory: you must explicitly pass in a value, even if that value is `null`, or the mutation returns an error.
+   *
+   * For more information, refer to the [compare and swap documentation](https://shopify.dev/docs/apps/build/orders-fulfillment/inventory-management-apps/manage-quantities-states#compare-and-swap).
+   */
+  changeFromQuantity?: InputMaybe<Scalars['Int']['input']>;
   /**
    * A non-Shopify URI that identifies what specific inventory transaction or ledger entry was changed. Represents the exact inventory movement being referenced, distinct from the business reason for the change.
    *
@@ -25038,6 +31894,17 @@ export type InventoryQuantity = Node & {
 
 /** The input fields for the quantity to be set for an inventory item at a location. */
 export type InventoryQuantityInput = {
+  /**
+   * The quantity currently expected at this location, before setting the new quantity.
+   *
+   * This field enables a compare-and-swap (CAS) safety check. If the location’s current quantity doesn't match the value you provide, then the mutation fails with a `CHANGE_FROM_QUANTITY_STALE` error. This helps prevent unintended overwrites when the request is based on stale inventory data.
+   *
+   * To skip the CAS check, pass `null`. Use this only when your system is the source of truth for this inventory and you don’t need to protect against concurrent updates.
+   * This field is mandatory: you must explicitly pass in a value, even if that value is `null`, or the mutation returns an error.
+   *
+   * For more information, refer to the [compare and swap documentation](https://shopify.dev/docs/apps/build/orders-fulfillment/inventory-management-apps/manage-quantities-states#compare-and-swap).
+   */
+  changeFromQuantity?: InputMaybe<Scalars['Int']['input']>;
   /** Specifies the inventory item to which the quantity will be set. */
   inventoryItemId: Scalars['ID']['input'];
   /** Specifies the location at which the quantity will be set. */
@@ -25110,48 +31977,6 @@ export type InventoryScheduledChangeEdge = {
   node: InventoryScheduledChange;
 };
 
-/** The input fields for a scheduled change of an inventory item. */
-export type InventoryScheduledChangeInput = {
-  /** The date and time that the scheduled change is expected to happen. */
-  expectedAt: Scalars['DateTime']['input'];
-  /**
-   * The quantity
-   * [name](https://shopify.dev/docs/apps/fulfillment/inventory-management-apps/quantities-states#move-inventory-quantities-between-states)
-   * to transition from.
-   */
-  fromName: Scalars['String']['input'];
-  /**
-   * The quantity
-   * [name](https://shopify.dev/docs/apps/fulfillment/inventory-management-apps/quantities-states#move-inventory-quantities-between-states)
-   * to transition to.
-   */
-  toName: Scalars['String']['input'];
-};
-
-/** The input fields for the inventory item associated with the scheduled changes that need to be applied. */
-export type InventoryScheduledChangeItemInput = {
-  /** The ID of the inventory item. */
-  inventoryItemId: Scalars['ID']['input'];
-  /**
-   * A non-Shopify URI that identifies what specific inventory transaction or ledger entry was changed. Represents the exact inventory movement being referenced, distinct from the business reason for the change.
-   *
-   * Preferred format - Global ID (GID): gid://[your-app-name]/[transaction-type]/[id]
-   *
-   * Examples:
-   * - gid://warehouse-app/InventoryTransaction/TXN-2024-001 (specific transaction)
-   * - gid://3pl-system/StockMovement/SM-2024-0125 (stock movement record)
-   * - gid://pos-app/InventoryUpdate/UPD-98765 (POS inventory update)
-   * - gid://erp-connector/LedgerEntry/LE-2024-11-21-001 (ledger entry)
-   *
-   * Requirements: Valid non-Shopify URI with scheme and content. Cannot use gid://shopify/* format.
-   */
-  ledgerDocumentUri: Scalars['URL']['input'];
-  /** The ID of the location. */
-  locationId: Scalars['ID']['input'];
-  /** An array of all the scheduled changes for the item. */
-  scheduledChanges: Array<InventoryScheduledChangeInput>;
-};
-
 /** The input fields required to set inventory on hand quantities. */
 export type InventorySetOnHandQuantitiesInput = {
   /**
@@ -25204,8 +32029,16 @@ export type InventorySetOnHandQuantitiesUserError = DisplayableError & {
 
 /** Possible error codes that can be returned by `InventorySetOnHandQuantitiesUserError`. */
 export enum InventorySetOnHandQuantitiesUserErrorCode {
+  /** The changeFromQuantity argument no longer matches the persisted quantity. */
+  ChangeFromQuantityStale = 'CHANGE_FROM_QUANTITY_STALE',
   /** The compareQuantity value does not match persisted value. */
   CompareQuantityStale = 'COMPARE_QUANTITY_STALE',
+  /** This request is currently in progress, please try again. */
+  IdempotencyConcurrentRequest = 'IDEMPOTENCY_CONCURRENT_REQUEST',
+  /** The same idempotency key cannot be used with different operation parameters. */
+  IdempotencyKeyParameterMismatch = 'IDEMPOTENCY_KEY_PARAMETER_MISMATCH',
+  /** A previous request with this idempotency key failed. Retry with a new idempotency key. */
+  IdempotencyPreviousAttemptFailed = 'IDEMPOTENCY_PREVIOUS_ATTEMPT_FAILED',
   /** The specified inventory item could not be found. */
   InvalidInventoryItem = 'INVALID_INVENTORY_ITEM',
   /** The specified location could not be found. */
@@ -25222,6 +32055,8 @@ export enum InventorySetOnHandQuantitiesUserErrorCode {
   ItemNotStockedAtLocation = 'ITEM_NOT_STOCKED_AT_LOCATION',
   /** The specified inventory item is not allowed to be adjusted via API. Example: if the inventory item is a parent bundle. */
   NonMutableInventoryItem = 'NON_MUTABLE_INVENTORY_ITEM',
+  /** The service is temporarily unavailable. Try again later. */
+  ServiceUnavailable = 'SERVICE_UNAVAILABLE',
   /** The on-hand quantities couldn't be set. Try again. */
   SetOnHandQuantitiesFailed = 'SET_ON_HAND_QUANTITIES_FAILED'
 }
@@ -25280,10 +32115,18 @@ export type InventorySetQuantitiesUserError = DisplayableError & {
 
 /** Possible error codes that can be returned by `InventorySetQuantitiesUserError`. */
 export enum InventorySetQuantitiesUserErrorCode {
+  /** The changeFromQuantity value does not match persisted value. */
+  ChangeFromQuantityStale = 'CHANGE_FROM_QUANTITY_STALE',
   /** The compareQuantity argument must be given to each quantity or ignored using ignoreCompareQuantity. */
   CompareQuantityRequired = 'COMPARE_QUANTITY_REQUIRED',
   /** The compareQuantity value does not match persisted value. */
   CompareQuantityStale = 'COMPARE_QUANTITY_STALE',
+  /** This request is currently in progress, please try again. */
+  IdempotencyConcurrentRequest = 'IDEMPOTENCY_CONCURRENT_REQUEST',
+  /** The same idempotency key cannot be used with different operation parameters. */
+  IdempotencyKeyParameterMismatch = 'IDEMPOTENCY_KEY_PARAMETER_MISMATCH',
+  /** A previous request with this idempotency key failed. Retry with a new idempotency key. */
+  IdempotencyPreviousAttemptFailed = 'IDEMPOTENCY_PREVIOUS_ATTEMPT_FAILED',
   /** The specified inventory item could not be found. */
   InvalidInventoryItem = 'INVALID_INVENTORY_ITEM',
   /** The specified location could not be found. */
@@ -25310,6 +32153,8 @@ export enum InventorySetQuantitiesUserErrorCode {
 
 /** The input fields for the quantity to be set for an inventory item at a location. */
 export type InventorySetQuantityInput = {
+  /** The current quantity to be compared against the persisted quantity. This field is mandatory- you must explicitly pass in a value (even if it's `null`), or else you will get an error. For more information, refer to the [Compare and Swap documentation](https://shopify.dev/docs/apps/build/orders-fulfillment/inventory-management-apps/manage-quantities-states#compare-and-swap). */
+  changeFromQuantity?: InputMaybe<Scalars['Int']['input']>;
   /** Specifies the inventory item to which the quantity will be set. */
   inventoryItemId: Scalars['ID']['input'];
   /** Specifies the location at which the quantity will be set. */
@@ -25318,86 +32163,11 @@ export type InventorySetQuantityInput = {
   quantity: Scalars['Int']['input'];
 };
 
-/** The input fields for setting up scheduled changes of inventory items. */
-export type InventorySetScheduledChangesInput = {
-  /** The list of all the items on which the scheduled changes need to be applied. */
-  items: Array<InventoryScheduledChangeItemInput>;
-  /** The reason for setting up the scheduled changes. */
-  reason: Scalars['String']['input'];
-  /**
-   * A URI that represents why the inventory change happened, identifying the source system and document that caused this adjustment. Enables complete audit trails and brand visibility in Shopify admin inventory history.
-   *
-   * Preferred format - Global ID (GID): gid://[your-app-name]/[entity-type]/[id]
-   *
-   * Examples:
-   * - gid://warehouse-app/PurchaseOrder/PO-2024-001 (stock received)
-   * - gid://3pl-system/CycleCount/CC-2024-0125 (cycle count adjustment)
-   * - gid://pos-app/Transaction/TXN-98765 (in-store sale)
-   * - gid://erp-connector/SyncJob/SYNC-2024-11-21-001 (ERP sync)
-   * - gid://shopify/Order/1234567890 (Shopify order reference)
-   *
-   * Benefits: Your app name appears directly in merchant inventory history, reducing support tickets and providing clear audit trails for compliance.
-   *
-   * Alternative formats (also supported): https://myapp.com/documents/12345, custom-scheme://identifier
-   *
-   * Requirements: Valid URI with scheme and content. For GID format, all components (app, entity, id) must be present.
-   */
-  referenceDocumentUri: Scalars['URL']['input'];
-};
-
-/** Return type for `inventorySetScheduledChanges` mutation. */
-export type InventorySetScheduledChangesPayload = {
-  __typename?: 'InventorySetScheduledChangesPayload';
-  /** The scheduled changes that were created. */
-  scheduledChanges?: Maybe<Array<InventoryScheduledChange>>;
-  /** The list of errors that occurred from executing the mutation. */
-  userErrors: Array<InventorySetScheduledChangesUserError>;
-};
-
-/** An error that occurs during the execution of `InventorySetScheduledChanges`. */
-export type InventorySetScheduledChangesUserError = DisplayableError & {
-  __typename?: 'InventorySetScheduledChangesUserError';
-  /** The error code. */
-  code?: Maybe<InventorySetScheduledChangesUserErrorCode>;
-  /** The path to the input field that caused the error. */
-  field?: Maybe<Array<Scalars['String']['output']>>;
-  /** The error message. */
-  message: Scalars['String']['output'];
-};
-
-/** Possible error codes that can be returned by `InventorySetScheduledChangesUserError`. */
-export enum InventorySetScheduledChangesUserErrorCode {
-  /** The item can only have one scheduled change for quantity name as the fromName. */
-  DuplicateFromName = 'DUPLICATE_FROM_NAME',
-  /** The item can only have one scheduled change for quantity name as the toName. */
-  DuplicateToName = 'DUPLICATE_TO_NAME',
-  /** There was an error updating the scheduled changes. */
-  ErrorUpdatingScheduled = 'ERROR_UPDATING_SCHEDULED',
-  /** The specified field is invalid. */
-  Inclusion = 'INCLUSION',
-  /** The specified fromName is invalid. */
-  InvalidFromName = 'INVALID_FROM_NAME',
-  /** The specified reason is invalid. */
-  InvalidReason = 'INVALID_REASON',
-  /** The specified toName is invalid. */
-  InvalidToName = 'INVALID_TO_NAME',
-  /** The inventory item was not found. */
-  InventoryItemNotFound = 'INVENTORY_ITEM_NOT_FOUND',
-  /** The inventory item was not found at the location specified. */
-  InventoryStateNotFound = 'INVENTORY_STATE_NOT_FOUND',
-  /** At least 1 item must be provided. */
-  ItemsEmpty = 'ITEMS_EMPTY',
-  /** The ledger document URI is invalid. */
-  LedgerDocumentInvalid = 'LEDGER_DOCUMENT_INVALID',
-  /** The location couldn't be found. */
-  LocationNotFound = 'LOCATION_NOT_FOUND',
-  /** The from_name and to_name can't be the same. */
-  SameFromToNames = 'SAME_FROM_TO_NAMES'
-}
-
 /** Represents an inventory shipment. */
 export type InventoryShipment = Node & {
   __typename?: 'InventoryShipment';
+  /** A unique barcode for the shipment. */
+  barcode?: Maybe<Scalars['String']['output']>;
   /** The date the shipment was created in UTC. */
   dateCreated?: Maybe<Scalars['DateTime']['output']>;
   /** The date the shipment was initially received in UTC. */
@@ -25418,7 +32188,7 @@ export type InventoryShipment = Node & {
   status: InventoryShipmentStatus;
   /** The total quantity of items accepted across all line items in this shipment. */
   totalAcceptedQuantity: Scalars['Int']['output'];
-  /** The total quantity of items received (both accepted and rejected) across all line items in this shipment. */
+  /** The total quantity of items accepted, rejected, or marked as canceled across all line items in this shipment. */
   totalReceivedQuantity: Scalars['Int']['output'];
   /** The total quantity of items rejected across all line items in this shipment. */
   totalRejectedQuantity: Scalars['Int']['output'];
@@ -25469,12 +32239,22 @@ export type InventoryShipmentAddItemsUserError = DisplayableError & {
 
 /** Possible error codes that can be returned by `InventoryShipmentAddItemsUserError`. */
 export enum InventoryShipmentAddItemsUserErrorCode {
+  /** Failed to activate inventory at location. */
+  ActivationFailed = 'ACTIVATION_FAILED',
   /** A single item can't be listed twice. */
   DuplicateItem = 'DUPLICATE_ITEM',
+  /** This request is currently in progress, please try again. */
+  IdempotencyConcurrentRequest = 'IDEMPOTENCY_CONCURRENT_REQUEST',
+  /** The same idempotency key cannot be used with different operation parameters. */
+  IdempotencyKeyParameterMismatch = 'IDEMPOTENCY_KEY_PARAMETER_MISMATCH',
+  /** A previous request with this idempotency key failed. Retry with a new idempotency key. */
+  IdempotencyPreviousAttemptFailed = 'IDEMPOTENCY_PREVIOUS_ATTEMPT_FAILED',
   /** The quantity is invalid. */
   InvalidQuantity = 'INVALID_QUANTITY',
   /** Current shipment status does not support this operation. */
   InvalidShipmentStatus = 'INVALID_SHIPMENT_STATUS',
+  /** The item is not stocked at the intended location. */
+  InventoryStateNotActive = 'INVENTORY_STATE_NOT_ACTIVE',
   /** The item was not found. */
   ItemNotFound = 'ITEM_NOT_FOUND',
   /** The location selected is not active. */
@@ -25524,6 +32304,12 @@ export enum InventoryShipmentCreateInTransitUserErrorCode {
   DuplicateItem = 'DUPLICATE_ITEM',
   /** The shipment input cannot be empty. */
   EmptyShipmentInput = 'EMPTY_SHIPMENT_INPUT',
+  /** This request is currently in progress, please try again. */
+  IdempotencyConcurrentRequest = 'IDEMPOTENCY_CONCURRENT_REQUEST',
+  /** The same idempotency key cannot be used with different operation parameters. */
+  IdempotencyKeyParameterMismatch = 'IDEMPOTENCY_KEY_PARAMETER_MISMATCH',
+  /** A previous request with this idempotency key failed. Retry with a new idempotency key. */
+  IdempotencyPreviousAttemptFailed = 'IDEMPOTENCY_PREVIOUS_ATTEMPT_FAILED',
   /** One or more items are not valid. */
   InvalidItem = 'INVALID_ITEM',
   /** The quantity is invalid. */
@@ -25542,6 +32328,8 @@ export enum InventoryShipmentCreateInTransitUserErrorCode {
   ItemNotFound = 'ITEM_NOT_FOUND',
   /** The location selected is not active. */
   LocationNotActive = 'LOCATION_NOT_ACTIVE',
+  /** The shipment was not found. */
+  ShipmentNotFound = 'SHIPMENT_NOT_FOUND',
   /** The transfer was not found. */
   TransferNotFound = 'TRANSFER_NOT_FOUND',
   /** The item does not track inventory. */
@@ -25550,6 +32338,8 @@ export enum InventoryShipmentCreateInTransitUserErrorCode {
 
 /** The input fields to add a shipment. */
 export type InventoryShipmentCreateInput = {
+  /** A unique barcode for the shipment. */
+  barcode?: InputMaybe<Scalars['String']['input']>;
   /** The date the shipment was created. */
   dateCreated?: InputMaybe<Scalars['DateTime']['input']>;
   /** The list of line items for the inventory shipment. */
@@ -25582,12 +32372,24 @@ export type InventoryShipmentCreateUserError = DisplayableError & {
 
 /** Possible error codes that can be returned by `InventoryShipmentCreateUserError`. */
 export enum InventoryShipmentCreateUserErrorCode {
+  /** This barcode is already assigned to another shipment. */
+  BarcodeDuplicate = 'BARCODE_DUPLICATE',
+  /** Barcode must be 255 characters or less. */
+  BarcodeTooLong = 'BARCODE_TOO_LONG',
   /** Bundled items cannot be used for this operation. */
   BundledItem = 'BUNDLED_ITEM',
   /** A single item can't be listed twice. */
   DuplicateItem = 'DUPLICATE_ITEM',
   /** The shipment input cannot be empty. */
   EmptyShipmentInput = 'EMPTY_SHIPMENT_INPUT',
+  /** This request is currently in progress, please try again. */
+  IdempotencyConcurrentRequest = 'IDEMPOTENCY_CONCURRENT_REQUEST',
+  /** The same idempotency key cannot be used with different operation parameters. */
+  IdempotencyKeyParameterMismatch = 'IDEMPOTENCY_KEY_PARAMETER_MISMATCH',
+  /** A previous request with this idempotency key failed. Retry with a new idempotency key. */
+  IdempotencyPreviousAttemptFailed = 'IDEMPOTENCY_PREVIOUS_ATTEMPT_FAILED',
+  /** The idempotency record was found but the associated scheduled changes no longer exist. */
+  IdempotencyRecordNotFound = 'IDEMPOTENCY_RECORD_NOT_FOUND',
   /** One or more items are not valid. */
   InvalidItem = 'INVALID_ITEM',
   /** The quantity is invalid. */
@@ -25658,7 +32460,7 @@ export type InventoryShipmentLineItem = Node & {
   quantity: Scalars['Int']['output'];
   /** The quantity of items that were rejected in this shipment line item. */
   rejectedQuantity: Scalars['Int']['output'];
-  /** The total quantity of units that haven't been received (neither accepted or rejected) in this shipment line item. */
+  /** The total quantity of units that haven't been accepted, rejected, or marked as canceled in this shipment line item. */
   unreceivedQuantity: Scalars['Int']['output'];
 };
 
@@ -25772,6 +32574,12 @@ export type InventoryShipmentReceiveUserError = DisplayableError & {
 
 /** Possible error codes that can be returned by `InventoryShipmentReceiveUserError`. */
 export enum InventoryShipmentReceiveUserErrorCode {
+  /** This request is currently in progress, please try again. */
+  IdempotencyConcurrentRequest = 'IDEMPOTENCY_CONCURRENT_REQUEST',
+  /** The same idempotency key cannot be used with different operation parameters. */
+  IdempotencyKeyParameterMismatch = 'IDEMPOTENCY_KEY_PARAMETER_MISMATCH',
+  /** A previous request with this idempotency key failed. Retry with a new idempotency key. */
+  IdempotencyPreviousAttemptFailed = 'IDEMPOTENCY_PREVIOUS_ATTEMPT_FAILED',
   /** Unexpected internal error happened. */
   InternalError = 'INTERNAL_ERROR',
   /** The quantity is invalid. */
@@ -25826,6 +32634,36 @@ export enum InventoryShipmentRemoveItemsUserErrorCode {
   ShipmentNotFound = 'SHIPMENT_NOT_FOUND'
 }
 
+/** Return type for `inventoryShipmentSetBarcode` mutation. */
+export type InventoryShipmentSetBarcodePayload = {
+  __typename?: 'InventoryShipmentSetBarcodePayload';
+  /** The inventory shipment with the updated barcode. */
+  inventoryShipment?: Maybe<InventoryShipment>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<InventoryShipmentSetBarcodeUserError>;
+};
+
+/** An error that occurs during the execution of `InventoryShipmentSetBarcode`. */
+export type InventoryShipmentSetBarcodeUserError = DisplayableError & {
+  __typename?: 'InventoryShipmentSetBarcodeUserError';
+  /** The error code. */
+  code?: Maybe<InventoryShipmentSetBarcodeUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `InventoryShipmentSetBarcodeUserError`. */
+export enum InventoryShipmentSetBarcodeUserErrorCode {
+  /** This barcode is already assigned to another shipment. */
+  BarcodeDuplicate = 'BARCODE_DUPLICATE',
+  /** Barcode must be 255 characters or less. */
+  BarcodeTooLong = 'BARCODE_TOO_LONG',
+  /** The shipment was not found. */
+  ShipmentNotFound = 'SHIPMENT_NOT_FOUND'
+}
+
 /** Return type for `inventoryShipmentSetTracking` mutation. */
 export type InventoryShipmentSetTrackingPayload = {
   __typename?: 'InventoryShipmentSetTrackingPayload';
@@ -25852,6 +32690,14 @@ export enum InventoryShipmentSetTrackingUserErrorCode {
   InvalidUrl = 'INVALID_URL',
   /** The shipment was not found. */
   ShipmentNotFound = 'SHIPMENT_NOT_FOUND'
+}
+
+/** The set of valid sort keys for the InventoryShipment query. */
+export enum InventoryShipmentSortKeys {
+  /** Sort by the `id` value. */
+  Id = 'ID',
+  /** Sort by the `status` value. */
+  Status = 'STATUS'
 }
 
 /** The status of an inventory shipment. */
@@ -26000,7 +32846,7 @@ export type InventoryTransfer = CommentEventSubject & HasEvents & HasMetafieldDe
   note?: Maybe<Scalars['String']['output']>;
   /** Snapshot of the origin location (name, address, when snapped) with an optional link to the live Location object. If the original location is deleted, the snapshot data will still be available but the location link will be nil. */
   origin?: Maybe<LocationSnapshot>;
-  /** The total quantity of items received in the transfer. */
+  /** The total quantity of items accepted, rejected, or marked as canceled in the transfer. */
   receivedQuantity: Scalars['Int']['output'];
   /** The reference name of the inventory transfer. */
   referenceName?: Maybe<Scalars['String']['output']>;
@@ -26161,13 +33007,15 @@ export type InventoryTransferCreateAsReadyToShipInput = {
   /** The date and time the inventory transfer was created. If left blank, defaults to the current date and time in UTC format. */
   dateCreated?: InputMaybe<Scalars['DateTime']['input']>;
   /** The destination location for the inventory transfer. */
-  destinationLocationId: Scalars['ID']['input'];
+  destinationLocationId?: InputMaybe<Scalars['ID']['input']>;
   /** The list of line items for the inventory transfer. */
   lineItems?: Array<InventoryTransferLineItemInput>;
+  /** The metafields to attach to the inventory transfer. */
+  metafields?: InputMaybe<Array<MetafieldInput>>;
   /** A note to add to the Inventory Transfer. */
   note?: InputMaybe<Scalars['String']['input']>;
   /** The origin location for the inventory transfer. */
-  originLocationId: Scalars['ID']['input'];
+  originLocationId?: InputMaybe<Scalars['ID']['input']>;
   /** The reference name to add to the inventory transfer. */
   referenceName?: InputMaybe<Scalars['String']['input']>;
   /** The tags to add to the inventory transfer. */
@@ -26200,8 +33048,18 @@ export enum InventoryTransferCreateAsReadyToShipUserErrorCode {
   BundledItem = 'BUNDLED_ITEM',
   /** A single item can't be listed twice. */
   DuplicateItem = 'DUPLICATE_ITEM',
+  /** This request is currently in progress, please try again. */
+  IdempotencyConcurrentRequest = 'IDEMPOTENCY_CONCURRENT_REQUEST',
+  /** The same idempotency key cannot be used with different operation parameters. */
+  IdempotencyKeyParameterMismatch = 'IDEMPOTENCY_KEY_PARAMETER_MISMATCH',
+  /** A previous request with this idempotency key failed. Retry with a new idempotency key. */
+  IdempotencyPreviousAttemptFailed = 'IDEMPOTENCY_PREVIOUS_ATTEMPT_FAILED',
+  /** One or more metafields are not valid. */
+  InvalidMetafields = 'INVALID_METAFIELDS',
   /** The quantity is invalid. */
   InvalidQuantity = 'INVALID_QUANTITY',
+  /** One or more tags are not valid. */
+  InvalidTag = 'INVALID_TAG',
   /** Current transfer status does not support this operation. */
   InvalidTransferStatus = 'INVALID_TRANSFER_STATUS',
   /** The item is not stocked at the intended location. */
@@ -26234,6 +33092,8 @@ export type InventoryTransferCreateInput = {
   destinationLocationId?: InputMaybe<Scalars['ID']['input']>;
   /** The list of line items for the inventory transfer. */
   lineItems?: Array<InventoryTransferLineItemInput>;
+  /** The metafields to attach to the inventory transfer. */
+  metafields?: InputMaybe<Array<MetafieldInput>>;
   /** A note to add to the Inventory Transfer. */
   note?: InputMaybe<Scalars['String']['input']>;
   /** The origin location for the inventory transfer. */
@@ -26270,8 +33130,18 @@ export enum InventoryTransferCreateUserErrorCode {
   BundledItem = 'BUNDLED_ITEM',
   /** A single item can't be listed twice. */
   DuplicateItem = 'DUPLICATE_ITEM',
+  /** This request is currently in progress, please try again. */
+  IdempotencyConcurrentRequest = 'IDEMPOTENCY_CONCURRENT_REQUEST',
+  /** The same idempotency key cannot be used with different operation parameters. */
+  IdempotencyKeyParameterMismatch = 'IDEMPOTENCY_KEY_PARAMETER_MISMATCH',
+  /** A previous request with this idempotency key failed. Retry with a new idempotency key. */
+  IdempotencyPreviousAttemptFailed = 'IDEMPOTENCY_PREVIOUS_ATTEMPT_FAILED',
+  /** One or more metafields are not valid. */
+  InvalidMetafields = 'INVALID_METAFIELDS',
   /** The quantity is invalid. */
   InvalidQuantity = 'INVALID_QUANTITY',
+  /** One or more tags are not valid. */
+  InvalidTag = 'INVALID_TAG',
   /** The item is not stocked at the intended location. */
   InventoryStateNotActive = 'INVENTORY_STATE_NOT_ACTIVE',
   /** The item was not found. */
@@ -26312,6 +33182,8 @@ export type InventoryTransferDeleteUserError = DisplayableError & {
 
 /** Possible error codes that can be returned by `InventoryTransferDeleteUserError`. */
 export enum InventoryTransferDeleteUserErrorCode {
+  /** A resource was not in the correct state for the operation to succeed. */
+  InvalidState = 'INVALID_STATE',
   /** Current transfer status does not support this operation. */
   InvalidTransferStatus = 'INVALID_TRANSFER_STATUS',
   /** The transfer was not found. */
@@ -26340,6 +33212,14 @@ export type InventoryTransferDuplicateUserError = DisplayableError & {
 
 /** Possible error codes that can be returned by `InventoryTransferDuplicateUserError`. */
 export enum InventoryTransferDuplicateUserErrorCode {
+  /** This request is currently in progress, please try again. */
+  IdempotencyConcurrentRequest = 'IDEMPOTENCY_CONCURRENT_REQUEST',
+  /** The same idempotency key cannot be used with different operation parameters. */
+  IdempotencyKeyParameterMismatch = 'IDEMPOTENCY_KEY_PARAMETER_MISMATCH',
+  /** A previous request with this idempotency key failed. Retry with a new idempotency key. */
+  IdempotencyPreviousAttemptFailed = 'IDEMPOTENCY_PREVIOUS_ATTEMPT_FAILED',
+  /** The quantity is invalid. */
+  InvalidQuantity = 'INVALID_QUANTITY',
   /** The transfer was not found. */
   TransferNotFound = 'TRANSFER_NOT_FOUND'
 }
@@ -26362,6 +33242,8 @@ export type InventoryTransferEditInput = {
    * changed for draft transfers.
    */
   destinationId?: InputMaybe<Scalars['ID']['input']>;
+  /** The metafields to attach to the inventory transfer. */
+  metafields?: InputMaybe<Array<MetafieldInput>>;
   /** A note to add to the Inventory Transfer. */
   note?: InputMaybe<Scalars['String']['input']>;
   /**
@@ -26399,6 +33281,10 @@ export type InventoryTransferEditUserError = DisplayableError & {
 export enum InventoryTransferEditUserErrorCode {
   /** Unexpected internal error happened. */
   InternalError = 'INTERNAL_ERROR',
+  /** One or more metafields are not valid. */
+  InvalidMetafields = 'INVALID_METAFIELDS',
+  /** One or more tags are not valid. */
+  InvalidTag = 'INVALID_TAG',
   /** The item is not stocked at the intended location. */
   InventoryStateNotActive = 'INVENTORY_STATE_NOT_ACTIVE',
   /** The location selected is not active. */
@@ -26517,7 +33403,11 @@ export enum InventoryTransferMarkAsReadyToShipUserErrorCode {
 export type InventoryTransferRemoveItemsInput = {
   /** The ID of the inventory transfer where the items will be removed. */
   id: Scalars['ID']['input'];
-  /** The IDs of the transfer line items to be removed from the transfer. */
+  /**
+   * The IDs of the [`InventoryTransferLineItem`s](https://shopify.dev/docs/api/admin-graphql/latest/objects/InventoryTransferLineItem)
+   * to be removed from the transfer. Passing an empty array is a no-op and returns
+   * the transfer unchanged.
+   */
   transferLineItemIds?: InputMaybe<Array<Scalars['ID']['input']>>;
 };
 
@@ -26545,15 +33435,15 @@ export type InventoryTransferRemoveItemsUserError = DisplayableError & {
 
 /** Possible error codes that can be returned by `InventoryTransferRemoveItemsUserError`. */
 export enum InventoryTransferRemoveItemsUserErrorCode {
-  /** The item cannot have its shippable quantity removed if all of its quantity is fully allocated in one or more shipments. */
+  /** The item cannot be removed because all of its quantity is fully allocated to one or more shipments (including draft shipments where the item has been picked). The error name refers to the underlying allocation check; it triggers regardless of whether the shipments have actually shipped. */
   AllQuantityShipped = 'ALL_QUANTITY_SHIPPED',
-  /** A ready to ship transfer must have at least one item. */
+  /** A `READY_TO_SHIP` transfer must have at least one line item; you cannot remove every line item from one. To empty a `READY_TO_SHIP` transfer, cancel it instead. */
   CantRemoveAllItemsFromReadyToShipTransfer = 'CANT_REMOVE_ALL_ITEMS_FROM_READY_TO_SHIP_TRANSFER',
   /** Current transfer status does not support this operation. */
   InvalidTransferStatus = 'INVALID_TRANSFER_STATUS',
   /** The item was not found. */
   ItemNotFound = 'ITEM_NOT_FOUND',
-  /** The item cannot be removed because it exists in a draft shipment with zero quantity. */
+  /** The line item cannot be removed because it appears on a draft shipment with quantity `0`. */
   ItemPresentOnDraftShipmentWithZeroQuantity = 'ITEM_PRESENT_ON_DRAFT_SHIPMENT_WITH_ZERO_QUANTITY',
   /** The location selected can't be found. */
   LocationNotFound = 'LOCATION_NOT_FOUND',
@@ -26565,7 +33455,7 @@ export enum InventoryTransferRemoveItemsUserErrorCode {
 export type InventoryTransferSetItemsInput = {
   /** The ID of the inventory transfer where the items will be set. */
   id: Scalars['ID']['input'];
-  /** The line items to be set on the Transfer. */
+  /** The line items to set on the Transfer. Only the items included in this list are affected; items already on the transfer that aren't referenced here will stay unchanged. Each inventory item may appear at most once in this list; duplicate `inventoryItemId` entries are rejected. */
   lineItems: Array<InventoryTransferLineItemInput>;
 };
 
@@ -26597,6 +33487,12 @@ export enum InventoryTransferSetItemsUserErrorCode {
   BundledItem = 'BUNDLED_ITEM',
   /** A single item can't be listed twice. */
   DuplicateItem = 'DUPLICATE_ITEM',
+  /** This request is currently in progress, please try again. */
+  IdempotencyConcurrentRequest = 'IDEMPOTENCY_CONCURRENT_REQUEST',
+  /** The same idempotency key cannot be used with different operation parameters. */
+  IdempotencyKeyParameterMismatch = 'IDEMPOTENCY_KEY_PARAMETER_MISMATCH',
+  /** A previous request with this idempotency key failed. Retry with a new idempotency key. */
+  IdempotencyPreviousAttemptFailed = 'IDEMPOTENCY_PREVIOUS_ATTEMPT_FAILED',
   /** The quantity is invalid. */
   InvalidQuantity = 'INVALID_QUANTITY',
   /** Current transfer status does not support this operation. */
@@ -27105,6 +34001,12 @@ export type LineItem = Node & {
   originalUnitPrice: Scalars['Money']['output'];
   /** In shop and presentment currencies, the unit price of the line item when the order was created. This value doesn't include discounts. */
   originalUnitPriceSet: MoneyBag;
+  /**
+   * The total price of the line item in shop and presentment currencies,
+   * after all discounts are applied and excluding refunded and removed quantities.
+   * This value doesn't include taxes.
+   */
+  priceAfterAllDiscountsBeforeTaxesSet: MoneyBag;
   /** The Product object associated with this line item's variant. */
   product?: Maybe<Product>;
   /** The number of units ordered, including refunded and removed units. */
@@ -27121,6 +34023,8 @@ export type LineItem = Node & {
   sku?: Maybe<Scalars['String']['output']>;
   /** Staff attributed to the line item. */
   staffMember?: Maybe<StaffMember>;
+  /** Return reasons suggested based on the line item's product category in Shopify's product taxonomy. Use [`returnReasonDefinitions`](https://shopify.dev/docs/api/admin-graphql/latest/queries/returnReasonDefinitions) to access the full library of available reasons. */
+  suggestedReturnReasonDefinitions?: Maybe<ReturnReasonDefinitionConnection>;
   /** The taxes charged for the line item, including taxes charged for refunded and removed quantities. */
   taxLines: Array<TaxLine>;
   /** Whether the variant is taxable. */
@@ -27156,6 +34060,8 @@ export type LineItem = Node & {
   variantTitle?: Maybe<Scalars['String']['output']>;
   /** The name of the vendor who made the variant. */
   vendor?: Maybe<Scalars['String']['output']>;
+  /** The weight of a line item unit. */
+  weight?: Maybe<Weight>;
 };
 
 
@@ -27182,6 +34088,36 @@ export type LineItem = Node & {
  */
 export type LineItemDiscountedTotalSetArgs = {
   withCodeDiscounts?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * The `LineItem` object represents a single product or service that a customer purchased in an
+ * [order](https://shopify.dev/docs/api/admin-graphql/latest/objects/Order).
+ * Each line item is associated with a
+ * [product variant](https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductVariant)
+ * and can have multiple [discount allocations](https://shopify.dev/docs/api/admin-graphql/latest/objects/DiscountAllocation).
+ * Line items contain details about what was purchased, including the product variant, quantity, pricing,
+ * and fulfillment status.
+ *
+ * Use the `LineItem` object to manage the following processes:
+ *
+ * - [Track the quantity of items](https://shopify.dev/docs/apps/build/orders-fulfillment/order-management-apps/build-fulfillment-solutions) ordered, fulfilled, and unfulfilled.
+ * - [Calculate prices](https://shopify.dev/docs/apps/build/orders-fulfillment/order-management-apps/edit-orders), including discounts and taxes.
+ * - Manage fulfillment through [fulfillment services](https://shopify.dev/docs/apps/build/orders-fulfillment/fulfillment-service-apps).
+ * - Manage [returns](https://shopify.dev/docs/apps/build/orders-fulfillment/returns-apps/build-return-management) and [exchanges](https://shopify.dev/docs/apps/build/orders-fulfillment/returns-apps/manage-exchanges).
+ * - Handle [subscriptions](https://shopify.dev/docs/apps/build/purchase-options/subscriptions) and recurring orders.
+ *
+ * Line items can also include custom attributes and properties, allowing merchants to add specific details
+ * about each item in an order. Learn more about
+ * [managing orders and fulfillment](https://shopify.dev/docs/apps/build/orders-fulfillment).
+ */
+export type LineItemSuggestedReturnReasonDefinitionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -27721,7 +34657,7 @@ export type Location = HasMetafieldDefinitions & HasMetafields & LegacyInteroper
   metafields: MetafieldConnection;
   /** The name of the location. */
   name: Scalars['String']['output'];
-  /** Whether this location is used for calculating shipping rates. In multi-origin shipping mode, this flag is ignored. */
+  /** Legacy field indicating this location was designated for shipping. All locations with valid addresses can now ship. */
   shipsInventory: Scalars['Boolean']['output'];
   /** List of suggested addresses for this location (empty if none). */
   suggestedAddresses: Array<LocationSuggestedAddress>;
@@ -27736,6 +34672,7 @@ export type Location = HasMetafieldDefinitions & HasMetafields & LegacyInteroper
  * Active locations can fulfill online orders when configured with shipping rates, local pickup, or local delivery options. Locations track inventory quantities for [products](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) and process [order](https://shopify.dev/docs/api/admin-graphql/latest/objects/Order) fulfillment. Third-party apps using [`FulfillmentService`](https://shopify.dev/docs/api/admin-graphql/latest/objects/FulfillmentService) can create and manage their own locations.
  */
 export type LocationInventoryLevelArgs = {
+  includeInactive?: InputMaybe<Scalars['Boolean']['input']>;
   inventoryItemId: Scalars['ID']['input'];
 };
 
@@ -27749,6 +34686,7 @@ export type LocationInventoryLevelsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  includeInactive?: InputMaybe<Scalars['Boolean']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   query?: InputMaybe<Scalars['String']['input']>;
   reverse?: InputMaybe<Scalars['Boolean']['input']>;
@@ -27827,6 +34765,10 @@ export enum LocationActivateUserErrorCode {
   HasNonUniqueName = 'HAS_NON_UNIQUE_NAME',
   /** This location currently cannot be activated as inventory, pending orders or transfers are being relocated from this location. */
   HasOngoingRelocation = 'HAS_ONGOING_RELOCATION',
+  /** This request is currently in progress, please try again. */
+  IdempotencyConcurrentRequest = 'IDEMPOTENCY_CONCURRENT_REQUEST',
+  /** The same idempotency key cannot be used with different operation parameters. */
+  IdempotencyKeyParameterMismatch = 'IDEMPOTENCY_KEY_PARAMETER_MISMATCH',
   /** Shop has reached its location limit. */
   LocationLimit = 'LOCATION_LIMIT',
   /** Location not found. */
@@ -28013,6 +34955,10 @@ export enum LocationDeactivateUserErrorCode {
   HasIncomingMovementsError = 'HAS_INCOMING_MOVEMENTS_ERROR',
   /** Location could not be deactivated because it has open purchase orders. */
   HasOpenPurchaseOrdersError = 'HAS_OPEN_PURCHASE_ORDERS_ERROR',
+  /** This request is currently in progress, please try again. */
+  IdempotencyConcurrentRequest = 'IDEMPOTENCY_CONCURRENT_REQUEST',
+  /** The same idempotency key cannot be used with different operation parameters. */
+  IdempotencyKeyParameterMismatch = 'IDEMPOTENCY_KEY_PARAMETER_MISMATCH',
   /** Location not found. */
   LocationNotFound = 'LOCATION_NOT_FOUND',
   /** Location either has a fulfillment service or is the only location with a shipping address. */
@@ -28320,7 +35266,7 @@ export type MailingAddress = Node & {
   /** The time zone of the address. */
   timeZone?: Maybe<Scalars['String']['output']>;
   /**
-   * The validation status that is leveraged by the address validation feature in the Shopify Admin.
+   * The validation status that's leveraged by the address validation feature in the Shopify Admin.
    * See ["Validating addresses in your Shopify admin"](https://help.shopify.com/manual/fulfillment/managing-orders/validating-order-address) for more details.
    */
   validationResultSummary?: Maybe<MailingAddressValidationResult>;
@@ -28441,12 +35387,14 @@ export type ManualDiscountApplication = DiscountApplication & {
 };
 
 /**
- * A market is a group of one or more regions that you want to target for international sales.
- * By creating a market, you can configure a distinct, localized shopping experience for
- * customers from a specific area of the world. For example, you can
- * [change currency](https://shopify.dev/api/admin-graphql/current/mutations/marketCurrencySettingsUpdate),
- * [configure international pricing](https://shopify.dev/apps/internationalization/product-price-lists),
- * or [add market-specific domains or subfolders](https://shopify.dev/api/admin-graphql/current/objects/MarketWebPresence).
+ * A merchant-defined group of buyers identified by conditions such as their
+ * region, retail location, or company location. Each market allows configuration
+ * of a distinct, localized buyer experience. Customizations include, but are
+ * not limited to,
+ * [currency](https://shopify.dev/api/admin-graphql/current/mutations/marketCurrencySettingsUpdate),
+ * [pricing and product availability](https://shopify.dev/apps/internationalization/product-price-lists),
+ * [web presence](https://shopify.dev/api/admin-graphql/current/objects/MarketWebPresence),
+ * and content translations.
  */
 export type Market = HasMetafieldDefinitions & HasMetafields & Node & {
   __typename?: 'Market';
@@ -28460,6 +35408,12 @@ export type Market = HasMetafieldDefinitions & HasMetafields & Node & {
   conditions?: Maybe<MarketConditions>;
   /** The market’s currency settings. */
   currencySettings?: Maybe<MarketCurrencySettings>;
+  /** The delivery settings for this market. */
+  delivery: MarketDeliveryConfigurations;
+  /** The discounts that are available in this market. */
+  discounts?: Maybe<DiscountNodeConnection>;
+  /** The number of discounts that are assigned to this market. */
+  discountsCount?: Maybe<Count>;
   /**
    * Whether the market is enabled to receive visitors and sales. **Note**: Regions in inactive
    * markets can't be selected on the storefront or in checkout.
@@ -28535,12 +35489,14 @@ export type Market = HasMetafieldDefinitions & HasMetafields & Node & {
 
 
 /**
- * A market is a group of one or more regions that you want to target for international sales.
- * By creating a market, you can configure a distinct, localized shopping experience for
- * customers from a specific area of the world. For example, you can
- * [change currency](https://shopify.dev/api/admin-graphql/current/mutations/marketCurrencySettingsUpdate),
- * [configure international pricing](https://shopify.dev/apps/internationalization/product-price-lists),
- * or [add market-specific domains or subfolders](https://shopify.dev/api/admin-graphql/current/objects/MarketWebPresence).
+ * A merchant-defined group of buyers identified by conditions such as their
+ * region, retail location, or company location. Each market allows configuration
+ * of a distinct, localized buyer experience. Customizations include, but are
+ * not limited to,
+ * [currency](https://shopify.dev/api/admin-graphql/current/mutations/marketCurrencySettingsUpdate),
+ * [pricing and product availability](https://shopify.dev/apps/internationalization/product-price-lists),
+ * [web presence](https://shopify.dev/api/admin-graphql/current/objects/MarketWebPresence),
+ * and content translations.
  */
 export type MarketAssignedCustomizationArgs = {
   customizationId: Scalars['ID']['input'];
@@ -28548,12 +35504,14 @@ export type MarketAssignedCustomizationArgs = {
 
 
 /**
- * A market is a group of one or more regions that you want to target for international sales.
- * By creating a market, you can configure a distinct, localized shopping experience for
- * customers from a specific area of the world. For example, you can
- * [change currency](https://shopify.dev/api/admin-graphql/current/mutations/marketCurrencySettingsUpdate),
- * [configure international pricing](https://shopify.dev/apps/internationalization/product-price-lists),
- * or [add market-specific domains or subfolders](https://shopify.dev/api/admin-graphql/current/objects/MarketWebPresence).
+ * A merchant-defined group of buyers identified by conditions such as their
+ * region, retail location, or company location. Each market allows configuration
+ * of a distinct, localized buyer experience. Customizations include, but are
+ * not limited to,
+ * [currency](https://shopify.dev/api/admin-graphql/current/mutations/marketCurrencySettingsUpdate),
+ * [pricing and product availability](https://shopify.dev/apps/internationalization/product-price-lists),
+ * [web presence](https://shopify.dev/api/admin-graphql/current/objects/MarketWebPresence),
+ * and content translations.
  */
 export type MarketCatalogsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -28565,12 +35523,33 @@ export type MarketCatalogsArgs = {
 
 
 /**
- * A market is a group of one or more regions that you want to target for international sales.
- * By creating a market, you can configure a distinct, localized shopping experience for
- * customers from a specific area of the world. For example, you can
- * [change currency](https://shopify.dev/api/admin-graphql/current/mutations/marketCurrencySettingsUpdate),
- * [configure international pricing](https://shopify.dev/apps/internationalization/product-price-lists),
- * or [add market-specific domains or subfolders](https://shopify.dev/api/admin-graphql/current/objects/MarketWebPresence).
+ * A merchant-defined group of buyers identified by conditions such as their
+ * region, retail location, or company location. Each market allows configuration
+ * of a distinct, localized buyer experience. Customizations include, but are
+ * not limited to,
+ * [currency](https://shopify.dev/api/admin-graphql/current/mutations/marketCurrencySettingsUpdate),
+ * [pricing and product availability](https://shopify.dev/apps/internationalization/product-price-lists),
+ * [web presence](https://shopify.dev/api/admin-graphql/current/objects/MarketWebPresence),
+ * and content translations.
+ */
+export type MarketDiscountsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * A merchant-defined group of buyers identified by conditions such as their
+ * region, retail location, or company location. Each market allows configuration
+ * of a distinct, localized buyer experience. Customizations include, but are
+ * not limited to,
+ * [currency](https://shopify.dev/api/admin-graphql/current/mutations/marketCurrencySettingsUpdate),
+ * [pricing and product availability](https://shopify.dev/apps/internationalization/product-price-lists),
+ * [web presence](https://shopify.dev/api/admin-graphql/current/objects/MarketWebPresence),
+ * and content translations.
  */
 export type MarketMetafieldArgs = {
   key: Scalars['String']['input'];
@@ -28579,12 +35558,14 @@ export type MarketMetafieldArgs = {
 
 
 /**
- * A market is a group of one or more regions that you want to target for international sales.
- * By creating a market, you can configure a distinct, localized shopping experience for
- * customers from a specific area of the world. For example, you can
- * [change currency](https://shopify.dev/api/admin-graphql/current/mutations/marketCurrencySettingsUpdate),
- * [configure international pricing](https://shopify.dev/apps/internationalization/product-price-lists),
- * or [add market-specific domains or subfolders](https://shopify.dev/api/admin-graphql/current/objects/MarketWebPresence).
+ * A merchant-defined group of buyers identified by conditions such as their
+ * region, retail location, or company location. Each market allows configuration
+ * of a distinct, localized buyer experience. Customizations include, but are
+ * not limited to,
+ * [currency](https://shopify.dev/api/admin-graphql/current/mutations/marketCurrencySettingsUpdate),
+ * [pricing and product availability](https://shopify.dev/apps/internationalization/product-price-lists),
+ * [web presence](https://shopify.dev/api/admin-graphql/current/objects/MarketWebPresence),
+ * and content translations.
  */
 export type MarketMetafieldDefinitionsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -28600,12 +35581,14 @@ export type MarketMetafieldDefinitionsArgs = {
 
 
 /**
- * A market is a group of one or more regions that you want to target for international sales.
- * By creating a market, you can configure a distinct, localized shopping experience for
- * customers from a specific area of the world. For example, you can
- * [change currency](https://shopify.dev/api/admin-graphql/current/mutations/marketCurrencySettingsUpdate),
- * [configure international pricing](https://shopify.dev/apps/internationalization/product-price-lists),
- * or [add market-specific domains or subfolders](https://shopify.dev/api/admin-graphql/current/objects/MarketWebPresence).
+ * A merchant-defined group of buyers identified by conditions such as their
+ * region, retail location, or company location. Each market allows configuration
+ * of a distinct, localized buyer experience. Customizations include, but are
+ * not limited to,
+ * [currency](https://shopify.dev/api/admin-graphql/current/mutations/marketCurrencySettingsUpdate),
+ * [pricing and product availability](https://shopify.dev/apps/internationalization/product-price-lists),
+ * [web presence](https://shopify.dev/api/admin-graphql/current/objects/MarketWebPresence),
+ * and content translations.
  */
 export type MarketMetafieldsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -28619,12 +35602,14 @@ export type MarketMetafieldsArgs = {
 
 
 /**
- * A market is a group of one or more regions that you want to target for international sales.
- * By creating a market, you can configure a distinct, localized shopping experience for
- * customers from a specific area of the world. For example, you can
- * [change currency](https://shopify.dev/api/admin-graphql/current/mutations/marketCurrencySettingsUpdate),
- * [configure international pricing](https://shopify.dev/apps/internationalization/product-price-lists),
- * or [add market-specific domains or subfolders](https://shopify.dev/api/admin-graphql/current/objects/MarketWebPresence).
+ * A merchant-defined group of buyers identified by conditions such as their
+ * region, retail location, or company location. Each market allows configuration
+ * of a distinct, localized buyer experience. Customizations include, but are
+ * not limited to,
+ * [currency](https://shopify.dev/api/admin-graphql/current/mutations/marketCurrencySettingsUpdate),
+ * [pricing and product availability](https://shopify.dev/apps/internationalization/product-price-lists),
+ * [web presence](https://shopify.dev/api/admin-graphql/current/objects/MarketWebPresence),
+ * and content translations.
  */
 export type MarketRegionsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -28636,12 +35621,14 @@ export type MarketRegionsArgs = {
 
 
 /**
- * A market is a group of one or more regions that you want to target for international sales.
- * By creating a market, you can configure a distinct, localized shopping experience for
- * customers from a specific area of the world. For example, you can
- * [change currency](https://shopify.dev/api/admin-graphql/current/mutations/marketCurrencySettingsUpdate),
- * [configure international pricing](https://shopify.dev/apps/internationalization/product-price-lists),
- * or [add market-specific domains or subfolders](https://shopify.dev/api/admin-graphql/current/objects/MarketWebPresence).
+ * A merchant-defined group of buyers identified by conditions such as their
+ * region, retail location, or company location. Each market allows configuration
+ * of a distinct, localized buyer experience. Customizations include, but are
+ * not limited to,
+ * [currency](https://shopify.dev/api/admin-graphql/current/mutations/marketCurrencySettingsUpdate),
+ * [pricing and product availability](https://shopify.dev/apps/internationalization/product-price-lists),
+ * [web presence](https://shopify.dev/api/admin-graphql/current/objects/MarketWebPresence),
+ * and content translations.
  */
 export type MarketWebPresencesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -28652,7 +35639,7 @@ export type MarketWebPresencesArgs = {
 };
 
 /**
- * A catalog for managing product availability and pricing for specific [`Market`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Market) contexts. Each catalog links to one or more markets and defines what [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) objects customers see through its [`Publication`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication) settings. The catalog can include a [`PriceList`](https://shopify.dev/docs/api/admin-graphql/latest/objects/PriceList) for market-specific pricing adjustments.
+ * A catalog for managing product availability and pricing for specific [`Market`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Market) contexts. Each catalog links to one or more markets. The catalog can optionally include a [`Publication`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication) to control which [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) objects customers see, and a [`PriceList`](https://shopify.dev/docs/api/admin-graphql/latest/objects/PriceList) for market-specific pricing adjustments. When a publication isn't associated with the catalog, product availability is determined by the sales channel.
  *
  * Use catalogs to create distinct shopping experiences for different geographic regions or customer segments.
  *
@@ -28680,7 +35667,7 @@ export type MarketCatalog = Catalog & Node & {
 
 
 /**
- * A catalog for managing product availability and pricing for specific [`Market`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Market) contexts. Each catalog links to one or more markets and defines what [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) objects customers see through its [`Publication`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication) settings. The catalog can include a [`PriceList`](https://shopify.dev/docs/api/admin-graphql/latest/objects/PriceList) for market-specific pricing adjustments.
+ * A catalog for managing product availability and pricing for specific [`Market`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Market) contexts. Each catalog links to one or more markets. The catalog can optionally include a [`Publication`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication) to control which [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) objects customers see, and a [`PriceList`](https://shopify.dev/docs/api/admin-graphql/latest/objects/PriceList) for market-specific pricing adjustments. When a publication isn't associated with the catalog, product availability is determined by the sales channel.
  *
  * Use catalogs to create distinct shopping experiences for different geographic regions or customer segments.
  *
@@ -28698,7 +35685,7 @@ export type MarketCatalogMarketsArgs = {
 
 
 /**
- * A catalog for managing product availability and pricing for specific [`Market`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Market) contexts. Each catalog links to one or more markets and defines what [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) objects customers see through its [`Publication`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication) settings. The catalog can include a [`PriceList`](https://shopify.dev/docs/api/admin-graphql/latest/objects/PriceList) for market-specific pricing adjustments.
+ * A catalog for managing product availability and pricing for specific [`Market`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Market) contexts. Each catalog links to one or more markets. The catalog can optionally include a [`Publication`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication) to control which [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) objects customers see, and a [`PriceList`](https://shopify.dev/docs/api/admin-graphql/latest/objects/PriceList) for market-specific pricing adjustments. When a publication isn't associated with the catalog, product availability is determined by the sales channel.
  *
  * Use catalogs to create distinct shopping experiences for different geographic regions or customer segments.
  *
@@ -28741,6 +35728,8 @@ export enum MarketConditionApplicationType {
 
 /** The condition types for the condition set. */
 export enum MarketConditionType {
+  /** The condition checks the channel that the visitor is shopping from. */
+  Channel = 'CHANNEL',
   /** The condition checks the company location that the visitor is purchasing for. */
   CompanyLocation = 'COMPANY_LOCATION',
   /** The condition checks the location that the visitor is shopping from. */
@@ -28752,6 +35741,8 @@ export enum MarketConditionType {
 /** The conditions that determine whether a visitor is in a market. */
 export type MarketConditions = {
   __typename?: 'MarketConditions';
+  /** The channel conditions that determine whether a visitor is in the market. */
+  channelsCondition?: Maybe<ChannelsCondition>;
   /** The company location conditions that determine whether a visitor is in the market. */
   companyLocationsCondition?: Maybe<CompanyLocationsCondition>;
   /** The set of condition types that are defined for the market. */
@@ -28760,6 +35751,12 @@ export type MarketConditions = {
   locationsCondition?: Maybe<LocationsCondition>;
   /** The region conditions that determine whether a visitor is in the market. */
   regionsCondition?: Maybe<RegionsCondition>;
+};
+
+/** The input fields required to create or update a channel market condition. */
+export type MarketConditionsChannelsInput = {
+  /** A list of channel IDs to include in the market condition. */
+  channelIds?: InputMaybe<Array<Scalars['ID']['input']>>;
 };
 
 /** The input fields required to create or update a company location market condition. */
@@ -28772,6 +35769,8 @@ export type MarketConditionsCompanyLocationsInput = {
 
 /** The input fields required to create or update the market conditions. */
 export type MarketConditionsInput = {
+  /** The channels to include in the market conditions. */
+  channelsCondition?: InputMaybe<MarketConditionsChannelsInput>;
   /** The company locations to include in the market conditions. */
   companyLocationsCondition?: InputMaybe<MarketConditionsCompanyLocationsInput>;
   /** The locations to include in the market conditions. */
@@ -28792,6 +35791,8 @@ export type MarketConditionsLocationsInput = {
 export type MarketConditionsRegionInput = {
   /** A country code to which this condition should apply. */
   countryCode: CountryCode;
+  /** A subdivision such as a province or state. */
+  subdivision?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** The input fields required to create or update a region market condition. */
@@ -28831,6 +35832,10 @@ export type MarketCreateInput = {
   conditions?: InputMaybe<MarketConditionsInput>;
   /** Currency settings for the market. */
   currencySettings?: InputMaybe<MarketCurrencySettingsUpdateInput>;
+  /** Delivery settings for the market. */
+  delivery?: InputMaybe<MarketDeliveryConfigurationsCreateInput>;
+  /** Discounts that are eligible for this market. */
+  discounts?: InputMaybe<Array<Scalars['ID']['input']>>;
   /**
    * A unique identifier for the market. For example `"ca"`.
    * If the handle isn't provided, then the handle is auto-generated based on the country or name.
@@ -28915,6 +35920,8 @@ export type MarketCurrencySettingsUserError = DisplayableError & {
 
 /** Possible error codes that can be returned by `MarketCurrencySettingsUserError`. */
 export enum MarketCurrencySettingsUserErrorCode {
+  /** Local currencies must be enabled when adaptive pricing is active. */
+  AdaptivePricingRequiresLocalCurrencies = 'ADAPTIVE_PRICING_REQUIRES_LOCAL_CURRENCIES',
   /** The currency settings of the given market cannot be changed because the market manager has exclusive control of pricing. */
   ManagedMarket = 'MANAGED_MARKET',
   /** The specified market wasn't found. */
@@ -28938,6 +35945,27 @@ export type MarketDeletePayload = {
   deletedId?: Maybe<Scalars['ID']['output']>;
   /** The list of errors that occurred from executing the mutation. */
   userErrors: Array<MarketUserError>;
+};
+
+/** Delivery configurations for a market. Container type for shipping configuration. */
+export type MarketDeliveryConfigurations = {
+  __typename?: 'MarketDeliveryConfigurations';
+  /** The shipping configuration for this market. Null means the market inherits shipping from its parent. */
+  shipping?: Maybe<ShippingConfiguration>;
+};
+
+/** The input fields for configuring delivery for a new market. */
+export type MarketDeliveryConfigurationsCreateInput = {
+  /** The shipping configuration for the market. */
+  shipping?: InputMaybe<ShippingConfigurationCreateInput>;
+};
+
+/** The input fields for configuring delivery for an existing market. */
+export type MarketDeliveryConfigurationsUpdateInput = {
+  /** When true, removes the shipping configuration so the market inherits shipping from its parent. */
+  removeShipping?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Shipping configuration changes. When omitted, shipping is not changed. */
+  shipping?: InputMaybe<ShippingConfigurationUpdateInput>;
 };
 
 /** An auto-generated type which holds one Market and a cursor during pagination. */
@@ -29053,6 +36081,8 @@ export type MarketLocalizationsRemovePayload = {
 /** The inclusive pricing strategy for a market. */
 export type MarketPriceInclusions = {
   __typename?: 'MarketPriceInclusions';
+  /** Whether adaptive pricing is enabled for the market. Only applicable to Managed Markets and must be ignored otherwise. */
+  adaptivePricingEnabled: Scalars['Boolean']['output'];
   /** The inclusive duties pricing strategy of the market. This determines if prices include duties. */
   inclusiveDutiesPricingStrategy: InclusiveDutiesPricingStrategy;
   /** The inclusive tax pricing strategy of the market. This determines if prices include taxes. */
@@ -29061,6 +36091,8 @@ export type MarketPriceInclusions = {
 
 /** The input fields used to create a price inclusion. */
 export type MarketPriceInclusionsInput = {
+  /** Whether adaptive pricing is enabled for the market. Only applicable for Markets with Managed Market enabled. When enabled, forces a state of `INCLUDES_TAXES_IN_PRICE_BASED_ON_COUNTRY`, `INCLUDE_DUTIES_IN_PRICE`, and `DDP`. When disabled, defaults to `INCLUDES_TAXES_IN_PRICE_BASED_ON_COUNTRY`, `ADD_DUTIES_AT_CHECKOUT`, and `DDP` unless otherwise specified. */
+  adaptivePricingEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   /** The inclusive duties pricing strategy for the market. */
   dutiesPricingStrategy?: InputMaybe<InclusiveDutiesPricingStrategy>;
   /** The inclusive tax pricing strategy for the market. */
@@ -29125,6 +36157,28 @@ export type MarketRegionEdge = {
   node: MarketRegion;
 };
 
+/** A subdivision of a country which comprises a market. */
+export type MarketRegionSubdivision = MarketRegion & Node & {
+  __typename?: 'MarketRegionSubdivision';
+  /** The ISO code identifying the subdivision. */
+  code: Scalars['String']['output'];
+  /** The country the subdivision belongs to. */
+  country: MarketRegionSubdivisionCountry;
+  /** A globally-unique ID. */
+  id: Scalars['ID']['output'];
+  /** The name of the region. */
+  name: Scalars['String']['output'];
+};
+
+/** A country that a subdivision belongs to. */
+export type MarketRegionSubdivisionCountry = {
+  __typename?: 'MarketRegionSubdivisionCountry';
+  /** The ISO code identifying the country. */
+  code: CountryCode;
+  /** The name of the country. */
+  name: Scalars['String']['output'];
+};
+
 /** Return type for `marketRegionsCreate` mutation. */
 export type MarketRegionsCreatePayload = {
   __typename?: 'MarketRegionsCreatePayload';
@@ -29153,6 +36207,8 @@ export enum MarketStatus {
 
 /** The market types. */
 export enum MarketType {
+  /** The market applies to the visitor based on the channel. */
+  Channel = 'CHANNEL',
   /** The market applies to the visitor based on the company location. */
   CompanyLocation = 'COMPANY_LOCATION',
   /** The market applies to the visitor based on the location. */
@@ -29173,6 +36229,12 @@ export type MarketUpdateInput = {
   conditions?: InputMaybe<MarketConditionsUpdateInput>;
   /** Currency settings for the market. */
   currencySettings?: InputMaybe<MarketCurrencySettingsUpdateInput>;
+  /** Delivery setting updates. When omitted, delivery settings are not changed. */
+  delivery?: InputMaybe<MarketDeliveryConfigurationsUpdateInput>;
+  /** The discounts to add to the market. */
+  discountsToAdd?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** The discounts to remove from the market. */
+  discountsToDelete?: InputMaybe<Array<Scalars['ID']['input']>>;
   /** A unique identifier for the market. For example `"ca"`. */
   handle?: InputMaybe<Scalars['String']['input']>;
   /** Whether to update duplicate region or wildcard markets' status to draft. */
@@ -29215,10 +36277,22 @@ export type MarketUserError = DisplayableError & {
 
 /** Possible error codes that can be returned by `MarketUserError`. */
 export enum MarketUserErrorCode {
+  /** The given priceInclusions setup is not compatible with adaptive pricing. */
+  AdaptivePricingRequiredSetupError = 'ADAPTIVE_PRICING_REQUIRED_SETUP_ERROR',
+  /** Local currencies must be enabled when adaptive pricing is active. */
+  AdaptivePricingRequiresLocalCurrencies = 'ADAPTIVE_PRICING_REQUIRES_LOCAL_CURRENCIES',
+  /** Adaptive pricing can only be enabled for Markets with Managed Markets enabled. */
+  AdaptivePricingRequiresManagedMarkets = 'ADAPTIVE_PRICING_REQUIRES_MANAGED_MARKETS',
+  /** The maximum number of active B2B catalogs allowed by your plan has been reached. */
+  B2BCatalogLimitReached = 'B2B_CATALOG_LIMIT_REACHED',
   /** B2B markets must be merchant managed. */
   B2BMarketMustBeMerchantManaged = 'B2B_MARKET_MUST_BE_MERCHANT_MANAGED',
   /** The input value is blank. */
   Blank = 'BLANK',
+  /** Can't activate this market because the B2B catalog limit has been reached. */
+  CannotActivateMarketB2BCatalogLimitReached = 'CANNOT_ACTIVATE_MARKET_B2B_CATALOG_LIMIT_REACHED',
+  /** Can't add all subdivisions for a country to a market. */
+  CannotAddAllSubdivisionsForACountryToAMarket = 'CANNOT_ADD_ALL_SUBDIVISIONS_FOR_A_COUNTRY_TO_A_MARKET',
   /** Can't add customer account domain to a market. */
   CannotAddCustomerDomain = 'CANNOT_ADD_CUSTOMER_DOMAIN',
   /**
@@ -29240,6 +36314,8 @@ export enum MarketUserErrorCode {
    * @deprecated No longer used
    */
   CannotDeletePrimaryMarketWebPresence = 'CANNOT_DELETE_PRIMARY_MARKET_WEB_PRESENCE',
+  /** Can't delete the last subdivision-driven market. */
+  CannotDeleteSubdivisionMarket = 'CANNOT_DELETE_SUBDIVISION_MARKET',
   /** Can't disable the primary market. */
   CannotDisablePrimaryMarket = 'CANNOT_DISABLE_PRIMARY_MARKET',
   /** Can't have both subfolder and domain web presences. */
@@ -29258,6 +36334,12 @@ export enum MarketUserErrorCode {
   CatalogNotCompatibleWithConditionTypes = 'CATALOG_NOT_COMPATIBLE_WITH_CONDITION_TYPES',
   /** A market can only have market catalogs. */
   CatalogTypeNotSupported = 'CATALOG_TYPE_NOT_SUPPORTED',
+  /** A channel driver must have a channel specification. */
+  ChannelDriverMustHaveChannelSpecification = 'CHANNEL_DRIVER_MUST_HAVE_CHANNEL_SPECIFICATION',
+  /** A channel market must have a single channel driver. */
+  ChannelMarketMustHaveSingleChannelDriver = 'CHANNEL_MARKET_MUST_HAVE_SINGLE_CHANNEL_DRIVER',
+  /** The selected channel is not valid for a channel market. */
+  ChannelNotValidForChannelMarket = 'CHANNEL_NOT_VALID_FOR_CHANNEL_MARKET',
   /** One or more condition IDs were not found. */
   ConditionsNotFound = 'CONDITIONS_NOT_FOUND',
   /** Contains regions that cannot be managed. */
@@ -29266,6 +36348,12 @@ export enum MarketUserErrorCode {
   CustomizationsNotFound = 'CUSTOMIZATIONS_NOT_FOUND',
   /** The language isn't enabled on the store. */
   DisabledLanguage = 'DISABLED_LANGUAGE',
+  /** One or more discounts exceed the maximum number of markets allowed. */
+  DiscountExceedsMarketLimit = 'DISCOUNT_EXCEEDS_MARKET_LIMIT',
+  /** The shop does not have discounts enabled for B2B markets. */
+  DiscountNotCompatibleWithB2BMarket = 'DISCOUNT_NOT_COMPATIBLE_WITH_B2B_MARKET',
+  /** One or more discounts do not have market eligibility. */
+  DiscountNotMarketContextual = 'DISCOUNT_NOT_MARKET_CONTEXTUAL',
   /** Domain was not found. */
   DomainNotFound = 'DOMAIN_NOT_FOUND',
   /** Duplicates found in languages. */
@@ -29278,14 +36366,24 @@ export enum MarketUserErrorCode {
   ExceedsMaxMultiContextMarkets = 'EXCEEDS_MAX_MULTI_CONTEXT_MARKETS',
   /** An error occurred. See the message for details. */
   GenericError = 'GENERIC_ERROR',
+  /** Global-e pricing configurations can only be edited by Global-e. */
+  GlobalEPricingStrategyNotPermitted = 'GLOBAL_E_PRICING_STRATEGY_NOT_PERMITTED',
   /** The input value isn't included in the list. */
   Inclusion = 'INCLUSION',
   /** Inclusive pricing cannot be added to a market with the specified condition types. */
   InclusivePricingNotCompatibleWithConditionTypes = 'INCLUSIVE_PRICING_NOT_COMPATIBLE_WITH_CONDITION_TYPES',
   /** The specified conditions are not compatible with each other. */
   IncompatibleConditions = 'INCOMPATIBLE_CONDITIONS',
+  /** The selected customization can't be applied to this configuration. */
+  IncompatibleConfiguration = 'INCOMPATIBLE_CONFIGURATION',
   /** The input value is invalid. */
   Invalid = 'INVALID',
+  /** Channel ids are invalid. */
+  InvalidChannelIds = 'INVALID_CHANNEL_IDS',
+  /** A country condition and a subdivision condition belonging to the same country cannot be added to the same market. */
+  InvalidCountryAndSubdivisionConditions = 'INVALID_COUNTRY_AND_SUBDIVISION_CONDITIONS',
+  /** Can't add selected customizations to a market with a subdivision condition. */
+  InvalidCustomizationForSubdivisionCondition = 'INVALID_CUSTOMIZATION_FOR_SUBDIVISION_CONDITION',
   /** The province format is invalid. */
   InvalidProvinceFormat = 'INVALID_PROVINCE_FORMAT',
   /**
@@ -29295,6 +36393,8 @@ export enum MarketUserErrorCode {
   InvalidResponderForProvinceDrivenMarket = 'INVALID_RESPONDER_FOR_PROVINCE_DRIVEN_MARKET',
   /** Invalid combination of status and enabled. */
   InvalidStatusAndEnabledCombination = 'INVALID_STATUS_AND_ENABLED_COMBINATION',
+  /** The subdivision format is invalid. */
+  InvalidSubdivisionFormat = 'INVALID_SUBDIVISION_FORMAT',
   /** Location match all is only valid with one non-match all region. */
   LocationMatchAllRequiresOneSpecificRegion = 'LOCATION_MATCH_ALL_REQUIRES_ONE_SPECIFIC_REGION',
   /** A location's country does not match the region's country. */
@@ -29303,8 +36403,14 @@ export enum MarketUserErrorCode {
   ManagedMarket = 'MANAGED_MARKET',
   /** Catalogs created by Managed Markets cannot be added to a market. */
   ManagedMarketsCatalogNotAllowed = 'MANAGED_MARKETS_CATALOG_NOT_ALLOWED',
+  /** Resources created by Managed Markets cannot be added to a market. */
+  ManagedMarketsResourceNotAllowed = 'MANAGED_MARKETS_RESOURCE_NOT_ALLOWED',
+  /** A Managed Market must use currencies that correspond to all of its countries. */
+  ManagedMarketCurrencyMustMatchCountry = 'MANAGED_MARKET_CURRENCY_MUST_MATCH_COUNTRY',
   /** A direct connection catalog can't be attached to a market. */
   MarketCantHaveDirectConnectionCatalog = 'MARKET_CANT_HAVE_DIRECT_CONNECTION_CATALOG',
+  /** Market managers and condition types are not compatible with each other. */
+  MarketManagerNotCompatibleWithConditionTypes = 'MARKET_MANAGER_NOT_COMPATIBLE_WITH_CONDITION_TYPES',
   /**
    * Market and condition types are not compatible with each other.
    * @deprecated This will no longer be used after legacy markets are removed in April 2026
@@ -29314,10 +36420,18 @@ export enum MarketUserErrorCode {
   MarketNotFound = 'MARKET_NOT_FOUND',
   /** Can't add another web presence to the market. */
   MarketReachedWebPresenceLimit = 'MARKET_REACHED_WEB_PRESENCE_LIMIT',
+  /** Another modification to this market is in progress. */
+  MarketUpdateConcurrentModification = 'MARKET_UPDATE_CONCURRENT_MODIFICATION',
+  /** The country code is missing. */
+  MissingCountryCode = 'MISSING_COUNTRY_CODE',
   /** The province code is missing. */
   MissingProvinceCode = 'MISSING_PROVINCE_CODE',
+  /** The subdivision code is missing. */
+  MissingSubdivisionCode = 'MISSING_SUBDIVISION_CODE',
   /** All retail locations in a market must be in the same country. */
   MixedCountryLocationsNotAllowed = 'MIXED_COUNTRY_LOCATIONS_NOT_ALLOWED',
+  /** All regions in a market that includes a subdivision must be in the same country. */
+  MixedCountrySubdivisionsNotAllowed = 'MIXED_COUNTRY_SUBDIVISIONS_NOT_ALLOWED',
   /** The shop's payment gateway does not support enabling more than one currency. */
   MultipleCurrenciesNotSupported = 'MULTIPLE_CURRENCIES_NOT_SUPPORTED',
   /** Can’t delete, disable, or change the type of the last region market. */
@@ -29347,6 +36461,8 @@ export enum MarketUserErrorCode {
   ProvinceDoesNotExist = 'PROVINCE_DOES_NOT_EXIST',
   /** The market region wasn't found. */
   RegionNotFound = 'REGION_NOT_FOUND',
+  /** The selected region is not supported for the selected channel. */
+  RegionNotSupportedForChannel = 'REGION_NOT_SUPPORTED_FOR_CHANNEL',
   /** Cannot add region-specific language. */
   RegionSpecificLanguage = 'REGION_SPECIFIC_LANGUAGE',
   /** One of `subfolderSuffix` or `domainId` is required. */
@@ -29358,6 +36474,8 @@ export enum MarketUserErrorCode {
   RequiresExactlyOneOption = 'REQUIRES_EXACTLY_ONE_OPTION',
   /** Retail location currency must be local. */
   RetailLocationCurrencyMustBeLocal = 'RETAIL_LOCATION_CURRENCY_MUST_BE_LOCAL',
+  /** Shipping and condition types are not compatible with each other. */
+  ShippingNotCompatibleWithConditionTypes = 'SHIPPING_NOT_COMPATIBLE_WITH_CONDITION_TYPES',
   /** The shop must have a web presence that uses the primary domain. */
   ShopMustHavePrimaryDomainWebPresence = 'SHOP_MUST_HAVE_PRIMARY_DOMAIN_WEB_PRESENCE',
   /**
@@ -29369,6 +36487,12 @@ export enum MarketUserErrorCode {
   SpecifiedConditionsCannotBeEmpty = 'SPECIFIED_CONDITIONS_CANNOT_BE_EMPTY',
   /** With an ID list in input, SPECIFIED is not needed. */
   SpecifiedNotValidForInput = 'SPECIFIED_NOT_VALID_FOR_INPUT',
+  /** The subdivision doesn't exist. */
+  SubdivisionDoesNotExist = 'SUBDIVISION_DOES_NOT_EXIST',
+  /** A market that includes a subdivision requires another market that includes the whole country. If the subdivision market is active, the country market must also be active. */
+  SubdivisionMarketRequiresCountryCoverage = 'SUBDIVISION_MARKET_REQUIRES_COUNTRY_COVERAGE',
+  /** The selected subdivision does not belong to the selected country. */
+  SubdivisionMustBelongToCountry = 'SUBDIVISION_MUST_BELONG_TO_COUNTRY',
   /** The subfolder suffix is invalid, please provide a different value. */
   SubfolderSuffixCannotBeScriptCode = 'SUBFOLDER_SUFFIX_CANNOT_BE_SCRIPT_CODE',
   /** The subfolder suffix must be at least 2 letters. */
@@ -30096,6 +37220,8 @@ export type MarketingEngagement = {
   __typename?: 'MarketingEngagement';
   /** The total ad spend for the marketing content. Recurring weekly, monthly, or yearly spend needs to be divided into daily amounts. */
   adSpend?: Maybe<MoneyV2>;
+  /** The number of all conversions from the marketing content. This field supports ad platforms that track conversions beyond traditional sales metrics. All conversions include both primary and secondary conversion goals as defined by the ad platform, such as purchases, add-to-carts, page views, and sign-ups. */
+  allConversions?: Maybe<Scalars['Decimal']['output']>;
   /** The unique string identifier of the channel to which the engagement metrics are being provided. This should be set when and only when providing channel-level engagements. This should be nil when providing activity-level engagements. For the correct handle for your channel, contact your partner manager. */
   channelHandle?: Maybe<Scalars['String']['output']>;
   /** The total number of interactions, such as a button press or a screen touch, that occurred on the marketing content. */
@@ -30112,7 +37238,10 @@ export type MarketingEngagement = {
   firstTimeCustomers?: Maybe<Scalars['Decimal']['output']>;
   /** The total number of times marketing content was displayed to users, whether or not an interaction occurred. For message-based platforms such as email or SMS, this represents the number of marketing emails or messages that were delivered. */
   impressionsCount?: Maybe<Scalars['Int']['output']>;
-  /** Specifies how the provided metrics have been aggregated. Cumulative metrics are aggregated from the first day of reporting up to and including `occuredOn`. Non-cumulative metrics are aggregated over the single day indicated in `occuredOn`. Cumulative metrics will monotonically increase in time as each record includes the previous day's values, and so on. Non-cumulative is strongly preferred, and support for cumulative metrics may be deprecated in the future. */
+  /**
+   * Specifies how the provided metrics have been aggregated. Cumulative metrics are aggregated from the first day of reporting up to and including `occuredOn`. Non-cumulative metrics are aggregated over the single day indicated in `occuredOn`. Cumulative metrics will monotonically increase in time as each record includes the previous day's values, and so on. Non-cumulative metrics are required going forward; cumulative metrics are deprecated.
+   * @deprecated Cumulative metrics are being phased out. Send non-cumulative engagement metrics instead (values aggregated over the single day indicated in `occurredOn`, with `isCumulative: false`). Existing activities that have been sending cumulative metrics can migrate to non-cumulative at any time.
+   */
   isCumulative: Scalars['Boolean']['output'];
   /** The marketing activity object related to this engagement. This corresponds to the marketingActivityId passed in on creation of the engagement. */
   marketingActivity?: Maybe<MarketingActivity>;
@@ -30120,6 +37249,8 @@ export type MarketingEngagement = {
   occurredOn: Scalars['Date']['output'];
   /** The number of orders generated from the marketing content. */
   orders?: Maybe<Scalars['Decimal']['output']>;
+  /** The number of primary conversions from the marketing content. This field supports ad platforms that track conversions beyond traditional sales metrics. Primary conversions represent the main conversion goal defined by the ad platform, such as purchases, sign-ups, or add-to-carts. */
+  primaryConversions?: Maybe<Scalars['Decimal']['output']>;
   /** The number of returning customers that have placed an order. Doesn't include adjustments such as edits, exchanges, or returns. */
   returningCustomers?: Maybe<Scalars['Decimal']['output']>;
   /** The amount of sales generated from the marketing content. */
@@ -30155,6 +37286,8 @@ export type MarketingEngagementCreatePayload = {
 export type MarketingEngagementInput = {
   /** The total ad spend for the marketing content. Recurring weekly, monthly, or yearly spend needs to be divided into daily amounts. */
   adSpend?: InputMaybe<MoneyInput>;
+  /** The number of all conversions from the marketing content. This field supports ad platforms that track conversions beyond traditional sales metrics. All conversions include both primary and secondary conversion goals as defined by the ad platform, such as purchases, add-to-carts, page views, and sign-ups. */
+  allConversions?: InputMaybe<Scalars['Decimal']['input']>;
   /** The total number of interactions, such as a button press or a screen touch, that occurred on the marketing content. */
   clicksCount?: InputMaybe<Scalars['Int']['input']>;
   /** The total number of comments on the marketing content. */
@@ -30169,12 +37302,12 @@ export type MarketingEngagementInput = {
   firstTimeCustomers?: InputMaybe<Scalars['Decimal']['input']>;
   /** The total number of times marketing content was displayed to users, whether or not an interaction occurred. For message-based platforms such as email or SMS, this represents the number of marketing emails or messages that were delivered. */
   impressionsCount?: InputMaybe<Scalars['Int']['input']>;
-  /** Specifies how the provided metrics have been aggregated. Cumulative metrics are aggregated from the first day of reporting up to and including `occuredOn`. Non-cumulative metrics are aggregated over the single day indicated in `occuredOn`. Cumulative metrics will monotonically increase in time as each record includes the previous day's values, and so on. Non-cumulative is strongly preferred, and support for cumulative metrics may be deprecated in the future. */
-  isCumulative: Scalars['Boolean']['input'];
   /** The calendar date (in the time zone offset specified by the utcOffset field) for which the metrics are being reported. For example, a shop in UTC-5 would set utcOffset="-05:00" and aggregate all engagements from 05:00:00Z up to 29:00:00Z (5am UTC next day) for each call. */
   occurredOn: Scalars['Date']['input'];
   /** The number of orders generated from the marketing content. */
   orders?: InputMaybe<Scalars['Decimal']['input']>;
+  /** The number of primary conversions from the marketing content. This field supports ad platforms that track conversions beyond traditional sales metrics. Primary conversions represent the main conversion goal defined by the ad platform, such as purchases, sign-ups, or add-to-carts. */
+  primaryConversions?: InputMaybe<Scalars['Decimal']['input']>;
   /** The number of returning customers that have placed an order. Doesn't include adjustments such as edits, exchanges, or returns. */
   returningCustomers?: InputMaybe<Scalars['Decimal']['input']>;
   /** The amount of sales generated from the marketing content. */
@@ -30333,6 +37466,8 @@ export type MarketsCatalogsEntitlement = {
   __typename?: 'MarketsCatalogsEntitlement';
   /** Whether catalogs are enabled. */
   enabled: Scalars['Boolean']['output'];
+  /** The maximum number of catalogs allowed. */
+  limit: Scalars['Int']['output'];
 };
 
 /** The entitlements for region markets. */
@@ -31180,7 +38315,7 @@ export type MerchantApprovalSignals = {
  * Some examples of the data that metafields enable you to store are specifications, size charts, downloadable documents, release dates, images, or part numbers.
  * Metafields are identified by an owner resource, namespace, and key. and store a value along with type information for that value.
  */
-export type Metafield = HasCompareDigest & LegacyInteroperability & Node & {
+export type Metafield = HasCompareDigest & HasPublishedTranslations & LegacyInteroperability & Node & {
   __typename?: 'Metafield';
   /** The data stored in the resource, represented as a digest. */
   compareDigest: Scalars['String']['output'];
@@ -31212,6 +38347,10 @@ export type Metafield = HasCompareDigest & LegacyInteroperability & Node & {
   reference?: Maybe<MetafieldReference>;
   /** A list of reference objects if the metafield's type is a resource reference list. */
   references?: Maybe<MetafieldReferenceConnection>;
+  /** The size of the metafield value in bytes. */
+  sizeInBytes: Scalars['Int']['output'];
+  /** The published translations associated with the resource. */
+  translations: Array<Translation>;
   /**
    * The type of data that's stored in the metafield.
    * Refer to the list of [supported types](https://shopify.dev/apps/metafields/types).
@@ -31235,6 +38374,18 @@ export type MetafieldReferencesArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+/**
+ * Metafields enable you to attach additional information to a Shopify resource, such as a [Product](https://shopify.dev/api/admin-graphql/latest/objects/product) or a [Collection](https://shopify.dev/api/admin-graphql/latest/objects/collection).
+ * For more information about where you can attach metafields refer to [HasMetafields](https://shopify.dev/api/admin-graphql/latest/interfaces/HasMetafields).
+ * Some examples of the data that metafields enable you to store are specifications, size charts, downloadable documents, release dates, images, or part numbers.
+ * Metafields are identified by an owner resource, namespace, and key. and store a value along with type information for that value.
+ */
+export type MetafieldTranslationsArgs = {
+  locale: Scalars['String']['input'];
+  marketId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** Access permissions for the definition's metafields. */
@@ -31295,6 +38446,10 @@ export type MetafieldCapabilities = {
   __typename?: 'MetafieldCapabilities';
   /** Indicate whether a metafield definition is configured for filtering. */
   adminFilterable: MetafieldCapabilityAdminFilterable;
+  /** Indicate whether a metafield definition can be queried in analytics. */
+  analyticsQueryable: MetafieldCapabilityAnalyticsQueryable;
+  /** The capability configuration for automatically copying values from a cart metafield to the corresponding order metafield when an order is created. */
+  cartToOrderCopyable: MetafieldCapabilityCartToOrderCopyable;
   /** Indicate whether a metafield definition can be used as a smart collection condition. */
   smartCollectionCondition: MetafieldCapabilitySmartCollectionCondition;
   /** Indicate whether the metafield values for a metafield definition are required to be unique. */
@@ -31318,10 +38473,56 @@ export type MetafieldCapabilityAdminFilterableInput = {
   enabled: Scalars['Boolean']['input'];
 };
 
+/** The analytics queryable capability of a metafield definition. */
+export type MetafieldCapabilityAnalyticsQueryable = {
+  __typename?: 'MetafieldCapabilityAnalyticsQueryable';
+  /** Indicates if the definition is eligible to have the capability. */
+  eligible: Scalars['Boolean']['output'];
+  /** Indicates if the capability is enabled. */
+  enabled: Scalars['Boolean']['output'];
+};
+
+/** The input fields for the analytics queryable capability. */
+export type MetafieldCapabilityAnalyticsQueryableInput = {
+  /** Indicates whether the capability should be enabled or disabled. */
+  enabled: Scalars['Boolean']['input'];
+};
+
+/**
+ * Information about the cart to order copyable capability on a metafield definition.
+ * Only order metafield definitions are eligible to have this capability enabled.
+ *
+ * When enabled, the value from a cart metafield is automatically copied to the corresponding
+ * order metafield when an order is created. The namespace and key must match between the cart and order metafields.
+ */
+export type MetafieldCapabilityCartToOrderCopyable = {
+  __typename?: 'MetafieldCapabilityCartToOrderCopyable';
+  /** Indicates if the definition is eligible to have the capability. */
+  eligible: Scalars['Boolean']['output'];
+  /** Indicates if the capability is enabled. */
+  enabled: Scalars['Boolean']['output'];
+};
+
+/**
+ * The input fields for enabling or disabling the "Cart to order copyable" capability.
+ * This capability is only available for order metafield definitions.
+ *
+ * When enabled, the value from a cart metafield is automatically copied to the corresponding
+ * order metafield when an order is created. The namespace and key must match between the cart and order metafields.
+ */
+export type MetafieldCapabilityCartToOrderCopyableInput = {
+  /** Indicates whether the capability should be enabled or disabled. */
+  enabled: Scalars['Boolean']['input'];
+};
+
 /** The input fields for creating a metafield capability. */
 export type MetafieldCapabilityCreateInput = {
   /** The input for updating the admin filterable capability. */
   adminFilterable?: InputMaybe<MetafieldCapabilityAdminFilterableInput>;
+  /** The input for the analytics queryable capability. */
+  analyticsQueryable?: InputMaybe<MetafieldCapabilityAnalyticsQueryableInput>;
+  /** The input for updating the cart to order copyable capability. */
+  cartToOrderCopyable?: InputMaybe<MetafieldCapabilityCartToOrderCopyableInput>;
   /** The input for updating the smart collection condition capability. */
   smartCollectionCondition?: InputMaybe<MetafieldCapabilitySmartCollectionConditionInput>;
   /** The input for updating the unique values capability. */
@@ -31362,6 +38563,10 @@ export type MetafieldCapabilityUniqueValuesInput = {
 export type MetafieldCapabilityUpdateInput = {
   /** The input for updating the admin filterable capability. */
   adminFilterable?: InputMaybe<MetafieldCapabilityAdminFilterableInput>;
+  /** The input for the analytics queryable capability. */
+  analyticsQueryable?: InputMaybe<MetafieldCapabilityAnalyticsQueryableInput>;
+  /** The input for updating the cart to order copyable capability. */
+  cartToOrderCopyable?: InputMaybe<MetafieldCapabilityCartToOrderCopyableInput>;
   /** The input for updating the smart collection condition capability. */
   smartCollectionCondition?: InputMaybe<MetafieldCapabilitySmartCollectionConditionInput>;
   /** The input for updating the unique values capability. */
@@ -31624,6 +38829,8 @@ export type MetafieldDefinitionCreateUserError = DisplayableError & {
   code?: Maybe<MetafieldDefinitionCreateUserErrorCode>;
   /** The index of the array element that's causing the error. */
   elementIndex?: Maybe<Scalars['Int']['output']>;
+  /** The key of the failing validation element. */
+  elementKey?: Maybe<Scalars['String']['output']>;
   /** The path to the input field that caused the error. */
   field?: Maybe<Array<Scalars['String']['output']>>;
   /** The error message. */
@@ -31658,6 +38865,8 @@ export enum MetafieldDefinitionCreateUserErrorCode {
   LimitExceeded = 'LIMIT_EXCEEDED',
   /** You have reached the maximum allowed definitions for automated collections. */
   OwnerTypeLimitExceededForAutomatedCollections = 'OWNER_TYPE_LIMIT_EXCEEDED_FOR_AUTOMATED_COLLECTIONS',
+  /** You have reached the maximum allowed definitions to be used as admin filters. */
+  OwnerTypeLimitExceededForUseAsAdminFilters = 'OWNER_TYPE_LIMIT_EXCEEDED_FOR_USE_AS_ADMIN_FILTERS',
   /** The pinned limit has been reached for the owner type. */
   PinnedLimitReached = 'PINNED_LIMIT_REACHED',
   /** The input value needs to be blank. */
@@ -31962,7 +39171,7 @@ export type MetafieldDefinitionUpdateInput = {
   name?: InputMaybe<Scalars['String']['input']>;
   /**
    * The container for a group of metafields that the metafield definition is associated with. Used to help identify
-   * the metafield definition, but cannot be updated itself. If omitted, the app-reserved namespace will be used.
+   * the metafield definition, but can't be updated itself. If omitted, the app-reserved namespace will be used.
    */
   namespace?: InputMaybe<Scalars['String']['input']>;
   /**
@@ -31999,6 +39208,8 @@ export type MetafieldDefinitionUpdateUserError = DisplayableError & {
   code?: Maybe<MetafieldDefinitionUpdateUserErrorCode>;
   /** The index of the array element that's causing the error. */
   elementIndex?: Maybe<Scalars['Int']['output']>;
+  /** The key of the failing validation element. */
+  elementKey?: Maybe<Scalars['String']['output']>;
   /** The path to the input field that caused the error. */
   field?: Maybe<Array<Scalars['String']['output']>>;
   /** The error message. */
@@ -32043,6 +39254,8 @@ export enum MetafieldDefinitionUpdateUserErrorCode {
   NotFound = 'NOT_FOUND',
   /** You have reached the maximum allowed definitions for automated collections. */
   OwnerTypeLimitExceededForAutomatedCollections = 'OWNER_TYPE_LIMIT_EXCEEDED_FOR_AUTOMATED_COLLECTIONS',
+  /** You have reached the maximum allowed definitions to be used as admin filters. */
+  OwnerTypeLimitExceededForUseAsAdminFilters = 'OWNER_TYPE_LIMIT_EXCEEDED_FOR_USE_AS_ADMIN_FILTERS',
   /** The pinned limit has been reached for the owner type. */
   PinnedLimitReached = 'PINNED_LIMIT_REACHED',
   /** The input value needs to be blank. */
@@ -32061,7 +39274,7 @@ export enum MetafieldDefinitionUpdateUserErrorCode {
  * For example, for a metafield definition of `number_integer` type, you can set a validation with the name `max`
  * and a value of `15`. This validation will ensure that the value of the metafield is a number less than or equal to 15.
  *
- * Refer to the [list of supported validations](https://shopify.dev/api/admin/graphql/reference/common-objects/metafieldDefinitionTypes#examples-Fetch_all_metafield_definition_types).
+ * Refer to the [list of supported validations](https://shopify.dev/docs/apps/build/metafields/list-of-validation-options).
  */
 export type MetafieldDefinitionValidation = {
   __typename?: 'MetafieldDefinitionValidation';
@@ -32079,7 +39292,7 @@ export type MetafieldDefinitionValidation = {
  * For example, for a metafield definition of `single_line_text_field` type, you can set a validation with the name `min` and a value of `10`.
  * This validation will ensure that the value of the metafield is at least 10 characters.
  *
- * Refer to the [list of supported validations](https://shopify.dev/apps/build/custom-data/metafields/list-of-validation-options).
+ * Refer to the [list of supported validations](https://shopify.dev/docs/apps/build/metafields/list-of-validation-options).
  */
 export type MetafieldDefinitionValidationInput = {
   /** The name for the metafield definition validation. */
@@ -32134,7 +39347,7 @@ export type MetafieldIdentifierInput = {
  * [metafieldsSet](https://shopify.dev/api/admin-graphql/latest/mutations/metafieldsSet) mutation.
  */
 export type MetafieldInput = {
-  /** The unique ID of the metafield. Using `owner_id`, `namespace`, and `key` is preferred for creating and updating. */
+  /** The unique ID of the metafield. Using `namespace` and `key` is preferred for creating and updating. */
   id?: InputMaybe<Scalars['ID']['input']>;
   /**
    * The unique identifier for a metafield within its namespace.
@@ -32156,7 +39369,7 @@ export type MetafieldInput = {
    */
   namespace?: InputMaybe<Scalars['String']['input']>;
   /**
-   * The type of data that is stored in the metafield.
+   * The type of data that's stored in the metafield.
    * Refer to the list of [supported types](https://shopify.dev/apps/metafields/types).
    *
    * Required when creating or updating a metafield without a definition.
@@ -32219,6 +39432,8 @@ export enum MetafieldOwnerType {
   SellingPlan = 'SELLING_PLAN',
   /** The Shop metafield owner type. */
   Shop = 'SHOP',
+  /** The Transfer metafield owner type. */
+  Transfer = 'TRANSFER',
   /** The Validation metafield owner type. */
   Validation = 'VALIDATION'
 }
@@ -32362,10 +39577,10 @@ export type MetafieldsSetInput = {
   /** The unique ID of the resource that the metafield is attached to. */
   ownerId: Scalars['ID']['input'];
   /**
-   * The type of data that is stored in the metafield.
+   * The type of data that's stored in the metafield.
    * The type must be one of the [supported types](https://shopify.dev/apps/metafields/types).
    *
-   * Required when there is no corresponding definition for the given `namespace`, `key`, and
+   * Required when there's no corresponding definition for the given `namespace`, `key`, and
    * owner resource type (derived from `ownerId`).
    */
   type?: InputMaybe<Scalars['String']['input']>;
@@ -32438,6 +39653,8 @@ export type Metaobject = Node & {
   __typename?: 'Metaobject';
   /** Metaobject capabilities for this Metaobject. */
   capabilities: MetaobjectCapabilityData;
+  /** When the object was created. */
+  createdAt: Scalars['DateTime']['output'];
   /** The app used to create the object. */
   createdBy: App;
   /** The app used to create the object. */
@@ -32469,6 +39686,8 @@ export type Metaobject = Node & {
   type: Scalars['String']['output'];
   /** When the object was last updated. */
   updatedAt: Scalars['DateTime']['output'];
+  /** The values of the metaobject. */
+  values: Scalars['JSON']['output'];
 };
 
 
@@ -32500,6 +39719,8 @@ export type MetaobjectAccess = {
   __typename?: 'MetaobjectAccess';
   /** The access permitted on the Admin API. */
   admin: MetaobjectAdminAccess;
+  /** The access permitted on the Customer Account API. */
+  customerAccount: MetaobjectCustomerAccountAccess;
   /** The access permitted on the Storefront API. */
   storefront: MetaobjectStorefrontAccess;
 };
@@ -32508,6 +39729,8 @@ export type MetaobjectAccess = {
 export type MetaobjectAccessInput = {
   /** The access permitted on the Admin API. */
   admin?: InputMaybe<MetaobjectAdminAccessInput>;
+  /** The access permitted on the Customer Account API. */
+  customerAccount?: InputMaybe<MetaobjectCustomerAccountAccess>;
   /** The access permitted on the Storefront API. */
   storefront?: InputMaybe<MetaobjectStorefrontAccess>;
 };
@@ -32521,9 +39744,15 @@ export enum MetaobjectAdminAccess {
   MerchantRead = 'MERCHANT_READ',
   /** The merchant has read and write access. No other apps have access. */
   MerchantReadWrite = 'MERCHANT_READ_WRITE',
-  /** The merchant and other apps have no access. */
+  /**
+   * The merchant and other apps have no access.
+   * @deprecated Use MERCHANT_READ instead. Removed in API version 2027-01.
+   */
   Private = 'PRIVATE',
-  /** The merchant and other apps have read-only access. */
+  /**
+   * The merchant and other apps have read-only access.
+   * @deprecated Use MERCHANT_READ instead. Removed in API version 2027-01.
+   */
   PublicRead = 'PUBLIC_READ',
   /** The merchant and other apps have read and write access. */
   PublicReadWrite = 'PUBLIC_READ_WRITE'
@@ -32767,6 +39996,8 @@ export type MetaobjectCreateInput = {
   handle?: InputMaybe<Scalars['String']['input']>;
   /** The type of the metaobject. Must match an existing metaobject definition type. */
   type: Scalars['String']['input'];
+  /** The field values for the metaobject as a JSON object, keyed by field definition key. Cannot be used in conjunction with `fields`. */
+  values?: InputMaybe<Scalars['JSON']['input']>;
 };
 
 /** Return type for `metaobjectCreate` mutation. */
@@ -32777,6 +40008,14 @@ export type MetaobjectCreatePayload = {
   /** The list of errors that occurred from executing the mutation. */
   userErrors: Array<MetaobjectUserError>;
 };
+
+/** Metaobject access permissions for the Customer Account API. */
+export enum MetaobjectCustomerAccountAccess {
+  /** No access. */
+  None = 'NONE',
+  /** Read-only access. */
+  Read = 'READ'
+}
 
 /**
  * Defines the structure and configuration for a custom data type in Shopify. Each definition specifies the fields, validation rules, and capabilities that apply to all [`Metaobject`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Metaobject) entries created from it.
@@ -32789,6 +40028,8 @@ export type MetaobjectDefinition = Node & {
   access: MetaobjectAccess;
   /** The capabilities of the metaobject definition. */
   capabilities: MetaobjectCapabilities;
+  /** The date and time when the metaobject definition was created. */
+  createdAt: Scalars['DateTime']['output'];
   /** The app used to create the metaobject definition. */
   createdByApp: App;
   /** The staff member who created the metaobject definition. */
@@ -32813,6 +40054,8 @@ export type MetaobjectDefinition = Node & {
   standardTemplate?: Maybe<StandardMetaobjectDefinitionTemplate>;
   /** The type of the object definition. Defines the namespace of associated metafields. */
   type: Scalars['String']['output'];
+  /** The date and time when the metaobject definition was last updated. */
+  updatedAt: Scalars['DateTime']['output'];
 };
 
 
@@ -32851,7 +40094,7 @@ export type MetaobjectDefinitionCreateInput = {
   /** The key of a field to reference as the display name for metaobjects of this type. */
   displayNameKey?: InputMaybe<Scalars['String']['input']>;
   /** A set of field definitions to create on this metaobject definition. */
-  fieldDefinitions: Array<MetaobjectFieldDefinitionCreateInput>;
+  fieldDefinitions?: InputMaybe<Array<MetaobjectFieldDefinitionCreateInput>>;
   /** A human-readable name for the definition. This can be changed at any time. */
   name?: InputMaybe<Scalars['String']['input']>;
   /**
@@ -33126,6 +40369,8 @@ export type MetaobjectUpdateInput = {
   handle?: InputMaybe<Scalars['String']['input']>;
   /** Whether to create a redirect for the metaobject. */
   redirectNewHandle?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The field values for the metaobject as a JSON object, keyed by field definition key. This is a full replacement — omitted keys are cleared on an existing record. Cannot be used in conjunction with `fields`. */
+  values?: InputMaybe<Scalars['JSON']['input']>;
 };
 
 /** Return type for `metaobjectUpdate` mutation. */
@@ -33705,7 +40950,7 @@ export type Mutation = {
   /**
    * Creates and runs a [bulk operation](https://shopify.dev/docs/api/admin-graphql/latest/objects/BulkOperation) to import data asynchronously. This mutation executes a specified GraphQL mutation multiple times using input data from a [JSONL](http://jsonlines.org/) file that you've uploaded to Shopify.
    *
-   * The operation processes each line in your JSONL file as a separate mutation execution. The operation delivers results in a JSONL file when it completes. You can run one bulk mutation operation at a time per shop, though a [`bulkOperationRunQuery`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/bulkoperationrunquery) operation can run simultaneously.
+   * The operation processes each line in your JSONL file as a separate mutation execution. The operation delivers results in a JSONL file when it completes. Bulk mutation operations and [`bulkOperationRunQuery`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/bulkoperationrunquery) operations can run at the same time per shop. The number of concurrent operations that an app can run depends on the API version. For the applicable concurrency limits, refer to the [bulk operations guide](https://shopify.dev/docs/api/usage/bulk-operations/imports).
    *
    * Learn more about [bulk importing data](https://shopify.dev/docs/api/usage/bulk-operations/imports).
    */
@@ -33713,7 +40958,7 @@ export type Mutation = {
   /**
    * Creates and runs a [bulk operation](https://shopify.dev/docs/api/admin-graphql/latest/objects/BulkOperation) to fetch data asynchronously. The operation processes your GraphQL query in the background and returns results in a [JSONL](http://jsonlines.org/) file when complete.
    *
-   * Apps can run one bulk query operation and one bulk mutation operation at a time per shop. The query must include at least one connection field and supports up to five connections with a maximum nesting depth of two levels.
+   * Bulk query and bulk mutation operations can run at the same time per shop. The number of concurrent operations that an app can run depends on the API version. For the applicable concurrency limits, refer to the [bulk operations guide](https://shopify.dev/docs/api/usage/bulk-operations/queries). The query must include at least one connection field and supports up to five connections with a maximum nesting depth of two levels.
    *
    * > Note: Results remain available for seven days after completion.
    *
@@ -33770,6 +41015,16 @@ export type Mutation = {
    * Learn more about [managing cart transforms](https://shopify.dev/docs/apps/selling-strategies/bundles).
    */
   cartTransformDelete?: Maybe<CartTransformDeletePayload>;
+  /** Creates a cash drawer in a provided location. */
+  cashDrawerCreate?: Maybe<CashDrawerCreatePayload>;
+  /** Finds or creates a cash drawer for cash management. Also ensures the provided device is assigned to the drawer. */
+  cashDrawerFindOrCreate?: Maybe<CashDrawerFindOrCreatePayload>;
+  /** Updates a cash drawer. */
+  cashDrawerUpdate?: Maybe<CashDrawerUpdatePayload>;
+  /** Create a cash management reason code. */
+  cashManagementReasonCodeCreate?: Maybe<CashManagementReasonCodeCreatePayload>;
+  /** Deletes a cash management reason code. */
+  cashManagementReasonCodeDelete?: Maybe<CashManagementReasonCodeDeletePayload>;
   /**
    * Modifies which contexts, like [markets](https://shopify.dev/docs/api/admin-graphql/latest/objects/Market) or B2B [company locations](https://shopify.dev/docs/api/admin-graphql/latest/objects/CompanyLocation), can access a [`Catalog`](https://shopify.dev/docs/api/admin-graphql/latest/interfaces/Catalog). You can add or remove contexts to control where the catalog's products and prices are available.
    *
@@ -33777,9 +41032,26 @@ export type Mutation = {
    */
   catalogContextUpdate?: Maybe<CatalogContextUpdatePayload>;
   /**
-   * Creates a [`Catalog`](https://shopify.dev/docs/api/admin-graphql/latest/interfaces/Catalog) that controls product availability and pricing for specific contexts like [markets](https://shopify.dev/docs/api/admin-graphql/latest/objects/Market) or B2B [company locations](https://shopify.dev/docs/api/admin-graphql/latest/objects/CompanyLocation). Catalogs use [`Publication`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication) objects to determine which products are available and [`PriceList`](https://shopify.dev/docs/api/admin-graphql/latest/objects/PriceList) objects to set custom pricing.
+   * Creates a [`Catalog`](https://shopify.dev/docs/api/admin-graphql/latest/interfaces/Catalog) that controls product availability and pricing for specific contexts like [markets](https://shopify.dev/docs/api/admin-graphql/latest/objects/Market) or B2B [company locations](https://shopify.dev/docs/api/admin-graphql/latest/objects/CompanyLocation).
+   *
+   * ### Publications and Price Lists
+   *
+   * - **[`Publication`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication)** objects control which products are visible in a catalog. Publications are **optional**. When a publication isn't associated with a catalog, product availability is determined by the sales channel.
+   * - **[`PriceList`](https://shopify.dev/docs/api/admin-graphql/latest/objects/PriceList)** objects define custom pricing for products in a catalog.
    *
    * You can optionally associate a publication and price list when creating the catalog, or add them later using separate mutations.
+   *
+   * ### When to use Publications
+   *
+   * **Create a publication only if you need to:**
+   * - Limit which products are visible in a specific context (e.g., show different products to different company locations or markets)
+   * - Publish a curated subset of your product catalog
+   *
+   * **Do NOT create a publication if:**
+   * - You want product availability determined by the sales channel
+   * - You only need to customize pricing (use a price list without a publication)
+   *
+   * > **Important:** For company location catalogs that only require custom pricing, create the catalog with a price list but without a publication.
    *
    * Learn more about [managing catalog contexts](https://shopify.dev/docs/apps/build/markets/new-markets/catalogs) and [using catalogs for different markets](https://shopify.dev/docs/apps/build/markets/catalogs-different-markets).
    */
@@ -33793,6 +41065,30 @@ export type Mutation = {
    */
   catalogUpdate?: Maybe<CatalogUpdatePayload>;
   /**
+   * Creates a [`Channel`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Channel) representing a connection between the shop and an external selling platform account. Use this mutation after a merchant authenticates with an external platform to establish the publishing destination for product syndication and, for order-generating channels, order import.
+   *
+   * The platform resolves the [channel specification](https://shopify.dev/docs/apps/build/sales-channels/channel-config-extension) identified by `specificationHandle`, determines its country coverage, intersects with the shop's available region markets, and establishes product feeds for all matching regions. Product feeds immediately begin emitting events to the application's webhook or event subscription.
+   *
+   * If the specification sets `expects_online_store_parity` and no matching region markets exist, the mutation returns an error. If the specification doesn't require online store parity and no matching region markets exist, a channel subordinate to shop defaults is created automatically.
+   */
+  channelCreate?: Maybe<ChannelCreatePayload>;
+  /** Deletes a [`Channel`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Channel) from the shop. All associated product feeds are removed. Existing orders attributed to the channel are preserved. The channel must have been created via [`channelCreate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/channelCreate). */
+  channelDelete?: Maybe<ChannelDeletePayload>;
+  /**
+   * Triggers a full product resync for the specified [`Channel`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Channel). All published products are added to the channel's product feed attention set, causing the next poll or event-triggered consumption to receive current state for the complete catalog. Use this mutation after initial channel setup, after recovering from a prolonged outage, or when the channel's external catalog has drifted from Shopify's state.
+   *
+   * The sync can be scoped to a specific country and language. When neither is specified, all country-language combinations covered by the channel's specification are triggered.
+   */
+  channelFullSync?: Maybe<ChannelFullSyncPayload>;
+  /**
+   * Updates the properties of an existing [`Channel`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Channel). Use this mutation to update account information — such as the display name shown in Shopify Admin — or to bind the channel to a different channel specification.
+   *
+   * Updating the `specificationHandle` triggers re-evaluation of the specification's country coverage against the shop's region markets, reconciling product feeds accordingly. This is also the mechanism for migrating legacy channel records to the multi-channel model by assigning a specification handle.
+   */
+  channelUpdate?: Maybe<ChannelUpdatePayload>;
+  /** Updates a checkout and accounts configuration. */
+  checkoutAndAccountsConfigurationUpdate?: Maybe<CheckoutAndAccountsConfigurationUpdatePayload>;
+  /**
    * Updates the visual branding for a [`CheckoutProfile`](https://shopify.dev/docs/api/admin-graphql/latest/objects/CheckoutProfile), customizing how checkout displays to customers. Creates new branding settings if none exist, or modifies existing settings.
    *
    * The mutation accepts two levels of customization through the [`CheckoutBrandingInput`](https://shopify.dev/docs/api/admin-graphql/latest/input-objects/CheckoutBrandingInput) input object. [`designSystem`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/checkoutBrandingUpsert#arguments-checkoutBrandingInput.fields.designSystem) defines foundational brand attributes like colors, typography, and corner radius that apply consistently throughout checkout. [`customizations`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/checkoutBrandingUpsert#arguments-checkoutBrandingInput.fields.customizations) defines styles for specific parts of the UI, individual components, or groups of components like the header, buttons, form fields, and sections.
@@ -33800,6 +41096,7 @@ export type Mutation = {
    * Changes to a published checkout profile display immediately in the store's checkout. You can preview draft profiles in the Shopify admin's checkout editor before publishing.
    *
    * Learn more about [checkout styling](https://shopify.dev/docs/apps/checkout/styling).
+   * @deprecated Use `checkoutAndAccountsConfigurationUpdate` instead.
    */
   checkoutBrandingUpsert?: Maybe<CheckoutBrandingUpsertPayload>;
   /**
@@ -33815,9 +41112,8 @@ export type Mutation = {
    *
    * The mutation processes multiple product additions and returns success status along with any errors encountered during the operation. Products are added to the collection while preserving existing collection settings.
    *
-   * This operation only works with manual collections where merchants explicitly choose which products to include. It will return an error if used with smart collections that automatically include products based on conditions.
-   *
    * Learn more about [collection management](https://shopify.dev/docs/api/admin-graphql/latest/objects/Collection).
+   * @deprecated Use `collectionUpdate` with inclusion.selectionsToAdd instead.
    */
   collectionAddProducts?: Maybe<CollectionAddProductsPayload>;
   /**
@@ -33827,8 +41123,15 @@ export type Mutation = {
    *
    * > Note:
    * > This mutation adds products in the order specified in the [`productIds`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/collectionAddProducts#arguments-productIds) argument.
+   * @deprecated Use `collectionUpdate` with inclusion.selectionsToAdd instead.
    */
   collectionAddProductsV2?: Maybe<CollectionAddProductsV2Payload>;
+  /** Creates a shareable collection source that can later be linked to one or more collections. */
+  collectionConditionsSourceCreate?: Maybe<CollectionConditionsSourceCreatePayload>;
+  /** Deletes a shareable collection source owned by the calling app. */
+  collectionConditionsSourceDelete?: Maybe<CollectionConditionsSourceDeletePayload>;
+  /** Updates a shareable collection source owned by the calling app. */
+  collectionConditionsSourceUpdate?: Maybe<CollectionConditionsSourceUpdatePayload>;
   /**
    * Creates a [collection](https://shopify.dev/docs/api/admin-graphql/latest/objects/Collection)
    * to group [products](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) together
@@ -33836,24 +41139,35 @@ export type Mutation = {
    * other [sales channels](https://shopify.dev/docs/apps/build/sales-channels).
    * For example, an athletics store might create different collections for running attire, shoes, and accessories.
    *
-   * There are two types of collections:
-   *
-   * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You specify the products to include in a collection.
-   * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You define rules, and products matching those rules are automatically
-   * included in the collection.
-   *
    * Use the `collectionCreate` mutation when you need to:
    *
    * - Create a new collection for a product launch or campaign
    * - Organize products by category, season, or promotion
-   * - Automate product grouping using rules (for example, by tag, type, or price)
+   * - Automate product grouping using conditions (for example, by tag, type, or price)
+   *
+   * Collections can include products manually and can also include products automatically based on rules, sources,
+   * or conditions.
+   *
+   * **Defining a collection's membership**
+   *
+   * Define membership with `sources` on the `collection` argument
+   * ([`CollectionCreateInput`](https://shopify.dev/docs/api/admin-graphql/latest/input-objects/CollectionCreateInput)).
+   * Each source adds products through `conditions` (such as product tag, title, or metafield—see
+   * [`CollectionSourceInclusionConditionInput`](https://shopify.dev/docs/api/admin-graphql/latest/input-objects/CollectionSourceInclusionConditionInput)
+   * for the full list) and through manual `selections`.
+   *
+   * > Note:
+   * > The `input` argument and its `ruleSet` field are deprecated. Existing integrations should migrate to
+   * `collection` and `sources` — a `ruleSet` rule maps to an equivalent source `condition` (for example, a
+   * tag rule becomes a `productTag` condition). If both `collection` and `input` are provided, `collection`
+   * is used.
    *
    * > Note:
    * > The created collection is unpublished by default. To make it available to customers,
    * use the [`publishablePublish`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/publishablePublish)
    * mutation after creation.
    *
-   * Learn more about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+   * Learn more about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
    */
   collectionCreate?: Maybe<CollectionCreatePayload>;
   /**
@@ -33872,12 +41186,25 @@ export type Mutation = {
    */
   collectionDelete?: Maybe<CollectionDeletePayload>;
   /**
+   * Duplicates a [collection](https://shopify.dev/docs/api/admin-graphql/latest/objects/Collection).
+   *
+   * An existing collection ID and new title are required.
+   *
+   * ## Publication Duplication
+   *
+   * Publications may be excluded by passing `copyPublications: false` in the input.
+   *
+   * ## Metafields
+   * Metafield values are not duplicated if the unique values capability is enabled.
+   */
+  collectionDuplicate?: Maybe<CollectionDuplicatePayload>;
+  /**
    * Publishes a collection to a channel.
    * @deprecated Use `publishablePublish` instead.
    */
   collectionPublish?: Maybe<CollectionPublishPayload>;
   /**
-   * Removes multiple products from a collection in a single operation. This mutation can process large product sets (up to 250 products) and may take significant time to complete for collections with many products.
+   * Removes multiple manually included products from a collection in a single operation. This mutation can process large product sets (up to 250 products) and may take significant time to complete for collections with many products.
    *
    * For example, when ending a seasonal promotion, merchants can remove all sale items from a "Summer Clearance" collection at once rather than editing each product individually.
    *
@@ -33889,6 +41216,7 @@ export type Mutation = {
    * The operation processes asynchronously to avoid timeouts and performance issues, especially for large product sets.
    *
    * Learn more about [collection management](https://shopify.dev/docs/api/admin-graphql/latest/objects/Collection).
+   * @deprecated Use `collectionUpdate` with inclusions.selectionsToRemove instead.
    */
   collectionRemoveProducts?: Maybe<CollectionRemoveProductsPayload>;
   /**
@@ -33927,21 +41255,19 @@ export type Mutation = {
    *
    * - Updating collection details, like title, description, or image
    * - Modifying SEO metadata for better search visibility
-   * - Changing which products are included (using rule updates for smart collections)
-   * - Publishing or unpublishing collections across different sales channels
+   * - Changing which products are included in a collection by updating its rules, sources, or conditions
    * - Updating custom data using [metafields](https://shopify.dev/docs/apps/build/custom-data/metafields)
    *
-   * There are two types of collections with different update capabilities:
-   *
-   * - **[Custom (manual) collections](https://help.shopify.com/manual/products/collections/manual-shopify-collection)**: You can update collection properties, but rule sets can't be modified since products are manually selected.
-   * - **[Smart (automated) collections](https://help.shopify.com/manual/products/collections/automated-collections)**: You can update both collection properties and the rules that automatically determine which products are included.
-   * When updating [rule sets](https://shopify.dev/docs/api/admin-graphql/latest/objects/CollectionRuleConditions) for smart collections, the operation might be processed asynchronously. In these cases, the mutation returns a [`job`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Job) object that you can use to track the progress of the update.
+   * Collections can include products manually and can also include products automatically based on rules, sources,
+   * or conditions. When product membership is updated through rules, sources, or conditions, the operation might
+   * be processed asynchronously. In these cases, the mutation returns a [`job`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Job) object
+   * that you can use to track the progress of the update.
    *
    * To publish or unpublish collections to specific sales channels, use the dedicated
    * [`publishablePublish`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/publishablePublish) and
    * [`publishableUnpublish`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/publishableUnpublish) mutations.
    *
-   * Learn more about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+   * Learn more about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
    */
   collectionUpdate?: Maybe<CollectionUpdatePayload>;
   /**
@@ -34149,7 +41475,13 @@ export type Mutation = {
    * Apps using protected customer data must meet Shopify's [protected customer data requirements](https://shopify.dev/docs/apps/launch/protected-customer-data#requirements).
    */
   customerDelete?: Maybe<CustomerDeletePayload>;
-  /** Updates a [`Customer`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Customer)'s email marketing consent information. The customer must have an email address to update their consent. Records the [marketing state](https://shopify.dev/docs/api/admin-graphql/latest/objects/CustomerEmailAddress#field-marketingState) (such as subscribed, pending, unsubscribed), [opt-in level](https://shopify.dev/docs/api/admin-graphql/latest/objects/CustomerEmailAddress#field-marketingOptInLevel), and when and where the customer gave or withdrew consent. */
+  /**
+   * Updates a [`Customer`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Customer)'s email marketing consent information. The customer must have an email address to update their consent. Records the [marketing state](https://shopify.dev/docs/api/admin-graphql/latest/objects/CustomerEmailAddress#field-marketingState) (such as subscribed, pending, unsubscribed), [opt-in level](https://shopify.dev/docs/api/admin-graphql/latest/objects/CustomerEmailAddress#field-marketingOptInLevel), and when and where the customer gave or withdrew consent.
+   *
+   * Only three values are accepted as input: SUBSCRIBED, UNSUBSCRIBED, and PENDING.
+   * NOT_SUBSCRIBED, REDACTED, and INVALID cannot be set via this mutation; they are
+   * read-only or internally-set states.
+   */
   customerEmailMarketingConsentUpdate?: Maybe<CustomerEmailMarketingConsentUpdatePayload>;
   /**
    * Generates a one-time activation URL for a [`Customer`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Customer) whose legacy customer account isn't yet enabled. Use this after importing customers or creating accounts that need activation.
@@ -34159,7 +41491,21 @@ export type Mutation = {
    * > Note: The generated URL only works when legacy customer accounts are enabled on the shop. It only works for customers with disabled or invited [`account states`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Customer#field-Customer.fields.state). Attempting to generate a URL for an already-enabled customer returns an error.
    */
   customerGenerateAccountActivationUrl?: Maybe<CustomerGenerateAccountActivationUrlPayload>;
-  /** Merges two customers. */
+  /**
+   * Merges two customers.
+   *
+   * The `customerOneId` and `customerTwoId` arguments don't guarantee which customer is kept. Shopify
+   * selects the resulting customer in this order:
+   * 1. If `overrideFields.customerIdOfEmailToKeep` is provided and valid, then the selected customer is kept.
+   * 2. If exactly one customer has an email address, then that customer is kept.
+   * 3. If both customers have email addresses, then account state and email marketing consent determine
+   *    the customer that's kept: an `enabled` account wins over other account states; otherwise, an
+   *    `invited` account can win when consent doesn't already prefer `subscribed` or `pending`; otherwise
+   *    the consent result is used. If those rules don't prefer either customer, then `customerTwoId` is kept.
+   * 4. If neither customer has an email address, then `customerTwoId` is kept.
+   *
+   * Use `customerMergePreview` and `resultingCustomerId` to check which customer will be kept before merging.
+   */
   customerMerge?: Maybe<CustomerMergePayload>;
   /**
    * Creates a vaulted payment method for a customer from duplication data.
@@ -34175,7 +41521,7 @@ export type Mutation = {
    * Please use customerPaymentMethodRemoteCreate if you are not managing credit cards directly.
    */
   customerPaymentMethodCreditCardCreate?: Maybe<CustomerPaymentMethodCreditCardCreatePayload>;
-  /** Updates the credit card payment method for a customer. */
+  /** Updates an existing vaulted credit card payment method for a customer, including billing address and card details. Requires a valid cardserver session from a PCI-compliant environment. Use this when a customer's card details have changed (e.g., new expiration date or replacement card) and ongoing subscriptions or saved payment methods need to be updated. */
   customerPaymentMethodCreditCardUpdate?: Maybe<CustomerPaymentMethodCreditCardUpdatePayload>;
   /**
    * Returns encrypted data that can be used to duplicate the payment method in another shop within the same organization.
@@ -34189,9 +41535,9 @@ export type Mutation = {
    * Currently, `customerPaymentMethodGetUpdateUrl` only supports Shop Pay.
    */
   customerPaymentMethodGetUpdateUrl?: Maybe<CustomerPaymentMethodGetUpdateUrlPayload>;
-  /** Creates a PayPal billing agreement for a customer. */
+  /** Creates a vaulted PayPal billing agreement for a customer, enabling recurring charges through PayPal. The billing agreement ID (starting with 'B-') must be obtained from PayPal. Once created, this payment method can be used for subscription billing or future order payments without requiring the customer to re-authenticate with PayPal. */
   customerPaymentMethodPaypalBillingAgreementCreate?: Maybe<CustomerPaymentMethodPaypalBillingAgreementCreatePayload>;
-  /** Updates a PayPal billing agreement for a customer. */
+  /** Updates the billing address associated with a customer's vaulted PayPal billing agreement. Use this when a customer's billing information has changed and their PayPal payment method record in Shopify needs to be updated accordingly. */
   customerPaymentMethodPaypalBillingAgreementUpdate?: Maybe<CustomerPaymentMethodPaypalBillingAgreementUpdatePayload>;
   /**
    * Creates a customer payment method using identifiers from remote payment gateways like Stripe, Authorize.Net, or Braintree. Imports existing payment methods from external gateways and associates them with [`Customer`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Customer) objects in Shopify.
@@ -34201,9 +41547,9 @@ export type Mutation = {
    * Learn more about [migrating customer payment methods from remote gateways](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/migrate-to-subscriptions-api/migrate-customer-information#step-2-import-payment-methods-for-customers).
    */
   customerPaymentMethodRemoteCreate?: Maybe<CustomerPaymentMethodRemoteCreatePayload>;
-  /** Revokes a customer's payment method. */
+  /** Revokes a customer's vaulted payment method, preventing it from being used for future charges such as subscriptions, draft orders, or other payments. Revocation will fail if the payment method has active subscription contracts. Use this when a customer requests removal of their stored payment information or when a payment method is no longer valid. */
   customerPaymentMethodRevoke?: Maybe<CustomerPaymentMethodRevokePayload>;
-  /** Sends a link to the customer so they can update a specific payment method. */
+  /** Sends an email to a customer containing a secure link to update a specific vaulted payment method. This is commonly used when a customer's credit card is expiring or has been declined, and they need to provide updated payment details for ongoing subscriptions. The email can be customized with sender and BCC fields. */
   customerPaymentMethodSendUpdateEmail?: Maybe<CustomerPaymentMethodSendUpdateEmailPayload>;
   /** Remove tax exemptions from a customer. */
   customerRemoveTaxExemptions?: Maybe<CustomerRemoveTaxExemptionsPayload>;
@@ -34266,6 +41612,12 @@ export type Mutation = {
   customerUpdate?: Maybe<CustomerUpdatePayload>;
   /** Updates a customer's default address. */
   customerUpdateDefaultAddress?: Maybe<CustomerUpdateDefaultAddressPayload>;
+  /**
+   * Updates a [customer](https://shopify.dev/docs/api/admin-graphql/latest/objects/Customer)'s WhatsApp marketing consent information. Shopify identifies the customer's WhatsApp account by their [phone number](https://shopify.dev/docs/api/admin-graphql/latest/objects/CustomerPhoneNumber).
+   *
+   * You can subscribe or unsubscribe the customer from WhatsApp marketing and specify the [opt-in level](https://shopify.dev/docs/api/admin-graphql/latest/mutations/customerWhatsAppMarketingConsentUpdate#arguments-input.fields.whatsAppMarketingConsent.optInLevel). You can also include when and [where](https://shopify.dev/docs/api/admin-graphql/latest/mutations/customerWhatsAppMarketingConsentUpdate#arguments-input.fields.whatsAppMarketingConsent.sourceLocationId) the consent was collected.
+   */
+  customerWhatsAppMarketingConsentUpdate?: Maybe<CustomerWhatsAppMarketingConsentUpdatePayload>;
   /** Opt out a customer from data sale. */
   dataSaleOptOut?: Maybe<DataSaleOptOutPayload>;
   /**
@@ -34312,7 +41664,11 @@ export type Mutation = {
   deliveryPromiseProviderUpsert?: Maybe<DeliveryPromiseProviderUpsertPayload>;
   /** Set the delivery settings for a shop. */
   deliverySettingUpdate?: Maybe<DeliverySettingUpdatePayload>;
-  /** Assigns a location as the shipping origin while using legacy compatibility mode for multi-location delivery profiles. */
+  /**
+   * Assigns a location as the shipping origin while using legacy compatibility mode for multi-location delivery profiles.
+   * Deprecated as of 2026-04 and will be removed in a future version as single origin shipping mode has been retired.
+   * @deprecated Single origin shipping mode is no longer supported.
+   */
   deliveryShippingOriginAssign?: Maybe<DeliveryShippingOriginAssignPayload>;
   /** Activates an automatic discount. */
   discountAutomaticActivate?: Maybe<DiscountAutomaticActivatePayload>;
@@ -34458,6 +41814,24 @@ export type Mutation = {
    * Learn more about [managing automatic discounts](https://shopify.dev/docs/api/admin-graphql/latest/objects/DiscountAutomaticFreeShipping).
    */
   discountAutomaticFreeShippingUpdate?: Maybe<DiscountAutomaticFreeShippingUpdatePayload>;
+  /**
+   * Adds tags to multiple [discounts](https://help.shopify.com/manual/discounts/discount-types) asynchronously using one of the following:
+   * - A search query
+   * - A saved search ID
+   * - A list of discount IDs
+   *
+   * For example, you can add tags to price rules that match a search criteria, or add tags to a predefined set of price rules.
+   */
+  discountBulkTagsAdd?: Maybe<DiscountBulkTagsAddPayload>;
+  /**
+   * Removes tags from multiple [discounts](https://help.shopify.com/manual/discounts/discount-types) asynchronously using one of the following:
+   * - A search query
+   * - A saved search ID
+   * - A list of discount IDs
+   *
+   * For example, you can delete tags from price rules that match a search criteria, or delete tags from a predefined set of price rules.
+   */
+  discountBulkTagsRemove?: Maybe<DiscountBulkTagsRemovePayload>;
   /**
    * Activates a previously created code discount, making it available for customers to use during checkout. This mutation transitions inactive discount codes into an active state where they can be applied to orders.
    *
@@ -34608,7 +41982,7 @@ export type Mutation = {
    * marketing channels.
    */
   discountRedeemCodeBulkAdd?: Maybe<DiscountRedeemCodeBulkAddPayload>;
-  /** Updates a dispute evidence. */
+  /** Updates the evidence package for a Shopify Payments dispute. Merchants submit evidence — such as shipping confirmations, customer communications, and refund policies — to contest a dispute filed by a cardholder. This mutation updates the evidence fields. */
   disputeEvidenceUpdate?: Maybe<DisputeEvidenceUpdatePayload>;
   /** Adds tags to multiple draft orders. */
   draftOrderBulkAddTags?: Maybe<DraftOrderBulkAddTagsPayload>;
@@ -34978,6 +42352,8 @@ export type Mutation = {
   fulfillmentOrderRejectFulfillmentRequest?: Maybe<FulfillmentOrderRejectFulfillmentRequestPayload>;
   /** Releases the fulfillment hold on a fulfillment order. */
   fulfillmentOrderReleaseHold?: Maybe<FulfillmentOrderReleaseHoldPayload>;
+  /** Reports the progress of an open or in-progress fulfillment order. */
+  fulfillmentOrderReportProgress?: Maybe<FulfillmentOrderReportProgressPayload>;
   /**
    * Reschedules a scheduled fulfillment order.
    *
@@ -35060,20 +42436,48 @@ export type Mutation = {
    * You can customize the gift card with an optional code, expiration date, and internal note. If you don't provide a code, the system generates a random 16 character alphanumeric code. The mutation also supports scheduling gift card notifications to recipients, with a personalized message, through the [`recipientAttributes`](https://shopify.dev/docs/api/admin-graphql/latest/input-objects/GiftCardCreateInput#fields-recipientAttributes) field on the `GiftCardCreateInput` input object.
    */
   giftCardCreate?: Maybe<GiftCardCreatePayload>;
-  /** Credit a gift card. */
+  /** Adds funds to an existing gift card, increasing its available balance. Use this when a merchant wants to top up a customer's gift card — for example, as a promotional bonus, a customer service gesture, or to reload a reusable gift card. */
   giftCardCredit?: Maybe<GiftCardCreditPayload>;
   /**
    * Deactivate a gift card. A deactivated gift card cannot be used by a customer.
    * A deactivated gift card cannot be re-enabled.
    */
   giftCardDeactivate?: Maybe<GiftCardDeactivatePayload>;
-  /** Debit a gift card. */
+  /** Removes funds from a gift card, decreasing its available balance. Use this for manual balance adjustments — for example, correcting an accidental over-credit or applying a fee. */
   giftCardDebit?: Maybe<GiftCardDebitPayload>;
-  /** Send notification to the customer of a gift card. */
+  /**
+   * Creates or updates a
+   * [`gift card`](https://shopify.dev/docs/api/admin-graphql/latest/objects/GiftCard)
+   * product. This mutation is specifically designed for gift card products and automatically sets
+   * the `giftCard` field to `true`, applies gift card variant defaults (non-taxable, no shipping
+   * required, inventory untracked), and omits fields that aren't relevant to gift cards.
+   *
+   * For list fields like
+   * [`variants`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/giftCardProductSet#arguments-input.fields.variants),
+   * the mutation performs a full replacement: it creates new entries, updates existing ones, and
+   * removes any entries not included in the input. For all other fields, only included fields
+   * change and omitted fields remain unchanged.
+   *
+   * You can run the mutation synchronously to receive the updated product immediately, or
+   * asynchronously by setting
+   * [`synchronous`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/giftCardProductSet#arguments-synchronous)`: false`
+   * to receive a
+   * [`ProductSetOperation`](https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductSetOperation)
+   * object instead. Use the
+   * [`productOperation`](https://shopify.dev/docs/api/admin-graphql/latest/queries/productOperation)
+   * query to check the status and retrieve the product details when running asynchronously.
+   *
+   * > Note:
+   * > The
+   * [`issuanceCurrency`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/giftCardProductSet#arguments-input.fields.issuanceCurrency)
+   * and [`crossCurrencyRedeemable`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/giftCardProductSet#arguments-input.fields.crossCurrencyRedeemable) fields can only be set during product creation. They can't be changed after the product is created.
+   */
+  giftCardProductSet?: Maybe<GiftCardProductSetPayload>;
+  /** Sends a notification to the customer who purchased a gift card, including the gift card details and code. The notification is delivered using the customer's available contact method. Use this to resend the purchase confirmation or remind the purchaser about a gift card they bought. */
   giftCardSendNotificationToCustomer?: Maybe<GiftCardSendNotificationToCustomerPayload>;
-  /** Send notification to the recipient of a gift card. */
+  /** Sends a notification to the designated recipient of a gift card, delivering the gift card code and redemption instructions. The notification is delivered using the recipient's available contact method. Use this to deliver or re-deliver the gift card to the intended recipient. */
   giftCardSendNotificationToRecipient?: Maybe<GiftCardSendNotificationToRecipientPayload>;
-  /** Update a gift card. */
+  /** Updates the properties of an existing gift card, such as its expiration date, note, or template suffix. Use this to modify gift card details — for example, extending an expiration date for a loyal customer or adding an internal note for tracking purposes. */
   giftCardUpdate?: Maybe<GiftCardUpdatePayload>;
   /**
    * Activates an inventory item at a [`Location`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Location) by creating an [`InventoryLevel`](https://shopify.dev/docs/api/admin-graphql/latest/objects/InventoryLevel) that tracks stock quantities. This enables you to manage inventory for a [`ProductVariant`](https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductVariant) at the specified location.
@@ -35159,15 +42563,6 @@ export type Mutation = {
    */
   inventorySetQuantities?: Maybe<InventorySetQuantitiesPayload>;
   /**
-   * Set up scheduled changes of inventory items.
-   *
-   * > Caution:
-   * > As of 2026-01, this mutation supports an optional idempotency key using the `@idempotent` directive.
-   * > As of 2026-04, the idempotency key is required and must be provided using the `@idempotent` directive.
-   * > For more information, see the [idempotency documentation](https://shopify.dev/docs/api/usage/idempotent-requests).
-   */
-  inventorySetScheduledChanges?: Maybe<InventorySetScheduledChangesPayload>;
-  /**
    * Adds items to an inventory shipment.
    *
    * > Caution:
@@ -35209,6 +42604,8 @@ export type Mutation = {
   inventoryShipmentReceive?: Maybe<InventoryShipmentReceivePayload>;
   /** Remove items from an inventory shipment. */
   inventoryShipmentRemoveItems?: Maybe<InventoryShipmentRemoveItemsPayload>;
+  /** Sets the barcode on an inventory shipment. */
+  inventoryShipmentSetBarcode?: Maybe<InventoryShipmentSetBarcodePayload>;
   /** Edits the tracking info on an inventory shipment. */
   inventoryShipmentSetTracking?: Maybe<InventoryShipmentSetTrackingPayload>;
   /** Updates items on an inventory shipment. */
@@ -35252,12 +42649,44 @@ export type Mutation = {
   /** Sets an inventory transfer to ready to ship. */
   inventoryTransferMarkAsReadyToShip?: Maybe<InventoryTransferMarkAsReadyToShipPayload>;
   /**
-   * This mutation allows removing the shippable quantities of line items on a Transfer.
-   * It removes all quantities of the item from the transfer that are not associated with shipments.
+   * This mutation removes [`InventoryTransferLineItem`s](https://shopify.dev/docs/api/admin-graphql/latest/objects/InventoryTransferLineItem),
+   * or portions of them, from a `DRAFT` or `READY_TO_SHIP` Transfer.
+   *
+   * For each referenced line item, if its entire quantity is still unallocated to a
+   * shipment, the line item is removed; otherwise the line item remains on the
+   * transfer with its quantity reduced to the allocated portion. Quantity allocated
+   * to a shipment (whether the shipment is in draft, in transit, or already
+   * received) is preserved.
+   *
+   * On `READY_TO_SHIP` transfers, removing items also returns the affected reserved
+   * quantity to available inventory at the origin location.
+   *
+   * To change the quantity of a line item without removing it, use
+   * [`inventoryTransferSetItems`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/inventoryTransferSetItems).
    */
   inventoryTransferRemoveItems?: Maybe<InventoryTransferRemoveItemsPayload>;
   /**
-   * This mutation allows for the setting of line items on a Transfer. Will replace the items already set, if any.
+   * This mutation sets the quantity for one or more line items on a Transfer.
+   *
+   * Only the items you include in the `lineItems` field are updated. Items already on
+   * the transfer but not referenced in your update will stay unchanged. Each inventory
+   * item may appear at most once in `lineItems`; duplicate `inventoryItemId` entries
+   * are rejected.
+   *
+   * For each entry in `lineItems`:
+   * - If the inventory item isn't yet on the transfer, a new line item is added with
+   *   the provided quantity.
+   * - If the inventory item is already on the transfer, the provided quantity
+   *   replaces the line item's [`processableQuantity`](https://shopify.dev/docs/api/admin-graphql/latest/objects/InventoryTransferLineItem#field-InventoryTransferLineItem.fields.processableQuantity).
+   *   Any quantity outside the processable portion (for example, already shipped or
+   *   picked for shipment) is preserved, so the resulting total quantity equals the
+   *   preserved portion plus the provided quantity.
+   *
+   * Passing a quantity of `0` is only allowed for transfers in `DRAFT` status; on
+   * `READY_TO_SHIP` or `IN_PROGRESS` transfers it returns an `INVALID_QUANTITY` error.
+   * On `DRAFT` transfers, `quantity: 0` leaves a zero-quantity line item on the
+   * transfer; it does not remove the item. To remove a line item from a transfer, use
+   * [`inventoryTransferRemoveItems`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/inventoryTransferRemoveItems).
    *
    * > Caution:
    * > As of 2026-01, this mutation supports an optional idempotency key using the `@idempotent` directive.
@@ -35319,8 +42748,8 @@ export type Mutation = {
   marketCreate?: Maybe<MarketCreatePayload>;
   /**
    * Updates currency settings of a market.
-   * @deprecated This will be removed in a future version. Use `marketCreate` and `marketUpdate` for creating and updating
-   * market currency settings, respectively.
+   * @deprecated Use `marketCreate` and `marketUpdate` for creating and updating
+   * market currency settings, respectively. Removed in API version 2027-01.
    *
    */
   marketCurrencySettingsUpdate?: Maybe<MarketCurrencySettingsUpdatePayload>;
@@ -35366,7 +42795,10 @@ export type Mutation = {
   marketingActivitiesDeleteAllExternal?: Maybe<MarketingActivitiesDeleteAllExternalPayload>;
   /** Create new marketing activity. Marketing activity app extensions are deprecated and will be removed in the near future. */
   marketingActivityCreate?: Maybe<MarketingActivityCreatePayload>;
-  /** Creates a new external marketing activity. */
+  /**
+   * Creates a new external marketing activity.
+   * @deprecated Use `marketingActivityUpsertExternal` instead.
+   */
   marketingActivityCreateExternal?: Maybe<MarketingActivityCreateExternalPayload>;
   /** Deletes an external marketing activity. */
   marketingActivityDeleteExternal?: Maybe<MarketingActivityDeleteExternalPayload>;
@@ -35508,6 +42940,25 @@ export type Mutation = {
   mobilePlatformApplicationDelete?: Maybe<MobilePlatformApplicationDeletePayload>;
   /** Update a mobile platform application. */
   mobilePlatformApplicationUpdate?: Maybe<MobilePlatformApplicationUpdatePayload>;
+  /**
+   * Deletes an order attribution definition for the calling app on the current shop. Existing orders
+   * attributed to this definition are preserved.
+   *
+   * Learn more in the [order attribution guide](https://shopify.dev/docs/apps/build/sales-channels/order-attribution).
+   */
+  orderAttributionDefinitionDelete?: Maybe<OrderAttributionDefinitionDeletePayload>;
+  /**
+   * Upserts an order attribution definition for the calling app on the current shop. Apps can use
+   * attribution definitions to label orders they route to a shop, replacing or augmenting any definitions
+   * shipped declaratively via the `order_attribution_config` extension.
+   *
+   * Learn more in the [order attribution guide](https://shopify.dev/docs/apps/build/sales-channels/order-attribution).
+   *
+   * If a definition with the same handle exists for this app on the shop, the supplied input fields are
+   * merged onto it; fields omitted from the input are left unchanged. Otherwise a new definition is
+   * created. To explicitly clear the stored `icon` on an existing definition, pass `icon: null`.
+   */
+  orderAttributionDefinitionUpsert?: Maybe<OrderAttributionDefinitionUpsertPayload>;
   /**
    * Cancels an order, with options for refunding, restocking inventory, and customer notification.
    *
@@ -35758,7 +43209,7 @@ export type Mutation = {
   orderMarkAsPaid?: Maybe<OrderMarkAsPaidPayload>;
   /** Opens a closed order. */
   orderOpen?: Maybe<OrderOpenPayload>;
-  /** Create a risk assessment for an order. */
+  /** Creates a risk assessment for a specific order using the provided risk level and facts. Shopify sends an `orders/risk_assessment_changed` webhook when the assessment is created. */
   orderRiskAssessmentCreate?: Maybe<OrderRiskAssessmentCreatePayload>;
   /**
    * Updates the attributes of an order, such as the customer's email, the shipping address for the order,
@@ -35813,22 +43264,42 @@ export type Mutation = {
    * The mutation supports partial updates, allowing specific changes while preserving other page properties.
    */
   pageUpdate?: Maybe<PageUpdatePayload>;
-  /** Activates and deactivates payment customizations. */
+  /** Activates or deactivates payment customizations for the shop. Payment customizations allow apps to hide, reorder, or rename payment methods at checkout based on cart contents, customer attributes, or other conditions. Use this to toggle customizations on or off without deleting them. */
   paymentCustomizationActivation?: Maybe<PaymentCustomizationActivationPayload>;
-  /** Creates a payment customization. */
+  /** Creates a new payment customization for the shop. Payment customizations let apps modify the payment methods shown at checkout — hiding, reordering, or renaming options based on cart contents, customer attributes, or other business logic. */
   paymentCustomizationCreate?: Maybe<PaymentCustomizationCreatePayload>;
-  /** Deletes a payment customization. */
+  /** Permanently deletes a payment customization. Once deleted, the customization will no longer affect which payment methods appear at checkout. */
   paymentCustomizationDelete?: Maybe<PaymentCustomizationDeletePayload>;
-  /** Updates a payment customization. */
+  /** Updates an existing payment customization, modifying its configuration for how payment methods are displayed at checkout. Use this to change the customization's title or enabled state. The customization's function can't be changed once set; create a new payment customization to use a different function. */
   paymentCustomizationUpdate?: Maybe<PaymentCustomizationUpdatePayload>;
   /** Sends an email payment reminder for a payment schedule. */
   paymentReminderSend?: Maybe<PaymentReminderSendPayload>;
+  /**
+   * Captures payment for a due [`PaymentSchedule`](https://shopify.dev/docs/api/admin-graphql/latest/objects/PaymentSchedule) using the vaulted payment method associated with the order.
+   *
+   * The mutation resolves the order and mandate from the given payment schedule, then initiates
+   * an asynchronous payment capture. Use the returned `jobResult` to poll for the status of the
+   * payment capture.
+   */
+  paymentScheduleCapture?: Maybe<PaymentScheduleCapturePayload>;
   /** Create payment terms on an order. To create payment terms on a draft order, use a draft order mutation and include the request with the `DraftOrderInput`. */
   paymentTermsCreate?: Maybe<PaymentTermsCreatePayload>;
   /** Delete payment terms for an order. To delete payment terms on a draft order, use a draft order mutation and include the request with the `DraftOrderInput`. */
   paymentTermsDelete?: Maybe<PaymentTermsDeletePayload>;
   /** Update payment terms on an order. To update payment terms on a draft order, use a draft order mutation and include the request with the `DraftOrderInput`. */
   paymentTermsUpdate?: Maybe<PaymentTermsUpdatePayload>;
+  /** Assigns a point of sale device to a cash drawer, removing any prior assignment. */
+  pointOfSaleDeviceAssignToCashDrawer?: Maybe<PointOfSaleDeviceAssignToCashDrawerPayload>;
+  /** Adds an adjustment to a point of sale device payment session. */
+  pointOfSaleDevicePaymentSessionAdjust?: Maybe<PointOfSaleDevicePaymentSessionAdjustPayload>;
+  /** Closes a point of sale device payment session. */
+  pointOfSaleDevicePaymentSessionClose?: Maybe<PointOfSaleDevicePaymentSessionClosePayload>;
+  /** Records a mid-session cash count for a point of sale device payment session. */
+  pointOfSaleDevicePaymentSessionCount?: Maybe<PointOfSaleDevicePaymentSessionCountPayload>;
+  /** Opens a point of sale device payment session. */
+  pointOfSaleDevicePaymentSessionOpen?: Maybe<PointOfSaleDevicePaymentSessionOpenPayload>;
+  /** Installs storefront generation preview for shop. */
+  previewInstall?: Maybe<PreviewInstallPayload>;
   /**
    * Creates a [`PriceList`](https://shopify.dev/docs/api/admin-graphql/latest/objects/PriceList). Price lists enable contextual pricing by defining fixed prices or percentage-based adjustments.
    *
@@ -35998,11 +43469,8 @@ export type Mutation = {
    * [locations](https://shopify.dev/api/admin-graphql/latest/input-objects/InventoryLevelInput),
    * you might encounter timeout errors.
    *
-   * To avoid these timeout errors, you can instead duplicate the product asynchronously.
-   *
-   * In API version 2024-10 and higher, include `synchronous: false` argument in this mutation to perform the duplication asynchronously.
-   *
-   * In API version 2024-07 and lower, use the asynchronous [`ProductDuplicateAsyncV2`](https://shopify.dev/api/admin-graphql/2024-07/mutations/productDuplicateAsyncV2).
+   * To avoid these timeout errors, include the `synchronous: false` argument in this mutation to perform
+   * the duplication asynchronously.
    *
    * Metafield values are not duplicated if the unique values capability is enabled.
    */
@@ -36055,10 +43523,10 @@ export type Mutation = {
    */
   productOptionUpdate?: Maybe<ProductOptionUpdatePayload>;
   /**
-   * Creates one or more [options](https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductOption)
-   * on a [product](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product),
+   * Creates one or more [options](https://shopify.dev/docs/api/admin-graphql/current/objects/ProductOption)
+   * on a [product](https://shopify.dev/docs/api/admin-graphql/current/objects/Product),
    * such as size, color, or material. Each option includes a name, position, and a list of values. The combination
-   * of a product option and value creates a [product variant](https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductVariant).
+   * of a product option and value creates a [product variant](https://shopify.dev/docs/api/admin-graphql/current/objects/ProductVariant).
    *
    * Use the `productOptionsCreate` mutation for the following use cases:
    *
@@ -36077,16 +43545,23 @@ export type Mutation = {
    * > Note:
    * > The `productOptionsCreate` mutation enforces strict data integrity for product options and variants.
    * All option positions must be sequential, and every option should be used by at least one variant.
-   * If you use the [`CREATE` variant strategy](https://shopify.dev/docs/api/admin-graphql/latest/mutations/productOptionsCreate#arguments-variantStrategy.enums.CREATE), consider the maximum allowed number of variants for each product is 2048.
+   * If you use the [`CREATE` variant strategy](https://shopify.dev/docs/api/admin-graphql/current/mutations/productOptionsCreate#arguments-variantStrategy.enums.CREATE), consider the maximum allowed number of variants for each product is 2048.
+   *
+   * If the product already has an option with the same name, then the mutation returns an
+   * `OPTION_ALREADY_EXISTS` error. A product that has only its default variant is the exception,
+   * because its implicit `Title` option is a placeholder that the mutation replaces.
+   * To declare the complete set of options and variants that a product
+   * should have, and let Shopify create, update, or remove them to match, use the
+   * [`productSet`](https://shopify.dev/docs/api/admin-graphql/current/mutations/productSet) mutation instead.
    *
    * After you create product options, you can further manage a product's configuration using related mutations:
    *
-   * - [`productOptionUpdate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/productOptionUpdate)
-   * - [`productOptionsReorder`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/productOptionsReorder)
-   * - [`productOptionsDelete`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/productOptionsDelete)
-   * - [`productVariantsBulkCreate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/productVariantsBulkCreate)
-   * - [`productVariantsBulkUpdate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/productVariantsBulkUpdate)
-   * - [`productSet`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/productSet)
+   * - [`productOptionUpdate`](https://shopify.dev/docs/api/admin-graphql/current/mutations/productOptionUpdate)
+   * - [`productOptionsReorder`](https://shopify.dev/docs/api/admin-graphql/current/mutations/productOptionsReorder)
+   * - [`productOptionsDelete`](https://shopify.dev/docs/api/admin-graphql/current/mutations/productOptionsDelete)
+   * - [`productVariantsBulkCreate`](https://shopify.dev/docs/api/admin-graphql/current/mutations/productVariantsBulkCreate)
+   * - [`productVariantsBulkUpdate`](https://shopify.dev/docs/api/admin-graphql/current/mutations/productVariantsBulkUpdate)
+   * - [`productSet`](https://shopify.dev/docs/api/admin-graphql/current/mutations/productSet)
    *
    * Learn more about the [product model](https://shopify.dev/docs/apps/build/graphql/migrate/new-product-model)
    * and [adding product data](https://shopify.dev/docs/apps/build/graphql/migrate/new-product-model/add-data).
@@ -36427,6 +43902,20 @@ export type Mutation = {
   /**
    * Creates a [`Publication`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication) that controls which [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) and [`Collection`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Collection) customers can access through a [`Catalog`](https://shopify.dev/docs/api/admin-graphql/latest/interfaces/Catalog).
    *
+   * ### When to create a publication
+   *
+   * Publications are **optional** for catalogs. Only create a publication if you need to control which products are visible in a specific catalog context. When a publication isn't associated with a catalog, product availability is determined by the sales channel.
+   *
+   * **Create a publication if you need to:**
+   * - Restrict product visibility to a subset of your inventory for a specific market or company location
+   * - Publish different product selections to different contexts
+   *
+   * **Do NOT create a publication if:**
+   * - You want product availability determined by the sales channel
+   * - You only need custom pricing (use a price list on the catalog instead)
+   *
+   * ### Configuration options
+   *
    * You can create an empty publication and add products later, or prepopulate it with all existing products. The [`autoPublish`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/publicationCreate#arguments-input.fields.autoPublish) field determines whether the publication automatically adds newly created products.
    */
   publicationCreate?: Maybe<PublicationCreatePayload>;
@@ -36450,6 +43939,7 @@ export type Mutation = {
    * Publishes a resource to the current [`Channel`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Channel) associated with the requesting app. The system determines the current channel by the app's API client ID. Resources include [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) and [`Collection`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Collection) objects that implement the [`Publishable`](https://shopify.dev/docs/api/admin-graphql/latest/interfaces/Publishable) interface.
    *
    * For products to be visible in the channel, they must have an active [`ProductStatus`](https://shopify.dev/docs/api/admin-graphql/latest/enums/ProductStatus). Products sold exclusively on subscription ([`requiresSellingPlan`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product#field-Product.fields.requiresSellingPlan): `true`) can only be published to online stores.
+   * @deprecated Use `publishablePublish` instead.
    */
   publishablePublishToCurrentChannel?: Maybe<PublishablePublishToCurrentChannelPayload>;
   /**
@@ -36458,7 +43948,10 @@ export type Mutation = {
    * For products to be visible in a channel, they must have an active [`ProductStatus`](https://shopify.dev/docs/api/admin-graphql/latest/enums/ProductStatus).
    */
   publishableUnpublish?: Maybe<PublishableUnpublishPayload>;
-  /** Unpublishes a resource from the current channel. If the resource is a product, then it's visible in the channel only if the product status is `active`. */
+  /**
+   * Unpublishes a resource from the current channel. If the resource is a product, then it's visible in the channel only if the product status is `active`.
+   * @deprecated Use `publishableUnpublish` instead.
+   */
   publishableUnpublishToCurrentChannel?: Maybe<PublishableUnpublishToCurrentChannelPayload>;
   /**
    * Updates quantity pricing on a [`PriceList`](https://shopify.dev/docs/api/admin-graphql/latest/objects/PriceList) for specific [`ProductVariant`](https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductVariant) objects. You can set fixed prices (see [`PriceListPrice`](https://shopify.dev/docs/api/admin-graphql/latest/objects/PriceListPrice)), quantity rules, and quantity price breaks in a single operation.
@@ -36509,7 +44002,7 @@ export type Mutation = {
    *
    * > Note:
    * > The refunding behavior of the `refundCreate` mutation is similar to the
-   * [`refundReturn`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/returnRefund)
+   * [`returnRefund`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/returnRefund)
    * mutation. The key difference is that the `refundCreate` mutation lets you to specify restocking behavior
    * for line items, whereas the `returnRefund` mutation focuses solely on handling the financial refund without
    * any restocking input.
@@ -36557,9 +44050,6 @@ export type Mutation = {
    * - Creates a [reverse fulfillment order](https://shopify.dev/docs/apps/build/orders-fulfillment/returns-apps/manage-reverse-fulfillment-orders),
    * and enables you to create a [reverse delivery](https://shopify.dev/docs/apps/build/orders-fulfillment/returns-apps/manage-reverse-deliveries)
    * for the reverse fulfillment order
-   * - Creates a sales agreement with a `RETURN` reason, which links to all sales created for the return or exchange
-   * - Generates sales records that reverse the sales records for the items being returned
-   * - Generates sales records for any exchange line items
    *
    * After you've created a return, use the
    * [`return`](https://shopify.dev/docs/api/admin-graphql/latest/queries/return) query to retrieve the
@@ -36620,9 +44110,6 @@ export type Mutation = {
    * <div class="note"><h4>Theme app extensions</h4>
    *   <p>If your app integrates with a Shopify theme and you plan to submit it to the Shopify App Store, you must use theme app extensions instead of Script tags. Script tags can only be used with vintage themes. <a href="/apps/online-store#what-integration-method-should-i-use" target="_blank">Learn more</a>.</p></div>
    *
-   * <div class="note"><h4>Script tag deprecation</h4>
-   *   <p>Script tags will be sunset for the <b>Order status</b> page on August 28, 2025. <a href="https://www.shopify.com/plus/upgrading-to-checkout-extensibility">Upgrade to Checkout Extensibility</a> before this date. <a href="/docs/api/liquid/objects#script">Shopify Scripts</a> will continue to work alongside Checkout Extensibility until August 28, 2025.</p></div>
-   *
    *
    * Creates a new script tag.
    */
@@ -36631,9 +44118,6 @@ export type Mutation = {
    * <div class="note"><h4>Theme app extensions</h4>
    *   <p>If your app integrates with a Shopify theme and you plan to submit it to the Shopify App Store, you must use theme app extensions instead of Script tags. Script tags can only be used with vintage themes. <a href="/apps/online-store#what-integration-method-should-i-use" target="_blank">Learn more</a>.</p></div>
    *
-   * <div class="note"><h4>Script tag deprecation</h4>
-   *   <p>Script tags will be sunset for the <b>Order status</b> page on August 28, 2025. <a href="https://www.shopify.com/plus/upgrading-to-checkout-extensibility">Upgrade to Checkout Extensibility</a> before this date. <a href="/docs/api/liquid/objects#script">Shopify Scripts</a> will continue to work alongside Checkout Extensibility until August 28, 2025.</p></div>
-   *
    *
    * Deletes a script tag.
    */
@@ -36641,9 +44125,6 @@ export type Mutation = {
   /**
    * <div class="note"><h4>Theme app extensions</h4>
    *   <p>If your app integrates with a Shopify theme and you plan to submit it to the Shopify App Store, you must use theme app extensions instead of Script tags. Script tags can only be used with vintage themes. <a href="/apps/online-store#what-integration-method-should-i-use" target="_blank">Learn more</a>.</p></div>
-   *
-   * <div class="note"><h4>Script tag deprecation</h4>
-   *   <p>Script tags will be sunset for the <b>Order status</b> page on August 28, 2025. <a href="https://www.shopify.com/plus/upgrading-to-checkout-extensibility">Upgrade to Checkout Extensibility</a> before this date. <a href="/docs/api/liquid/objects#script">Shopify Scripts</a> will continue to work alongside Checkout Extensibility until August 28, 2025.</p></div>
    *
    *
    * Updates a script tag.
@@ -36679,6 +44160,39 @@ export type Mutation = {
   serverPixelCreate?: Maybe<ServerPixelCreatePayload>;
   /** Deletes the Server Pixel associated with the current app & shop. */
   serverPixelDelete?: Maybe<ServerPixelDeletePayload>;
+  /**
+   * Purchases a shipping label for a fulfillment order.
+   *
+   * The `shippingLabelPurchase` mutation buys one shipping label for one fulfillment order using Shopify Shipping.
+   * The mutation validates the fulfillment order, shipment details, package information, and available rates before it starts an asynchronous label purchase.
+   *
+   * > Note:
+   * > The shop must have accepted the Shopify Shipping terms of service before an app can purchase labels.
+   * >
+   * > FedEx label purchases are not supported.
+   *
+   * After validation, the mutation builds the shipment details, fetches available rates, selects a rate, and enqueues the label purchase. If you provide `preferredRateSelection`, the mutation attempts to purchase the matching carrier and service. If you don't provide `preferredRateSelection`, the mutation uses Shopify Shipping's default rate selection.
+   *
+   * Default rate selection first tries to keep the fulfillment order's buyer-selected delivery method when available. If no buyer-selected rate matches, the mutation uses the shop's preferred carrier and service when configured. Otherwise, it uses Shopify's recommended rate for the shipment destination.
+   *
+   * For Merchant of Record (MoR) and Markets Pro orders, the mutation first removes rates from carriers that don't support Markets Pro.
+   *
+   * A shipping label can be purchased only when the fulfillment order meets the following criteria:
+   *
+   * - The fulfillment order is fulfillable and requires shipping.
+   * - The order has a destination shipping address.
+   * - The fulfillment order has an assigned location that can be used as the origin address.
+   * - The shipment has a valid shipping date, package, weight, and required customs information.
+   * - At least one shipping rate is available for the shipment.
+   *
+   * The mutation can return errors in two places:
+   *
+   * - Synchronous validation errors are returned in the mutation's `userErrors` field. For example, invalid fulfillment orders, invalid package dimensions, missing customs information, or unavailable rates.
+   * - Asynchronous purchase-processing errors are returned in the `ShippingLabelPurchaseResult.errors` field after the purchase starts. For example, carrier availability, connection, billing, or other purchase-processing failures.
+   *
+   * Use the returned `ShippingLabelPurchaseResult.id` to poll the purchase status with the `node` query. The result starts with a status of `PENDING_PURCHASE` and ends with `PURCHASED` or `PURCHASE_FAILED`. When the purchase succeeds, `shippingLabels` contains the purchased label.
+   */
+  shippingLabelPurchase?: Maybe<ShippingLabelPurchasePayload>;
   /** Deletes a shipping package. */
   shippingPackageDelete?: Maybe<ShippingPackageDeletePayload>;
   /**
@@ -36706,11 +44220,14 @@ export type Mutation = {
    *
    * ## Sending feedback on a shop
    *
-   * You can send resource feedback on a shop to let the merchant know what steps they need to take to make sure that your app is set up correctly. Feedback can have one of two states: `requires_action` or `success`. You need to send a `requires_action` feedback request for each step that the merchant is required to complete.
+   * You can send resource feedback on a shop to let the merchant know what steps they need to take to make sure that your app is set up correctly. Feedback can have one of two states: `REQUIRES_ACTION` or `ACCEPTED`. You need to send a `REQUIRES_ACTION` feedback request for each step that the merchant is required to complete.
    *
-   * If there are multiple set-up steps that require merchant action, then send feedback with a state of `requires_action` as merchants complete prior steps. And to remove the feedback message from the Shopify admin, send a `success` feedback request.
+   * If there are multiple set-up steps that require merchant action, then send feedback with a state of `REQUIRES_ACTION` as merchants complete prior steps. When all required actions are resolved, send an `ACCEPTED` feedback request to clear the active feedback signal.
    *
-   * #### Important
+   * ### Clearing feedback with ACCEPTED
+   * Sending `state: ACCEPTED` removes the active feedback entry. After this mutation succeeds, reading `channel.resourceFeedback`, `app.feedback`, or the `feedback` field on this payload may return `null`—this is expected behavior, not a mutation failure. A `null` result means no outstanding feedback exists for the channel.
+   *
+   * ### Important
    * Sending feedback replaces previously sent feedback for the shop. Send a new `shopResourceFeedbackCreate` mutation to push the latest state of a shop or its resources to Shopify.
    */
   shopResourceFeedbackCreate?: Maybe<ShopResourceFeedbackCreatePayload>;
@@ -36846,7 +44363,10 @@ export type Mutation = {
    *
    * After you create the draft, you can either modify it with the [`subscriptionDraftUpdate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/subscriptionDraftUpdate) mutation or finalize and create the active subscription contract with [`subscriptionDraftCommit`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/subscriptionDraftCommit).
    *
+   * This mutation and the draft-based flow are deprecated in favor of the [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api).
+   *
    * Learn more about [building subscription contracts](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/build-a-subscription-contract).
+   * @deprecated Use [`subscriptionContractCreateCalculate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/subscriptionContractCreateCalculate) instead.
    */
   subscriptionContractCreate?: Maybe<SubscriptionContractCreatePayload>;
   /** Expires a Subscription Contract. */
@@ -36869,33 +44389,69 @@ export type Mutation = {
    *
    * Changes remain in draft state and don't affect the live contract until committed. After you've made all necessary changes to the draft, commit it using [`subscriptionDraftCommit`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/subscriptionDraftCommit) to apply the updates to the original contract.
    *
+   * This mutation and the draft-based edit flow are deprecated in favor of the [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api).
+   *
    * Learn more about [updating subscription contracts](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/update-a-subscription-contract#step-2-create-a-draft-of-an-existing-contract).
+   * @deprecated Use [`subscriptionContractUpdateCalculate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/subscriptionContractUpdateCalculate) instead.
    */
   subscriptionContractUpdate?: Maybe<SubscriptionContractUpdatePayload>;
-  /** Commits the updates of a Subscription Contract draft. */
+  /**
+   * Commits the updates of a Subscription Contract draft.
+   * @deprecated Use the [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api) instead.
+   */
   subscriptionDraftCommit?: Maybe<SubscriptionDraftCommitPayload>;
-  /** Adds a subscription discount to a subscription draft. */
+  /**
+   * Adds a subscription discount to a subscription draft.
+   * @deprecated Use the [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api) instead.
+   */
   subscriptionDraftDiscountAdd?: Maybe<SubscriptionDraftDiscountAddPayload>;
-  /** Applies a code discount on the subscription draft. */
+  /**
+   * Applies a code discount on the subscription draft.
+   * @deprecated Use the [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api) instead.
+   */
   subscriptionDraftDiscountCodeApply?: Maybe<SubscriptionDraftDiscountCodeApplyPayload>;
-  /** Removes a subscription discount from a subscription draft. */
+  /**
+   * Removes a subscription discount from a subscription draft.
+   * @deprecated Use the [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api) instead.
+   */
   subscriptionDraftDiscountRemove?: Maybe<SubscriptionDraftDiscountRemovePayload>;
-  /** Updates a subscription discount on a subscription draft. */
+  /**
+   * Updates a subscription discount on a subscription draft.
+   * @deprecated Use the [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api) instead.
+   */
   subscriptionDraftDiscountUpdate?: Maybe<SubscriptionDraftDiscountUpdatePayload>;
-  /** Adds a subscription free shipping discount to a subscription draft. */
+  /**
+   * Adds a subscription free shipping discount to a subscription draft.
+   * @deprecated Use the [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api) instead.
+   */
   subscriptionDraftFreeShippingDiscountAdd?: Maybe<SubscriptionDraftFreeShippingDiscountAddPayload>;
-  /** Updates a subscription free shipping discount on a subscription draft. */
+  /**
+   * Updates a subscription free shipping discount on a subscription draft.
+   * @deprecated Use the [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api) instead.
+   */
   subscriptionDraftFreeShippingDiscountUpdate?: Maybe<SubscriptionDraftFreeShippingDiscountUpdatePayload>;
-  /** Adds a subscription line to a subscription draft. */
+  /**
+   * Adds a subscription line to a subscription draft.
+   * @deprecated Use the [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api) instead.
+   */
   subscriptionDraftLineAdd?: Maybe<SubscriptionDraftLineAddPayload>;
-  /** Removes a subscription line from a subscription draft. */
+  /**
+   * Removes a subscription line from a subscription draft.
+   * @deprecated Use the [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api) instead.
+   */
   subscriptionDraftLineRemove?: Maybe<SubscriptionDraftLineRemovePayload>;
-  /** Updates a subscription line on a subscription draft. */
+  /**
+   * Updates a subscription line on a subscription draft.
+   * @deprecated Use the [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api) instead.
+   */
   subscriptionDraftLineUpdate?: Maybe<SubscriptionDraftLineUpdatePayload>;
-  /** Updates a Subscription Draft. */
+  /**
+   * Updates a Subscription Draft.
+   * @deprecated Use the [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api) instead.
+   */
   subscriptionDraftUpdate?: Maybe<SubscriptionDraftUpdatePayload>;
   /**
-   * Adds tags to a resource in the store. Supported resources include [`Order`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Order), [`DraftOrder`](https://shopify.dev/docs/api/admin-graphql/latest/objects/DraftOrder), [`Customer`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Customer), [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product), and [`Article`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Article).
+   * Adds tags to a resource. If the resource type doesn't support tagging, the `id` argument returns a resource-not-found error.
    *
    * Tags help merchants organize and filter resources. See the [`tags`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/tagsAdd#arguments-tags) argument for supported input formats.
    *
@@ -36903,13 +44459,18 @@ export type Mutation = {
    */
   tagsAdd?: Maybe<TagsAddPayload>;
   /**
-   * Removes tags from an [`Order`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Order), [`DraftOrder`](https://shopify.dev/docs/api/admin-graphql/latest/objects/DraftOrder), [`Customer`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Customer), [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product), or [`Article`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Article).
+   * Removes tags from a resource. If the resource type doesn't support tagging, the `id` argument returns a resource-not-found error.
    *
    * Tags are searchable keywords that help organize and filter these resources.
    */
   tagsRemove?: Maybe<TagsRemovePayload>;
   /** Allows tax app configurations for tax partners. */
   taxAppConfigure?: Maybe<TaxAppConfigurePayload>;
+  /**
+   * Creates a tax summary for a given order.
+   * If both an order ID and a start and end time are provided, the order ID will be used.
+   */
+  taxSummaryCreate?: Maybe<TaxSummaryCreatePayload>;
   /**
    * Creates a theme from an external URL or staged upload. The theme source can either be a ZIP file hosted at a public URL or files previously uploaded using the [`stagedUploadsCreate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/stageduploadscreate) mutation. The theme displays in the [Themes page](https://admin.shopify.com/themes) in the Shopify admin.
    *
@@ -36979,11 +44540,21 @@ export type Mutation = {
   urlRedirectImportSubmit?: Maybe<UrlRedirectImportSubmitPayload>;
   /** Updates a URL redirect. */
   urlRedirectUpdate?: Maybe<UrlRedirectUpdatePayload>;
-  /** Creates a validation. */
+  /**
+   * Creates a cart and checkout validation: a server-side rule enforced before a customer can complete checkout. Each validation is powered by a cart and checkout validation function that you provide using `functionId` or `functionHandle`.
+   *
+   * Use `validationCreate` to apply custom rules at checkout, such as limiting item quantities, enforcing order minimums or maximums, or blocking checkout for restricted shipping addresses. Validations run on Shopify's servers and are enforced throughout checkout, so they can't be bypassed by the client.
+   *
+   * Validation errors always block checkout progress. The `blockOnFailure` field controls whether runtime exceptions, such as timeouts, also block checkout.
+   */
   validationCreate?: Maybe<ValidationCreatePayload>;
-  /** Deletes a validation. */
+  /** Deletes a cart and checkout validation, removing its rule from the shop's checkout. Once deleted, its cart and checkout validation function no longer runs during checkout. */
   validationDelete?: Maybe<ValidationDeletePayload>;
-  /** Update a validation. */
+  /**
+   * Updates a cart and checkout validation. Use `validationUpdate` to rename it, toggle whether it's enabled at checkout, change its `blockOnFailure` behavior, or update its metafields.
+   *
+   * Validation errors always block checkout progress. The `blockOnFailure` field controls whether runtime exceptions, such as timeouts, also block checkout.
+   */
   validationUpdate?: Maybe<ValidationUpdatePayload>;
   /**
    * Activate a [web pixel extension](https://shopify.dev/docs/apps/build/marketing-analytics/build-web-pixels)
@@ -37174,7 +44745,6 @@ export type MutationBulkOperationCancelArgs = {
 /** The schema's entry point for all mutation operations. */
 export type MutationBulkOperationRunMutationArgs = {
   clientIdentifier?: InputMaybe<Scalars['String']['input']>;
-  groupObjects?: Scalars['Boolean']['input'];
   mutation: Scalars['String']['input'];
   stagedUploadPath: Scalars['String']['input'];
 };
@@ -37226,6 +44796,40 @@ export type MutationCartTransformDeleteArgs = {
 
 
 /** The schema's entry point for all mutation operations. */
+export type MutationCashDrawerCreateArgs = {
+  locationId: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationCashDrawerFindOrCreateArgs = {
+  locationId: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
+  pointOfSaleDeviceId: Scalars['ID']['input'];
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationCashDrawerUpdateArgs = {
+  id: Scalars['ID']['input'];
+  input: CashDrawerUpdateInput;
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationCashManagementReasonCodeCreateArgs = {
+  code: Scalars['String']['input'];
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationCashManagementReasonCodeDeleteArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+/** The schema's entry point for all mutation operations. */
 export type MutationCatalogContextUpdateArgs = {
   catalogId: Scalars['ID']['input'];
   contextsToAdd?: InputMaybe<CatalogContextInput>;
@@ -37254,6 +44858,42 @@ export type MutationCatalogUpdateArgs = {
 
 
 /** The schema's entry point for all mutation operations. */
+export type MutationChannelCreateArgs = {
+  input: ChannelCreateInput;
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationChannelDeleteArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationChannelFullSyncArgs = {
+  beforeUpdatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  channelId: Scalars['ID']['input'];
+  country?: InputMaybe<CountryCode>;
+  language?: InputMaybe<LanguageCode>;
+  updatedAtSince?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationChannelUpdateArgs = {
+  id: Scalars['ID']['input'];
+  input: ChannelUpdateInput;
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationCheckoutAndAccountsConfigurationUpdateArgs = {
+  configuration: CheckoutAndAccountsConfigurationInput;
+  id: Scalars['ID']['input'];
+};
+
+
+/** The schema's entry point for all mutation operations. */
 export type MutationCheckoutBrandingUpsertArgs = {
   checkoutBrandingInput?: InputMaybe<CheckoutBrandingInput>;
   checkoutProfileId: Scalars['ID']['input'];
@@ -37275,14 +44915,38 @@ export type MutationCollectionAddProductsV2Args = {
 
 
 /** The schema's entry point for all mutation operations. */
+export type MutationCollectionConditionsSourceCreateArgs = {
+  input: CollectionCreateConditionsSourceInput;
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationCollectionConditionsSourceDeleteArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationCollectionConditionsSourceUpdateArgs = {
+  input: CollectionUpdateConditionsSourceInput;
+};
+
+
+/** The schema's entry point for all mutation operations. */
 export type MutationCollectionCreateArgs = {
-  input: CollectionInput;
+  collection?: InputMaybe<CollectionCreateInput>;
 };
 
 
 /** The schema's entry point for all mutation operations. */
 export type MutationCollectionDeleteArgs = {
   input: CollectionDeleteInput;
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationCollectionDuplicateArgs = {
+  input: CollectionDuplicateInput;
 };
 
 
@@ -37314,7 +44978,7 @@ export type MutationCollectionUnpublishArgs = {
 
 /** The schema's entry point for all mutation operations. */
 export type MutationCollectionUpdateArgs = {
-  input: CollectionInput;
+  collection?: InputMaybe<CollectionUpdateInput>;
 };
 
 
@@ -37780,6 +45444,12 @@ export type MutationCustomerUpdateDefaultAddressArgs = {
 
 
 /** The schema's entry point for all mutation operations. */
+export type MutationCustomerWhatsAppMarketingConsentUpdateArgs = {
+  input: CustomerWhatsAppMarketingConsentUpdateInput;
+};
+
+
+/** The schema's entry point for all mutation operations. */
 export type MutationDataSaleOptOutArgs = {
   email: Scalars['String']['input'];
 };
@@ -37856,12 +45526,6 @@ export type MutationDeliveryPromiseProviderUpsertArgs = {
   fulfillmentDelay?: InputMaybe<Scalars['Int']['input']>;
   locationId: Scalars['ID']['input'];
   timeZone?: InputMaybe<Scalars['String']['input']>;
-};
-
-
-/** The schema's entry point for all mutation operations. */
-export type MutationDeliverySettingUpdateArgs = {
-  setting: DeliverySettingInput;
 };
 
 
@@ -37946,6 +45610,24 @@ export type MutationDiscountAutomaticFreeShippingCreateArgs = {
 export type MutationDiscountAutomaticFreeShippingUpdateArgs = {
   freeShippingAutomaticDiscount: DiscountAutomaticFreeShippingInput;
   id: Scalars['ID']['input'];
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationDiscountBulkTagsAddArgs = {
+  ids?: InputMaybe<Array<Scalars['ID']['input']>>;
+  savedSearchId?: InputMaybe<Scalars['ID']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  tags: Array<Scalars['String']['input']>;
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationDiscountBulkTagsRemoveArgs = {
+  ids?: InputMaybe<Array<Scalars['ID']['input']>>;
+  savedSearchId?: InputMaybe<Scalars['ID']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  tags: Array<Scalars['String']['input']>;
 };
 
 
@@ -38342,6 +46024,13 @@ export type MutationFulfillmentOrderReleaseHoldArgs = {
 
 
 /** The schema's entry point for all mutation operations. */
+export type MutationFulfillmentOrderReportProgressArgs = {
+  id: Scalars['ID']['input'];
+  progressReport?: InputMaybe<FulfillmentOrderReportProgressInput>;
+};
+
+
+/** The schema's entry point for all mutation operations. */
 export type MutationFulfillmentOrderRescheduleArgs = {
   fulfillAt: Scalars['DateTime']['input'];
   id: Scalars['ID']['input'];
@@ -38387,7 +46076,7 @@ export type MutationFulfillmentOrdersSetFulfillmentDeadlineArgs = {
 
 /** The schema's entry point for all mutation operations. */
 export type MutationFulfillmentServiceCreateArgs = {
-  callbackUrl: Scalars['URL']['input'];
+  callbackUrl?: InputMaybe<Scalars['URL']['input']>;
   inventoryManagement?: InputMaybe<Scalars['Boolean']['input']>;
   name: Scalars['String']['input'];
   requiresShippingMethod?: InputMaybe<Scalars['Boolean']['input']>;
@@ -38457,6 +46146,14 @@ export type MutationGiftCardDebitArgs = {
 
 
 /** The schema's entry point for all mutation operations. */
+export type MutationGiftCardProductSetArgs = {
+  identifier?: InputMaybe<ProductSetIdentifiers>;
+  input: GiftCardProductSetInput;
+  synchronous?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/** The schema's entry point for all mutation operations. */
 export type MutationGiftCardSendNotificationToCustomerArgs = {
   id: Scalars['ID']['input'];
 };
@@ -38481,7 +46178,6 @@ export type MutationInventoryActivateArgs = {
   inventoryItemId: Scalars['ID']['input'];
   locationId: Scalars['ID']['input'];
   onHand?: InputMaybe<Scalars['Int']['input']>;
-  stockAtLegacyLocation?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -38530,12 +46226,6 @@ export type MutationInventorySetQuantitiesArgs = {
 
 
 /** The schema's entry point for all mutation operations. */
-export type MutationInventorySetScheduledChangesArgs = {
-  input: InventorySetScheduledChangesInput;
-};
-
-
-/** The schema's entry point for all mutation operations. */
 export type MutationInventoryShipmentAddItemsArgs = {
   id: Scalars['ID']['input'];
   lineItems: Array<InventoryShipmentLineItemInput>;
@@ -38580,6 +46270,13 @@ export type MutationInventoryShipmentReceiveArgs = {
 export type MutationInventoryShipmentRemoveItemsArgs = {
   id: Scalars['ID']['input'];
   lineItems: Array<Scalars['ID']['input']>;
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationInventoryShipmentSetBarcodeArgs = {
+  barcode: Scalars['String']['input'];
+  id: Scalars['ID']['input'];
 };
 
 
@@ -38948,7 +46645,8 @@ export type MutationMetaobjectUpdateArgs = {
 /** The schema's entry point for all mutation operations. */
 export type MutationMetaobjectUpsertArgs = {
   handle: MetaobjectHandleInput;
-  metaobject: MetaobjectUpsertInput;
+  metaobject?: InputMaybe<MetaobjectUpsertInput>;
+  values?: InputMaybe<Scalars['JSON']['input']>;
 };
 
 
@@ -38968,6 +46666,18 @@ export type MutationMobilePlatformApplicationDeleteArgs = {
 export type MutationMobilePlatformApplicationUpdateArgs = {
   id: Scalars['ID']['input'];
   input: MobilePlatformApplicationUpdateInput;
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationOrderAttributionDefinitionDeleteArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationOrderAttributionDefinitionUpsertArgs = {
+  input: OrderAttributionDefinitionUpsertInput;
 };
 
 
@@ -39220,6 +46930,12 @@ export type MutationPaymentReminderSendArgs = {
 
 
 /** The schema's entry point for all mutation operations. */
+export type MutationPaymentScheduleCaptureArgs = {
+  paymentScheduleId: Scalars['ID']['input'];
+};
+
+
+/** The schema's entry point for all mutation operations. */
 export type MutationPaymentTermsCreateArgs = {
   paymentTermsAttributes: PaymentTermsCreateInput;
   referenceId: Scalars['ID']['input'];
@@ -39235,6 +46951,63 @@ export type MutationPaymentTermsDeleteArgs = {
 /** The schema's entry point for all mutation operations. */
 export type MutationPaymentTermsUpdateArgs = {
   input: PaymentTermsUpdateInput;
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationPointOfSaleDeviceAssignToCashDrawerArgs = {
+  cashDrawerId: Scalars['ID']['input'];
+  pointOfSaleDeviceId: Scalars['ID']['input'];
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationPointOfSaleDevicePaymentSessionAdjustArgs = {
+  cash: MoneyInput;
+  note?: InputMaybe<Scalars['String']['input']>;
+  pointOfSaleDevicePaymentSessionId: Scalars['ID']['input'];
+  reasonCodeId?: InputMaybe<Scalars['ID']['input']>;
+  staffMemberId: Scalars['ID']['input'];
+  time?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationPointOfSaleDevicePaymentSessionCloseArgs = {
+  balance: MoneyInput;
+  note?: InputMaybe<Scalars['String']['input']>;
+  pointOfSaleDevicePaymentSessionId: Scalars['ID']['input'];
+  reasonCodeId?: InputMaybe<Scalars['ID']['input']>;
+  staffMemberId: Scalars['ID']['input'];
+  time?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationPointOfSaleDevicePaymentSessionCountArgs = {
+  balance: MoneyInput;
+  note?: InputMaybe<Scalars['String']['input']>;
+  pointOfSaleDevicePaymentSessionId: Scalars['ID']['input'];
+  reasonCodeId?: InputMaybe<Scalars['ID']['input']>;
+  staffMemberId: Scalars['ID']['input'];
+  time?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationPointOfSaleDevicePaymentSessionOpenArgs = {
+  balance?: InputMaybe<MoneyInput>;
+  note?: InputMaybe<Scalars['String']['input']>;
+  pointOfSaleDeviceId: Scalars['ID']['input'];
+  reasonCodeId?: InputMaybe<Scalars['ID']['input']>;
+  staffMemberId: Scalars['ID']['input'];
+  time?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationPreviewInstallArgs = {
+  storefrontGenerationPreviewUuid: Scalars['String']['input'];
 };
 
 
@@ -39448,6 +47221,7 @@ export type MutationProductUnpublishArgs = {
 
 /** The schema's entry point for all mutation operations. */
 export type MutationProductUpdateArgs = {
+  identifier?: InputMaybe<ProductUpdateIdentifiers>;
   media?: InputMaybe<Array<CreateMediaInput>>;
   product?: InputMaybe<ProductUpdateInput>;
 };
@@ -39820,6 +47594,12 @@ export type MutationSellingPlanGroupUpdateArgs = {
 
 
 /** The schema's entry point for all mutation operations. */
+export type MutationShippingLabelPurchaseArgs = {
+  shippingLabelPurchase: ShippingLabelPurchaseInput;
+};
+
+
+/** The schema's entry point for all mutation operations. */
 export type MutationShippingPackageDeleteArgs = {
   id: Scalars['ID']['input'];
 };
@@ -39948,9 +47728,11 @@ export type MutationSubscriptionBillingAttemptCreateArgs = {
 
 /** The schema's entry point for all mutation operations. */
 export type MutationSubscriptionBillingCycleBulkChargeArgs = {
+  actor?: InputMaybe<SubscriptionActor>;
   billingAttemptExpectedDateRange: SubscriptionBillingCyclesDateRangeSelector;
   filters?: InputMaybe<SubscriptionBillingCycleBulkFilters>;
   inventoryPolicy?: InputMaybe<SubscriptionBillingAttemptInventoryPolicy>;
+  paymentProcessingPolicy?: InputMaybe<SubscriptionBillingAttemptPaymentProcessingPolicy>;
 };
 
 
@@ -39963,8 +47745,10 @@ export type MutationSubscriptionBillingCycleBulkSearchArgs = {
 
 /** The schema's entry point for all mutation operations. */
 export type MutationSubscriptionBillingCycleChargeArgs = {
+  actor?: InputMaybe<SubscriptionActor>;
   billingCycleSelector: SubscriptionBillingCycleSelector;
   inventoryPolicy?: InputMaybe<SubscriptionBillingAttemptInventoryPolicy>;
+  paymentProcessingPolicy?: InputMaybe<SubscriptionBillingAttemptPaymentProcessingPolicy>;
   subscriptionContractId: Scalars['ID']['input'];
 };
 
@@ -39984,6 +47768,7 @@ export type MutationSubscriptionBillingCycleContractDraftConcatenateArgs = {
 
 /** The schema's entry point for all mutation operations. */
 export type MutationSubscriptionBillingCycleContractEditArgs = {
+  actor?: InputMaybe<SubscriptionActor>;
   billingCycleInput: SubscriptionBillingCycleInput;
 };
 
@@ -40022,6 +47807,7 @@ export type MutationSubscriptionBillingCycleUnskipArgs = {
 
 /** The schema's entry point for all mutation operations. */
 export type MutationSubscriptionContractActivateArgs = {
+  actor?: InputMaybe<SubscriptionActor>;
   subscriptionContractId: Scalars['ID']['input'];
 };
 
@@ -40034,6 +47820,7 @@ export type MutationSubscriptionContractAtomicCreateArgs = {
 
 /** The schema's entry point for all mutation operations. */
 export type MutationSubscriptionContractCancelArgs = {
+  actor?: InputMaybe<SubscriptionActor>;
   subscriptionContractId: Scalars['ID']['input'];
 };
 
@@ -40046,24 +47833,28 @@ export type MutationSubscriptionContractCreateArgs = {
 
 /** The schema's entry point for all mutation operations. */
 export type MutationSubscriptionContractExpireArgs = {
+  actor?: InputMaybe<SubscriptionActor>;
   subscriptionContractId: Scalars['ID']['input'];
 };
 
 
 /** The schema's entry point for all mutation operations. */
 export type MutationSubscriptionContractFailArgs = {
+  actor?: InputMaybe<SubscriptionActor>;
   subscriptionContractId: Scalars['ID']['input'];
 };
 
 
 /** The schema's entry point for all mutation operations. */
 export type MutationSubscriptionContractPauseArgs = {
+  actor?: InputMaybe<SubscriptionActor>;
   subscriptionContractId: Scalars['ID']['input'];
 };
 
 
 /** The schema's entry point for all mutation operations. */
 export type MutationSubscriptionContractProductChangeArgs = {
+  actor?: InputMaybe<SubscriptionActor>;
   input: SubscriptionContractProductChangeInput;
   lineId: Scalars['ID']['input'];
   subscriptionContractId: Scalars['ID']['input'];
@@ -40079,6 +47870,7 @@ export type MutationSubscriptionContractSetNextBillingDateArgs = {
 
 /** The schema's entry point for all mutation operations. */
 export type MutationSubscriptionContractUpdateArgs = {
+  actor?: InputMaybe<SubscriptionActor>;
   contractId: Scalars['ID']['input'];
 };
 
@@ -40179,6 +47971,14 @@ export type MutationTagsRemoveArgs = {
 /** The schema's entry point for all mutation operations. */
 export type MutationTaxAppConfigureArgs = {
   ready: Scalars['Boolean']['input'];
+};
+
+
+/** The schema's entry point for all mutation operations. */
+export type MutationTaxSummaryCreateArgs = {
+  endTime?: InputMaybe<Scalars['DateTime']['input']>;
+  orderId?: InputMaybe<Scalars['ID']['input']>;
+  startTime?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 
@@ -40711,6 +48511,8 @@ export enum OnlineStoreThemeFilesUserErrorsCode {
   LessThanOrEqualTo = 'LESS_THAN_OR_EQUAL_TO',
   /** The record with the ID used as the input value couldn't be found. */
   NotFound = 'NOT_FOUND',
+  /** Theme contextualization and condition types are not compatible with each other. */
+  ThemeContextualizationNotCompatibleWithConditionTypes = 'THEME_CONTEXTUALIZATION_NOT_COMPATIBLE_WITH_CONDITION_TYPES',
   /** There are theme files with conflicts. */
   ThemeFilesConflict = 'THEME_FILES_CONFLICT',
   /** This action is not available on your current plan. Please upgrade to access theme editing features. */
@@ -40856,6 +48658,8 @@ export type Order = CommentEventSubject & HasEvents & HasLocalizationExtensions 
    * Learn more about [building apps for orders and fulfillment](https://shopify.dev/docs/apps/build/orders-fulfillment).
    */
   app?: Maybe<OrderApp>;
+  /** The attribution details for the order. */
+  attribution?: Maybe<OrderAttribution>;
   /**
    * The billing address associated with the payment method selected by the customer for an order.
    * Returns `null` if no billing address was provided during checkout.
@@ -40891,6 +48695,8 @@ export type Order = CommentEventSubject & HasEvents & HasLocalizationExtensions 
   cartDiscountAmount?: Maybe<Scalars['Money']['output']>;
   /** The total discount amount applied at the time the order was created, displayed in both shop and presentment currencies, before returns, refunds, order edits, and cancellations. This field only includes discounts applied to the entire order. */
   cartDiscountAmountSet?: Maybe<MoneyBag>;
+  /** The token associated with the cart that was used to create the order. */
+  cartToken?: Maybe<Scalars['String']['output']>;
   /**
    * The sales channel from which an order originated, such as the [Online Store](https://shopify.dev/docs/apps/build/app-surfaces#online-store) or [Shopify POS](https://shopify.dev/docs/apps/build/app-surfaces#point-of-sale).
    * @deprecated Use `publication` instead.
@@ -40899,8 +48705,11 @@ export type Order = CommentEventSubject & HasEvents & HasLocalizationExtensions 
   /**
    * Details about the sales channel that created the order, such as the [channel app type](https://shopify.dev/docs/api/admin-graphql/latest/objects/channel#field-Channel.fields.channelType)
    * and [channel name](https://shopify.dev/docs/api/admin-graphql/latest/objects/ChannelDefinition#field-ChannelDefinition.fields.channelName), which helps to track order sources.
+   * @deprecated Use `attribution` instead.
    */
   channelInformation?: Maybe<ChannelInformation>;
+  /** The token associated with the checkout that was used to create the order. Useful for correlating an order with the checkout it originated from, including in web pixels and analytics workflows. */
+  checkoutToken?: Maybe<Scalars['String']['output']>;
   /** The IP address of the customer who placed the order. Useful for fraud detection and geographic analysis. */
   clientIp?: Maybe<Scalars['String']['output']>;
   /** Whether an order is closed. An order is considered closed if all its line items have been fulfilled or canceled, and all financial transactions are complete. */
@@ -41130,6 +48939,7 @@ export type Order = CommentEventSubject & HasEvents & HasLocalizationExtensions 
    * The note associated with the order.
    * Contains additional information or instructions added by merchants or customers during the order process.
    * Commonly used for special delivery instructions, gift messages, or internal processing notes.
+   * The maximum length is 5000 characters.
    */
   note?: Maybe<Scalars['String']['output']>;
   /** The order number used to generate the name using the store's configured order number prefix/suffix. This number isn't guaranteed to follow a consecutive integer sequence (e.g. 1, 2, 3..), nor is it guaranteed to be unique across multiple stores, or even for a single store. */
@@ -42214,6 +50024,119 @@ export type OrderApp = {
   name: Scalars['String']['output'];
 };
 
+/** The attribution details for an order. */
+export type OrderAttribution = {
+  __typename?: 'OrderAttribution';
+  /** The display name of the attribution source. */
+  displayName: Scalars['String']['output'];
+  /** An identifier for the attribution source. */
+  handle: Scalars['String']['output'];
+  /** Sanitized SVG content used as the attribution source icon. */
+  icon?: Maybe<Scalars['String']['output']>;
+};
+
+/**
+ * An attribution definition that an app can use to label orders it routes to a shop.
+ * Definitions can be supplied declaratively via the `order_attribution_config` extension or created
+ * dynamically per-shop via the Admin API.
+ * Learn more in the [order attribution guide](https://shopify.dev/docs/apps/build/sales-channels/order-attribution).
+ */
+export type OrderAttributionDefinition = Node & {
+  __typename?: 'OrderAttributionDefinition';
+  /** A human-readable name for the definition, displayed in Shopify Admin and on order details. */
+  displayName: Scalars['String']['output'];
+  /** A unique identifier for the definition, scoped to the calling app on a single shop. Used as the `attribution_handle` value when an app attributes an order to this definition. */
+  handle: Scalars['String']['output'];
+  /** Sanitized SVG content used as the icon for orders attributed to this definition. May be null when no icon is provided. */
+  icon?: Maybe<Scalars['String']['output']>;
+  /** A globally-unique ID. */
+  id: Scalars['ID']['output'];
+};
+
+/** An auto-generated type for paginating through multiple OrderAttributionDefinitions. */
+export type OrderAttributionDefinitionConnection = {
+  __typename?: 'OrderAttributionDefinitionConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<OrderAttributionDefinitionEdge>;
+  /** A list of nodes that are contained in OrderAttributionDefinitionEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<OrderAttributionDefinition>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** Return type for `orderAttributionDefinitionDelete` mutation. */
+export type OrderAttributionDefinitionDeletePayload = {
+  __typename?: 'OrderAttributionDefinitionDeletePayload';
+  /** The ID of the deleted order attribution definition. */
+  deletedId?: Maybe<Scalars['ID']['output']>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<OrderAttributionDefinitionDeleteUserError>;
+};
+
+/** An error that occurs during the execution of `OrderAttributionDefinitionDelete`. */
+export type OrderAttributionDefinitionDeleteUserError = DisplayableError & {
+  __typename?: 'OrderAttributionDefinitionDeleteUserError';
+  /** The error code. */
+  code?: Maybe<OrderAttributionDefinitionDeleteUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `OrderAttributionDefinitionDeleteUserError`. */
+export enum OrderAttributionDefinitionDeleteUserErrorCode {
+  /** The input value is invalid. */
+  Invalid = 'INVALID',
+  /** The record with the ID used as the input value couldn't be found. */
+  NotFound = 'NOT_FOUND'
+}
+
+/** An auto-generated type which holds one OrderAttributionDefinition and a cursor during pagination. */
+export type OrderAttributionDefinitionEdge = {
+  __typename?: 'OrderAttributionDefinitionEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of OrderAttributionDefinitionEdge. */
+  node: OrderAttributionDefinition;
+};
+
+/** The input fields for upserting an order attribution definition. */
+export type OrderAttributionDefinitionUpsertInput = {
+  /** A human-readable name for the definition, displayed in Shopify Admin and on order details. */
+  displayName: Scalars['String']['input'];
+  /** A unique identifier for the definition, scoped to the calling app on a single shop. Case insensitive. Used to match an existing definition when upserting. */
+  handle: Scalars['String']['input'];
+  /** Sanitized SVG content used as the icon for orders attributed to this definition. Must conform to the platform's SVG sanitization rules and a 0 0 20 20 viewbox. Omit this field to leave the existing icon unchanged on update, or pass `null` to clear it. */
+  icon?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Return type for `orderAttributionDefinitionUpsert` mutation. */
+export type OrderAttributionDefinitionUpsertPayload = {
+  __typename?: 'OrderAttributionDefinitionUpsertPayload';
+  /** The order attribution definition that was upserted. */
+  orderAttributionDefinition?: Maybe<OrderAttributionDefinition>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<OrderAttributionDefinitionUpsertUserError>;
+};
+
+/** An error that occurs during the execution of `OrderAttributionDefinitionUpsert`. */
+export type OrderAttributionDefinitionUpsertUserError = DisplayableError & {
+  __typename?: 'OrderAttributionDefinitionUpsertUserError';
+  /** The error code. */
+  code?: Maybe<OrderAttributionDefinitionUpsertUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `OrderAttributionDefinitionUpsertUserError`. */
+export enum OrderAttributionDefinitionUpsertUserErrorCode {
+  /** The input value is invalid. */
+  Invalid = 'INVALID'
+}
+
 /** Return type for `orderCancel` mutation. */
 export type OrderCancelPayload = {
   __typename?: 'OrderCancelPayload';
@@ -42468,12 +50391,12 @@ export type OrderCreateFulfillmentInput = {
    * If you specify a tracking company name from
    * [the list](https://shopify.dev/api/admin-graphql/latest/objects/FulfillmentTrackingInfo#supported-tracking-companies),
    * Shopify will automatically build tracking URLs for all provided tracking numbers,
-   * which will make the tracking numbers clickable in the interface.
+   * which will make the tracking numbers clickable in the interface. This doesn't mean
+   * that Shopify automatically updates the fulfillment's `shipment_status` field in Admin.
    * The same tracking company will be applied to all tracking numbers specified.
    *
-   * Additionally, for the tracking companies listed on the
-   * [Shipping Carriers help page](https://help.shopify.com/manual/shipping/understanding-shipping/shipping-carriers#integrated-shipping-carriers)
-   * Shopify will automatically update the fulfillment's `shipment_status` field during the fulfillment process.
+   * For tracking companies whose `shipment_status` field is updated automatically, see the
+   * [Shipping Carriers help page](https://help.shopify.com/manual/shipping/understanding-shipping/shipping-carriers#integrated-shipping-carriers).
    *
    * > Note:
    * > Send the tracking company name exactly as written in
@@ -42574,16 +50497,43 @@ export type OrderCreateLineItemPropertyInput = {
   value: Scalars['String']['input'];
 };
 
+/** A job result for tracking the status of a mandate payment request on an order. */
+export type OrderCreateMandatePaymentJobResult = JobResult & Node & {
+  __typename?: 'OrderCreateMandatePaymentJobResult';
+  /** This indicates if the job is still queued or has been run. */
+  done: Scalars['Boolean']['output'];
+  /** Returns any errors that occurred during the mandate payment. */
+  errors: Array<UserError>;
+  /** A globally-unique ID that's returned when running an asynchronous mutation. */
+  id: Scalars['ID']['output'];
+  /** The order associated with the mandate payment request. */
+  order?: Maybe<Order>;
+  /** The current status of the mandate payment request. */
+  status: OrderCreateMandatePaymentStatus;
+};
+
 /** Return type for `orderCreateMandatePayment` mutation. */
 export type OrderCreateMandatePaymentPayload = {
   __typename?: 'OrderCreateMandatePaymentPayload';
   /** The async job used for charging the payment. */
   job?: Maybe<Job>;
+  /** The job result for tracking the status of the mandate payment request. */
+  jobResult?: Maybe<OrderCreateMandatePaymentJobResult>;
   /** The Unique ID for the created payment. */
   paymentReferenceId?: Maybe<Scalars['String']['output']>;
   /** The list of errors that occurred from executing the mutation. */
   userErrors: Array<OrderCreateMandatePaymentUserError>;
 };
+
+/** Represents the status of a mandate payment request. */
+export enum OrderCreateMandatePaymentStatus {
+  /** The mandate payment has failed. */
+  Failed = 'FAILED',
+  /** The mandate payment request has been initiated. */
+  Started = 'STARTED',
+  /** The mandate payment has been completed successfully. */
+  Succeeded = 'SUCCEEDED'
+}
 
 /** An error that occurs during the execution of `OrderCreateMandatePayment`. */
 export type OrderCreateMandatePaymentUserError = DisplayableError & {
@@ -42619,6 +50569,8 @@ export enum OrderCreateManualPaymentOrderCreateManualPaymentErrorCode {
   AmountExceedsBalance = 'AMOUNT_EXCEEDS_BALANCE',
   /** Amount must be positive. */
   AmountNotPositive = 'AMOUNT_NOT_POSITIVE',
+  /** The currency of the amount doesn't match the presentment currency of the order. */
+  CurrencyMismatch = 'CURRENCY_MISMATCH',
   /** Payment gateway is not found. */
   GatewayNotFound = 'GATEWAY_NOT_FOUND',
   /** Order is temporarily unavailable. */
@@ -42707,7 +50659,7 @@ export type OrderCreateOrderInput = {
   poNumber?: InputMaybe<Scalars['String']['input']>;
   /** The presentment currency that was used to display prices to the customer. This must be specified if any presentment currencies are used in the order. */
   presentmentCurrency?: InputMaybe<CurrencyCode>;
-  /** The date and time ([ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format) when an order was processed. This value is the date that appears on your orders and that's used in the analytic reports. If you're importing orders from an app or another platform, then you can set processed_at to a date and time in the past to match when the original order was created. */
+  /** The date and time ([ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format) when an order was processed. This value is the date that appears on your orders and that's used in the analytic reports. If you're importing orders from an app or another platform, then you can set processed_at to a date and time in the past to match when the original order was created. As of API version 2026-07, values in the future are clamped to the current time. In earlier versions, future values return a `PROCESSED_AT_INVALID` error. */
   processedAt?: InputMaybe<Scalars['DateTime']['input']>;
   /** The website where the customer clicked a link to the shop. */
   referringSite?: InputMaybe<Scalars['URL']['input']>;
@@ -42724,7 +50676,7 @@ export type OrderCreateOrderInput = {
   shippingLines?: InputMaybe<Array<OrderCreateShippingLineInput>>;
   /** The ID of the order placed on the originating platform. This value doesn't correspond to the Shopify ID that's generated from a completed draft. */
   sourceIdentifier?: InputMaybe<Scalars['String']['input']>;
-  /** The source of the checkout. To use this field for sales attribution, you must register the channels that your app is managing. You can register the channels that your app is managing by completing [this Google Form](https://docs.google.com/forms/d/e/1FAIpQLScmVTZRQNjOJ7RD738mL1lGeFjqKVe_FM2tO9xsm21QEo5Ozg/viewform?usp=sf_link). After you've submited your request, you need to wait for your request to be processed by Shopify. You can find a list of your channels in the Partner Dashboard, in your app's Marketplace extension. You can specify a handle as the source_name value in your request. */
+  /** The source channel that the order is attributed to. Set this to the handle of an order attribution definition configured for your sales channel app, such as `youtube` or `channel:amazon-us`. To set up order attribution for your app, follow the [order attribution guide](https://shopify.dev/docs/apps/build/sales-channels/order-attribution). */
   sourceName?: InputMaybe<Scalars['String']['input']>;
   /** A valid URL to the original order on the originating surface. This URL is displayed to merchants on the Order Details page. If the URL is invalid, then it won't be displayed. */
   sourceUrl?: InputMaybe<Scalars['URL']['input']>;
@@ -42738,7 +50690,7 @@ export type OrderCreateOrderInput = {
   test?: InputMaybe<Scalars['Boolean']['input']>;
   /** The payment transactions to create for the order. */
   transactions?: InputMaybe<Array<OrderCreateOrderTransactionInput>>;
-  /** The ID of the user logged into Shopify POS who processed the order, if applicable. */
+  /** The ID of the user who processed the order, if applicable. */
   userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -42808,7 +50760,7 @@ export type OrderCreateShippingLineInput = {
 export type OrderCreateTaxLineInput = {
   /** Whether the channel that submitted the tax line is liable for remitting. A value of `null` indicates unknown liability for the tax line. */
   channelLiable?: InputMaybe<Scalars['Boolean']['input']>;
-  /** The amount of tax to be charged on the item. */
+  /** The amount added to the order for this tax in shop and presentment currencies after discounts are applied. */
   priceSet?: InputMaybe<MoneyBagInput>;
   /** The proportion of the item price that the tax represents as a decimal. */
   rate: Scalars['Decimal']['input'];
@@ -42991,10 +50943,7 @@ export enum OrderDisplayFinancialStatus {
   Pending = 'PENDING',
   /** Displayed as **Refunded**. The full amount paid for an order was refunded to the customer. */
   Refunded = 'REFUNDED',
-  /**
-   * Displayed as **Voided**. An unpaid (payment authorized but not captured) order was manually
-   *          canceled.
-   */
+  /** Displayed as **Voided**. An authorized but uncaptured payment was voided, releasing the hold on the funds. This is the payment's financial status and is distinct from the order's status: an order can remain open even when its payment is voided. */
   Voided = 'VOIDED'
 }
 
@@ -43370,6 +51319,8 @@ export type OrderInput = {
   metafields?: InputMaybe<Array<MetafieldInput>>;
   /** The new contents for the note associated with the order. Overwrites the existing note. */
   note?: InputMaybe<Scalars['String']['input']>;
+  /** A new customer phone number for the order. Overwrites the existing phone number. */
+  phone?: InputMaybe<Scalars['String']['input']>;
   /** The new purchase order number for the order. */
   poNumber?: InputMaybe<Scalars['String']['input']>;
   /** The new shipping address for the order. Overwrites the existing shipping address. */
@@ -43529,37 +51480,37 @@ export type OrderRisk = {
 };
 
 /**
- * The risk assessments for an order.
+ * A risk assessment for an order.
  *
- * See the [example query "Retrieves a list of all order risks for an order"](https://shopify.dev/docs/api/admin-graphql/unstable/queries/order?example=Retrieves+a+list+of+all+order+risks+for+an+order).
+ * See the [example query "Retrieve order risk assessments"](https://shopify.dev/docs/api/admin-graphql/unstable/queries/order?example=retrieve-order-risk-assessments).
  */
 export type OrderRiskAssessment = {
   __typename?: 'OrderRiskAssessment';
   /**
-   * Optional facts used to describe the risk assessment. The values in here are specific to the provider.
+   * Facts included with the risk assessment. Fact values are specific to the provider.
    * See the [examples for the mutation orderRiskAssessmentCreate](https://shopify.dev/api/admin-graphql/unstable/mutations/orderRiskAssessmentCreate#section-examples).
    */
   facts: Array<RiskFact>;
   /** The app that provided the assessment, `null` if the assessment was provided by Shopify. */
   provider?: Maybe<App>;
-  /** The likelihood that the order is fraudulent, based on this risk assessment. */
+  /** The risk level assigned to the order. */
   riskLevel: RiskAssessmentResult;
 };
 
-/** The input fields for an order risk assessment. */
+/** The input fields for creating an order risk assessment. */
 export type OrderRiskAssessmentCreateInput = {
-  /** The list of facts used to determine the fraud assessment. */
+  /** Facts to include with the risk assessment. Up to 20 facts can be provided. */
   facts: Array<OrderRiskAssessmentFactInput>;
-  /** The ID of the order receiving the fraud assessment. */
+  /** The ID of the order to assess. */
   orderId: Scalars['ID']['input'];
-  /** The risk level of the fraud assessment. */
+  /** The risk level assigned to the order. */
   riskLevel: RiskAssessmentResult;
 };
 
 /** Return type for `orderRiskAssessmentCreate` mutation. */
 export type OrderRiskAssessmentCreatePayload = {
   __typename?: 'OrderRiskAssessmentCreatePayload';
-  /** The order risk assessment created. */
+  /** The created risk assessment. */
   orderRiskAssessment?: Maybe<OrderRiskAssessment>;
   /** The list of errors that occurred from executing the mutation. */
   userErrors: Array<OrderRiskAssessmentCreateUserError>;
@@ -43582,17 +51533,17 @@ export enum OrderRiskAssessmentCreateUserErrorCode {
   Invalid = 'INVALID',
   /** The record with the ID used as the input value couldn't be found. */
   NotFound = 'NOT_FOUND',
-  /** The order is marked as fulfilled and can no longer accept new risk assessments. */
+  /** The order is marked as fulfilled and can no longer accept new order risk assessments. */
   OrderAlreadyFulfilled = 'ORDER_ALREADY_FULFILLED',
-  /** Too many facts were provided for the risk assessment. */
+  /** More than 20 facts were provided for the order risk assessment. */
   TooManyFacts = 'TOO_MANY_FACTS'
 }
 
-/** The input fields to create a fact on an order risk assessment. */
+/** The input fields for a risk assessment fact. */
 export type OrderRiskAssessmentFactInput = {
-  /** A description of the fact. Large values are truncated to 256 characters. */
+  /** Descriptions longer than 256 characters are truncated. */
   description: Scalars['String']['input'];
-  /** Indicates whether the fact is a negative, neutral or positive contributor with regards to risk. */
+  /** Indicates whether the fact contributes negatively, neutrally, or positively to risk. */
   sentiment: RiskFactSentiment;
 };
 
@@ -43611,7 +51562,7 @@ export enum OrderRiskLevel {
   Medium = 'MEDIUM'
 }
 
-/** List of possible values for an OrderRiskRecommendation recommendation. */
+/** Possible recommendations for an order. */
 export enum OrderRiskRecommendationResult {
   /** Recommends fulfilling the order. */
   Accept = 'ACCEPT',
@@ -43626,13 +51577,13 @@ export enum OrderRiskRecommendationResult {
 /**
  * Summary of risk characteristics for an order.
  *
- * See the [example query "Retrieves a list of all order risks for an order"](https://shopify.dev/docs/api/admin-graphql/unstable/queries/order?example=Retrieves+a+list+of+all+order+risks+for+an+order).
+ * See the [example query "Retrieve order risk assessments"](https://shopify.dev/docs/api/admin-graphql/unstable/queries/order?example=retrieve-order-risk-assessments).
  */
 export type OrderRiskSummary = {
   __typename?: 'OrderRiskSummary';
-  /** The list of risk assessments for the order. */
+  /** The risk assessments for the order. */
   assessments: Array<OrderRiskAssessment>;
-  /** The recommendation for the order based on the results of the risk assessments. This suggests the action the merchant should take with regards to its risk of fraud. */
+  /** The recommended action for the order based on its risk assessments. */
   recommendation: OrderRiskRecommendationResult;
 };
 
@@ -43884,7 +51835,9 @@ export type OrderTransaction = Node & {
   processedAt?: Maybe<Scalars['DateTime']['output']>;
   /**
    * The transaction receipt that the payment gateway attaches to the transaction.
-   * The value of this field depends on which payment gateway processed the transaction.
+   * > **Note:** This field is **gateway-specific** and **not a stable contract**.
+   * > Its structure and contents can vary by payment gateway and may change without notice.
+   * > Apps **shouldn't parse or rely on this field for business logic**; prefer typed fields on `OrderTransaction` and related objects.
    */
   receiptJson?: Maybe<Scalars['JSON']['output']>;
   /** The settlement currency. */
@@ -43898,19 +51851,25 @@ export type OrderTransaction = Node & {
   /** Whether the transaction is a test transaction. */
   test: Scalars['Boolean']['output'];
   /**
-   * Specifies the available amount to capture on the gateway.
-   * Only available when an amount is capturable or manually mark as paid.
+   * The amount of the original authorization that remains unsettled.
+   * During a pending capture, this reflects the full outstanding balance including the pending amount.
+   * When no capture is pending, this equals the capturable amount.
+   * Only available when an amount is capturable or manually marked as paid.
    * @deprecated Use `totalUnsettledSet` instead.
    */
   totalUnsettled?: Maybe<Scalars['Money']['output']>;
   /**
-   * Specifies the available amount with currency to capture on the gateway in shop and presentment currencies.
-   * Only available when an amount is capturable or manually mark as paid.
+   * The amount of the original authorization that remains unsettled, in shop and presentment currencies.
+   * During a pending capture, this reflects the full outstanding balance including the pending amount.
+   * When no capture is pending, this equals the capturable amount.
+   * Only available when an amount is capturable or manually marked as paid.
    */
   totalUnsettledSet?: Maybe<MoneyBag>;
   /**
-   * Specifies the available amount with currency to capture on the gateway.
-   * Only available when an amount is capturable or manually mark as paid.
+   * The amount with currency of the original authorization that remains unsettled.
+   * During a pending capture, this reflects the full outstanding balance including the pending amount.
+   * When no capture is pending, this equals the capturable amount.
+   * Only available when an amount is capturable or manually marked as paid.
    * @deprecated Use `totalUnsettledSet` instead.
    */
   totalUnsettledV2?: Maybe<MoneyV2>;
@@ -43954,44 +51913,84 @@ export enum OrderTransactionErrorCode {
   AmazonPaymentsOrderReferenceCanceled = 'AMAZON_PAYMENTS_ORDER_REFERENCE_CANCELED',
   /** The order was not confirmed within three hours. */
   AmazonPaymentsStale = 'AMAZON_PAYMENTS_STALE',
-  /** Call the card issuer. */
+  /** The transaction amount exceeds the maximum amount allowed. */
+  AmountTooLarge = 'AMOUNT_TOO_LARGE',
+  /** The transaction amount is below the minimum amount allowed. */
+  AmountTooSmall = 'AMOUNT_TOO_SMALL',
+  /** The 3D Secure authentication failed. */
+  AuthenticationFailed = 'AUTHENTICATION_FAILED',
+  /** The transaction requires 3D Secure authentication but was attempted without authentication. */
+  AuthenticationRequired = 'AUTHENTICATION_REQUIRED',
+  /** The authorization has expired. */
+  AuthorizationExpired = 'AUTHORIZATION_EXPIRED',
+  /** The issuer declined the transaction, the customer should contact their issuer for more details. */
   CallIssuer = 'CALL_ISSUER',
+  /** The transaction was cancelled. */
+  CancelledPayment = 'CANCELLED_PAYMENT',
   /** The card was declined. */
   CardDeclined = 'CARD_DECLINED',
+  /** The transaction was declined due to suspected card testing activity. */
+  CardTesting = 'CARD_TESTING',
   /** There is an error in the gateway or merchant configuration. */
   ConfigError = 'CONFIG_ERROR',
+  /** The issuer declined the transaction without providing a specific reason. */
+  DoNotHonor = 'DO_NOT_HONOR',
   /** The card is expired. */
   ExpiredCard = 'EXPIRED_CARD',
+  /** The transaction was declined due to suspected fraudulent activity. */
+  FraudSuspected = 'FRAUD_SUSPECTED',
   /** There was an unknown error with processing the payment. */
   GenericError = 'GENERIC_ERROR',
-  /** The address does not match the card number. */
+  /** The address is incorrect. */
   IncorrectAddress = 'INCORRECT_ADDRESS',
-  /** The CVC does not match the card number. */
+  /** The card security code (CVC/CVV) is incorrect. */
   IncorrectCvc = 'INCORRECT_CVC',
   /** The card number is incorrect. */
   IncorrectNumber = 'INCORRECT_NUMBER',
-  /** The entered PIN is incorrect. */
+  /** The PIN entered is incorrect. */
   IncorrectPin = 'INCORRECT_PIN',
-  /** The ZIP or postal code does not match the card number. */
+  /** The ZIP or postal code doesn't match the one on file. */
   IncorrectZip = 'INCORRECT_ZIP',
-  /** The amount is either too high or too low for the provider. */
+  /** The payment instrument was declined. */
+  InstrumentDeclined = 'INSTRUMENT_DECLINED',
+  /** There are insufficient funds available to complete the transaction. */
+  InsufficientFunds = 'INSUFFICIENT_FUNDS',
+  /** The amount is invalid. */
   InvalidAmount = 'INVALID_AMOUNT',
   /** The payment method is not available in the customer's country. */
   InvalidCountry = 'INVALID_COUNTRY',
+  /** The currency isn't supported. */
+  InvalidCurrency = 'INVALID_CURRENCY',
   /** The format of the CVC is incorrect. */
   InvalidCvc = 'INVALID_CVC',
   /** The format of the expiry date is incorrect. */
   InvalidExpiryDate = 'INVALID_EXPIRY_DATE',
   /** The format of the card number is incorrect. */
   InvalidNumber = 'INVALID_NUMBER',
+  /** The payment method is invalid or not found. */
+  InvalidPaymentMethod = 'INVALID_PAYMENT_METHOD',
+  /** This payment method doesn't support the requested transaction type. */
+  InvalidPurchaseType = 'INVALID_PURCHASE_TYPE',
+  /** The transaction couldn't be processed due to an issue with the merchant account. */
+  MerchantAccountError = 'MERCHANT_ACCOUNT_ERROR',
+  /** The transaction was blocked due to the merchant's custom payment risk rule. */
+  MerchantRule = 'MERCHANT_RULE',
   /** The payment method is momentarily unavailable. */
   PaymentMethodUnavailable = 'PAYMENT_METHOD_UNAVAILABLE',
+  /** The payment method isn't supported. */
+  PaymentMethodUnsupported = 'PAYMENT_METHOD_UNSUPPORTED',
+  /** The transaction couldn't be processed due to an unexpected error with the payment provider. */
+  PaymentProviderError = 'PAYMENT_PROVIDER_ERROR',
   /** The card has been reported as lost or stolen, and the card issuer has requested that the merchant keep the card and call the number on the back. */
   PickUpCard = 'PICK_UP_CARD',
   /** There was an error while processing the payment. */
   ProcessingError = 'PROCESSING_ERROR',
+  /** The transaction retry attempt was declined. */
+  RetryDeclined = 'RETRY_DECLINED',
   /** A real card was used but the gateway was in test mode. */
   TestModeLiveCard = 'TEST_MODE_LIVE_CARD',
+  /** The payment instrument has exceeded the processing frequency limit. */
+  TransactionLimitExceeded = 'TRANSACTION_LIMIT_EXCEEDED',
   /** The gateway or merchant configuration doesn't support a feature, such as network tokenization. */
   UnsupportedFeature = 'UNSUPPORTED_FEATURE'
 }
@@ -44059,6 +52058,14 @@ export type OrderUpdatePayload = {
   order?: Maybe<Order>;
   /** The list of errors that occurred from executing the mutation. */
   userErrors: Array<UserError>;
+};
+
+/** The input fields that describe package information for the shipping label purchase. Exactly one of `customPackage` or `carrierPackage` must be provided. */
+export type PackageInfoInput = {
+  /** A standard package provided by the carrier. Mutually exclusive with `customPackage`. */
+  carrierPackage?: InputMaybe<ShippingCarrierPackageInput>;
+  /** A package with custom dimensions and empty-package weight. Mutually exclusive with `carrierPackage`. */
+  customPackage?: InputMaybe<ShippingLabelPurchaseCustomPackageInput>;
 };
 
 /**
@@ -44542,6 +52549,8 @@ export enum PaymentCustomizationErrorCode {
   InvalidMetafields = 'INVALID_METAFIELDS',
   /** Maximum payment customizations are already enabled. */
   MaximumActivePaymentCustomizations = 'MAXIMUM_ACTIVE_PAYMENT_CUSTOMIZATIONS',
+  /** The maximum number of payment customizations per shop has been reached. */
+  MaximumPaymentCustomizations = 'MAXIMUM_PAYMENT_CUSTOMIZATIONS',
   /** Either function_id or function_handle must be provided. */
   MissingFunctionIdentifier = 'MISSING_FUNCTION_IDENTIFIER',
   /** Only one of function_id or function_handle can be provided, not both. */
@@ -44579,7 +52588,7 @@ export type PaymentCustomizationUpdatePayload = {
 export type PaymentDetails = CardPaymentDetails | LocalPaymentMethodsPaymentDetails | PaypalWalletPaymentDetails | ShopPayInstallmentsPaymentDetails;
 
 /** All possible instrument outputs for Payment Mandates. */
-export type PaymentInstrument = VaultCreditCard | VaultPaypalBillingAgreement;
+export type PaymentInstrument = BankAccount | VaultCreditCard | VaultPaypalBillingAgreement;
 
 /**
  * A payment instrument and the permission
@@ -44600,6 +52609,8 @@ export type PaymentMandate = Node & {
  */
 export type PaymentMandateResource = {
   __typename?: 'PaymentMandateResource';
+  /** The unique ID of the payment mandate. Matches the corresponding `CustomerPaymentMethod.id` token, so partners can identify which payment method to use for a given mandate scope (e.g., SUBSCRIPTIONS). */
+  id: Scalars['ID']['output'];
   /** The ID of the resource that this payment method was created for. */
   resourceId?: Maybe<Scalars['ID']['output']>;
   /** The resource type that this payment method was created for (e.g., Order, Subscriptions). */
@@ -44707,6 +52718,36 @@ export type PaymentSchedule = Node & {
   /** Remaining balance to be paid or authorized by the customer for this payment schedule. */
   totalBalance: MoneyV2;
 };
+
+/** Return type for `paymentScheduleCapture` mutation. */
+export type PaymentScheduleCapturePayload = {
+  __typename?: 'PaymentScheduleCapturePayload';
+  /** The async job used for charging the payment. */
+  job?: Maybe<Job>;
+  /** The job result for tracking the status of the payment capture. */
+  jobResult?: Maybe<OrderCreateMandatePaymentJobResult>;
+  /** The unique ID for the created payment. */
+  paymentReferenceId?: Maybe<Scalars['String']['output']>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<PaymentScheduleCaptureUserError>;
+};
+
+/** An error that occurs during the execution of `PaymentScheduleCapture`. */
+export type PaymentScheduleCaptureUserError = DisplayableError & {
+  __typename?: 'PaymentScheduleCaptureUserError';
+  /** The error code. */
+  code?: Maybe<PaymentScheduleCaptureUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `PaymentScheduleCaptureUserError`. */
+export enum PaymentScheduleCaptureUserErrorCode {
+  /** Errors for capturing a scheduled payment. */
+  PaymentScheduleCaptureErrorCode = 'PAYMENT_SCHEDULE_CAPTURE_ERROR_CODE'
+}
 
 /** An auto-generated type for paginating through multiple PaymentSchedules. */
 export type PaymentScheduleConnection = {
@@ -45000,8 +53041,310 @@ export type PickupInStoreLocation = {
 /** Represents a mobile device that Shopify Point of Sale has been installed on. */
 export type PointOfSaleDevice = Node & {
   __typename?: 'PointOfSaleDevice';
+  /** The currently open payment session for this device. Data is returned only if the device's location has a POS Pro subscription. */
+  activePaymentSession?: Maybe<PointOfSaleDevicePaymentSession>;
+  /** The cash drawer that this device is currently assigned to. Data is returned only if the device's location has a POS Pro subscription. */
+  cashDrawer?: Maybe<CashDrawer>;
   /** A globally-unique ID. */
   id: Scalars['ID']['output'];
+};
+
+/** Return type for `pointOfSaleDeviceAssignToCashDrawer` mutation. */
+export type PointOfSaleDeviceAssignToCashDrawerPayload = {
+  __typename?: 'PointOfSaleDeviceAssignToCashDrawerPayload';
+  /** The point of sale device. */
+  pointOfSaleDevice?: Maybe<PointOfSaleDevice>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<PointOfSaleDeviceAssignToCashDrawerUserError>;
+};
+
+/** An error that occurs during the execution of `PointOfSaleDeviceAssignToCashDrawer`. */
+export type PointOfSaleDeviceAssignToCashDrawerUserError = DisplayableError & {
+  __typename?: 'PointOfSaleDeviceAssignToCashDrawerUserError';
+  /** The error code. */
+  code?: Maybe<PointOfSaleDeviceAssignToCashDrawerUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `PointOfSaleDeviceAssignToCashDrawerUserError`. */
+export enum PointOfSaleDeviceAssignToCashDrawerUserErrorCode {
+  /** The cash drawer was not found. */
+  CashDrawerNotFound = 'CASH_DRAWER_NOT_FOUND',
+  /** Unexpected internal error happened. */
+  InternalError = 'INTERNAL_ERROR',
+  /** The cash drawer and point of sale device must be in the same location. */
+  LocationMismatch = 'LOCATION_MISMATCH',
+  /** The point of sale device was not found. */
+  PointOfSaleDeviceNotFound = 'POINT_OF_SALE_DEVICE_NOT_FOUND'
+}
+
+/** An auto-generated type for paginating through multiple PointOfSaleDevices. */
+export type PointOfSaleDeviceConnection = {
+  __typename?: 'PointOfSaleDeviceConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<PointOfSaleDeviceEdge>;
+  /** A list of nodes that are contained in PointOfSaleDeviceEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<PointOfSaleDevice>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** An auto-generated type which holds one PointOfSaleDevice and a cursor during pagination. */
+export type PointOfSaleDeviceEdge = {
+  __typename?: 'PointOfSaleDeviceEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of PointOfSaleDeviceEdge. */
+  node: PointOfSaleDevice;
+};
+
+/** Tracks the payment activity for a point of sale device. */
+export type PointOfSaleDevicePaymentSession = Node & {
+  __typename?: 'PointOfSaleDevicePaymentSession';
+  /** The activities on the point of sale device payment session. */
+  cashActivities: CashActivityConnection;
+  /** The cash that was physically counted when the point of sale device payment session was closed. */
+  cashCountedAtClose?: Maybe<MoneyV2>;
+  /** The cash that was physically counted when the point of sale device payment session was opened. */
+  cashCountedAtOpen: MoneyV2;
+  /** The cash drawer associated with the point of sale device payment session. The session's sales andcash tracking activity will affect the cash drawer's balance. */
+  cashDrawer: CashDrawer;
+  /** The amount that the cash drawer balance was adjusted when the session was closed. */
+  closingAdjustment?: Maybe<MoneyV2>;
+  /** The counted balance of the cash drawer when the point of sale device payment session was closed. */
+  closingBalance?: Maybe<MoneyV2>;
+  /** The note associated with the point of sale device payment session closing. */
+  closingNote?: Maybe<Scalars['String']['output']>;
+  /** The staff member who closed the point of sale device payment session. */
+  closingStaffMember?: Maybe<StaffMember>;
+  /** The time the point of sale device payment session was closed. */
+  closingTime?: Maybe<Scalars['DateTime']['output']>;
+  /** The currency of the point of sale device payment session. */
+  currency: Scalars['String']['output'];
+  /** The expected cash when the point of sale device payment session was closed. */
+  expectedCashAtClose?: Maybe<MoneyV2>;
+  /** The expected balance of the cash drawer when the point of sale device payment session was opened. */
+  expectedCashAtOpen: MoneyV2;
+  /** A globally-unique ID. */
+  id: Scalars['ID']['output'];
+  /** The location associated with the point of sale device payment session. The session's sales and cash tracking activity will contribute to the location's totals. */
+  location: Location;
+  /** The net cash sales for the point of sale device payment session. */
+  netCashSales: MoneyV2;
+  /** The net sales for the duration of this session. */
+  netSales: MoneyV2;
+  /** The note associated with the point of sale device payment session opening. */
+  openingNote?: Maybe<Scalars['String']['output']>;
+  /** The staff member who opened the point of sale device payment session. */
+  openingStaffMember: StaffMember;
+  /** The time the point of sale device payment session was opened. */
+  openingTime: Scalars['DateTime']['output'];
+  /** The point of sale device. */
+  pointOfSaleDevice: PointOfSaleDevice;
+  /** Whether the point of sale device payment session is open. Payments can't be processed or refunded during a closed session, and the cash drawer balance can't be adjusted or corrected. */
+  status: PointOfSaleDevicePaymentSessionStatus;
+  /** The total adjustments for the point of sale device payment session. */
+  totalAdjustments: MoneyV2;
+  /** The total cash refunds for the point of sale device payment session. */
+  totalCashRefunds: MoneyV2;
+  /** The total cash sales for the point of sale device payment session. */
+  totalCashSales: MoneyV2;
+  /** The total discrepancy for the point of sale device payment session. */
+  totalDiscrepancy: MoneyV2;
+  /** The sum of all refunds for the duration of this session. */
+  totalRefunds: MoneyV2;
+  /** The sum of all sales for the duration of this session. */
+  totalSales: MoneyV2;
+  /** Whether the point of sale device payment session totals are ready. */
+  totalsReady: Scalars['Boolean']['output'];
+};
+
+
+/** Tracks the payment activity for a point of sale device. */
+export type PointOfSaleDevicePaymentSessionCashActivitiesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+  staffMemberId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** Return type for `pointOfSaleDevicePaymentSessionAdjust` mutation. */
+export type PointOfSaleDevicePaymentSessionAdjustPayload = {
+  __typename?: 'PointOfSaleDevicePaymentSessionAdjustPayload';
+  /** The adjusted point of sale device payment session. */
+  pointOfSaleDevicePaymentSession?: Maybe<PointOfSaleDevicePaymentSession>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<UserError>;
+};
+
+/** Return type for `pointOfSaleDevicePaymentSessionClose` mutation. */
+export type PointOfSaleDevicePaymentSessionClosePayload = {
+  __typename?: 'PointOfSaleDevicePaymentSessionClosePayload';
+  /** The closed point of sale device payment session. */
+  pointOfSaleDevicePaymentSession?: Maybe<PointOfSaleDevicePaymentSession>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<PointOfSaleDevicePaymentSessionCloseUserError>;
+};
+
+/** An error that occurs during the execution of `PointOfSaleDevicePaymentSessionClose`. */
+export type PointOfSaleDevicePaymentSessionCloseUserError = DisplayableError & {
+  __typename?: 'PointOfSaleDevicePaymentSessionCloseUserError';
+  /** The error code. */
+  code?: Maybe<PointOfSaleDevicePaymentSessionCloseUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `PointOfSaleDevicePaymentSessionCloseUserError`. */
+export enum PointOfSaleDevicePaymentSessionCloseUserErrorCode {
+  /** The currency code does not match the cash drawer currency. */
+  CurrencyMismatch = 'CURRENCY_MISMATCH',
+  /** Point of sale device payment session not closed. */
+  FailedToCloseSession = 'FAILED_TO_CLOSE_SESSION',
+  /** Point of sale device has no cash drawer associated with it. */
+  NoCashDrawerAssociated = 'NO_CASH_DRAWER_ASSOCIATED',
+  /** Point of sale device payment session not found. */
+  PaymentSessionNotFound = 'PAYMENT_SESSION_NOT_FOUND',
+  /** Reason code not found. */
+  ReasonCodeNotFound = 'REASON_CODE_NOT_FOUND',
+  /** Session is already closed. */
+  SessionAlreadyClosed = 'SESSION_ALREADY_CLOSED',
+  /** Staff member not found. */
+  StaffMemberNotFound = 'STAFF_MEMBER_NOT_FOUND',
+  /** Time cannot be before session opening time. */
+  TimeBeforeSessionOpen = 'TIME_BEFORE_SESSION_OPEN'
+}
+
+/** An auto-generated type for paginating through multiple PointOfSaleDevicePaymentSessions. */
+export type PointOfSaleDevicePaymentSessionConnection = {
+  __typename?: 'PointOfSaleDevicePaymentSessionConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<PointOfSaleDevicePaymentSessionEdge>;
+  /** A list of nodes that are contained in PointOfSaleDevicePaymentSessionEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<PointOfSaleDevicePaymentSession>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** Return type for `pointOfSaleDevicePaymentSessionCount` mutation. */
+export type PointOfSaleDevicePaymentSessionCountPayload = {
+  __typename?: 'PointOfSaleDevicePaymentSessionCountPayload';
+  /** The point of sale device payment session after recording the count. */
+  pointOfSaleDevicePaymentSession?: Maybe<PointOfSaleDevicePaymentSession>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<PointOfSaleDevicePaymentSessionCountUserError>;
+};
+
+/** An error that occurs during the execution of `PointOfSaleDevicePaymentSessionCount`. */
+export type PointOfSaleDevicePaymentSessionCountUserError = DisplayableError & {
+  __typename?: 'PointOfSaleDevicePaymentSessionCountUserError';
+  /** The error code. */
+  code?: Maybe<PointOfSaleDevicePaymentSessionCountUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `PointOfSaleDevicePaymentSessionCountUserError`. */
+export enum PointOfSaleDevicePaymentSessionCountUserErrorCode {
+  /** The currency code does not match the cash drawer currency. */
+  CurrencyMismatch = 'CURRENCY_MISMATCH',
+  /** Point of sale device payment session count not recorded. */
+  FailedToRecordCount = 'FAILED_TO_RECORD_COUNT',
+  /** Point of sale device has no cash drawer associated with it. */
+  NoCashDrawerAssociated = 'NO_CASH_DRAWER_ASSOCIATED',
+  /** Point of sale device payment session not found. */
+  PaymentSessionNotFound = 'PAYMENT_SESSION_NOT_FOUND',
+  /** Reason code not found. */
+  ReasonCodeNotFound = 'REASON_CODE_NOT_FOUND',
+  /** Session is already closed. */
+  SessionAlreadyClosed = 'SESSION_ALREADY_CLOSED',
+  /** Staff member not found. */
+  StaffMemberNotFound = 'STAFF_MEMBER_NOT_FOUND',
+  /** Time cannot be before session opening time. */
+  TimeBeforeSessionOpen = 'TIME_BEFORE_SESSION_OPEN'
+}
+
+/** An auto-generated type which holds one PointOfSaleDevicePaymentSession and a cursor during pagination. */
+export type PointOfSaleDevicePaymentSessionEdge = {
+  __typename?: 'PointOfSaleDevicePaymentSessionEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of PointOfSaleDevicePaymentSessionEdge. */
+  node: PointOfSaleDevicePaymentSession;
+};
+
+/** Return type for `pointOfSaleDevicePaymentSessionOpen` mutation. */
+export type PointOfSaleDevicePaymentSessionOpenPayload = {
+  __typename?: 'PointOfSaleDevicePaymentSessionOpenPayload';
+  /** The created point of sale device payment session. */
+  pointOfSaleDevicePaymentSession?: Maybe<PointOfSaleDevicePaymentSession>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<PointOfSaleDevicePaymentSessionOpenUserError>;
+};
+
+/** An error that occurs during the execution of `PointOfSaleDevicePaymentSessionOpen`. */
+export type PointOfSaleDevicePaymentSessionOpenUserError = DisplayableError & {
+  __typename?: 'PointOfSaleDevicePaymentSessionOpenUserError';
+  /** The error code. */
+  code?: Maybe<PointOfSaleDevicePaymentSessionOpenUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `PointOfSaleDevicePaymentSessionOpenUserError`. */
+export enum PointOfSaleDevicePaymentSessionOpenUserErrorCode {
+  /** A point of sale device payment session is already open for this point of sale device. */
+  AlreadyOpen = 'ALREADY_OPEN',
+  /** The currency does not match the currency of the cash drawer. */
+  CurrencyMismatch = 'CURRENCY_MISMATCH',
+  /** The point of sale device payment session was not created. */
+  NotSaved = 'NOT_SAVED',
+  /** The point_of_sale_device has no cash drawer associated with it. */
+  NoCashDrawerAssociated = 'NO_CASH_DRAWER_ASSOCIATED',
+  /** The point of sale device was not found. */
+  PointOfSaleDeviceNotFound = 'POINT_OF_SALE_DEVICE_NOT_FOUND',
+  /** The reason code was not found. */
+  ReasonCodeNotFound = 'REASON_CODE_NOT_FOUND',
+  /** The staff member was not found. */
+  StaffMemberNotFound = 'STAFF_MEMBER_NOT_FOUND'
+}
+
+/** The set of valid sort keys for the PointOfSaleDevicePaymentSession query. */
+export enum PointOfSaleDevicePaymentSessionSortKeys {
+  /** Sort by the `closing_time` value. */
+  ClosingTime = 'CLOSING_TIME',
+  /** Sort by the `id` value. */
+  Id = 'ID',
+  /** Sort by the `opening_time` value. */
+  OpeningTime = 'OPENING_TIME'
+}
+
+/** The status of the point of sale device payment session. Payments can't be processed or refunded during a closed session, and the cash drawer balance can't be adjusted or corrected. */
+export enum PointOfSaleDevicePaymentSessionStatus {
+  /** The point of sale device payment session is closed. */
+  Closed = 'CLOSED',
+  /** The point of sale device payment session is open. */
+  Open = 'OPEN'
+}
+
+/** The input fields for selecting a preferred shipping rate by carrier and service codes. */
+export type PreferredRateSelectionInput = {
+  /** The code identifying the carrier for the preferred rate. Examples include `usps`, `ups_shipping`, `dhl_express`, and `canada_post`. */
+  carrierCode: Scalars['String']['input'];
+  /** The carrier-defined service code for the preferred rate. */
+  serviceCode: Scalars['String']['input'];
 };
 
 /** The input fields used to include the line items of a specified fulfillment order that should be marked as prepared for pickup by a customer. */
@@ -45009,6 +53352,32 @@ export type PreparedFulfillmentOrderLineItemsInput = {
   /** The ID of the fulfillment order. */
   fulfillmentOrderId: Scalars['ID']['input'];
 };
+
+/** Return type for `previewInstall` mutation. */
+export type PreviewInstallPayload = {
+  __typename?: 'PreviewInstallPayload';
+  /** The installed theme. */
+  newTheme?: Maybe<OnlineStoreTheme>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<PreviewInstallUserError>;
+};
+
+/** An error that occurs during the execution of `PreviewInstall`. */
+export type PreviewInstallUserError = DisplayableError & {
+  __typename?: 'PreviewInstallUserError';
+  /** The error code. */
+  code?: Maybe<PreviewInstallUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `PreviewInstallUserError`. */
+export enum PreviewInstallUserErrorCode {
+  /** Unexpected internal error happened. */
+  InternalError = 'INTERNAL_ERROR'
+}
 
 /** How to calculate the parent product variant's price while bulk updating variant relationships. */
 export enum PriceCalculationType {
@@ -45223,6 +53592,10 @@ export enum PriceListFixedPricesByProductBulkUpdateUserErrorCode {
   DuplicateIdInInput = 'DUPLICATE_ID_IN_INPUT',
   /** IDs must be mutually exclusive across add or delete operations. */
   IdMustBeMutuallyExclusive = 'ID_MUST_BE_MUTUALLY_EXCLUSIVE',
+  /** The issuance currency of a local currency gift card must match the price list currency. */
+  LocalCurrencyGiftCardIssuanceCurrencyMismatch = 'LOCAL_CURRENCY_GIFT_CARD_ISSUANCE_CURRENCY_MISMATCH',
+  /** The price of a local currency gift card cannot exceed the maximum gift card purchase limit. */
+  LocalCurrencyGiftCardLimitExceeded = 'LOCAL_CURRENCY_GIFT_CARD_LIMIT_EXCEEDED',
   /** No update operations specified. */
   NoUpdateOperationsSpecified = 'NO_UPDATE_OPERATIONS_SPECIFIED',
   /** The currency specified does not match the price list's currency. */
@@ -45389,6 +53762,10 @@ export type PriceListPriceUserError = DisplayableError & {
 export enum PriceListPriceUserErrorCode {
   /** The input value is blank. */
   Blank = 'BLANK',
+  /** The issuance currency of a local currency gift card must match the price list currency. */
+  LocalCurrencyGiftCardIssuanceCurrencyMismatch = 'LOCAL_CURRENCY_GIFT_CARD_ISSUANCE_CURRENCY_MISMATCH',
+  /** The price of a local currency gift card cannot exceed the maximum gift card purchase limit. */
+  LocalCurrencyGiftCardLimitExceeded = 'LOCAL_CURRENCY_GIFT_CARD_LIMIT_EXCEEDED',
   /** The specified currency doesn't match the price list's currency. */
   PriceListCurrencyMismatch = 'PRICE_LIST_CURRENCY_MISMATCH',
   /** The price list doesn't exist. */
@@ -45401,6 +53778,8 @@ export enum PriceListPriceUserErrorCode {
 
 /** The input fields representing the price for all variants of a product. */
 export type PriceListProductPriceInput = {
+  /** Specifies the compare-at price and currency to apply to the product's variants on the price list. */
+  compareAtPrice?: InputMaybe<MoneyInput>;
   /** Specifies the price and currency to apply to the product's variants on the price list. */
   price: MoneyInput;
   /** Specifies the ID of the product to update its variants for. */
@@ -45880,7 +54259,10 @@ export type PriceRuleShippingLineEntitlements = {
   __typename?: 'PriceRuleShippingLineEntitlements';
   /** The codes for the countries to which the price rule applies to. */
   countryCodes: Array<CountryCode>;
-  /** Whether the price rule is applicable to countries that haven't been defined in the shop's shipping zones. */
+  /**
+   * Whether the price rule is applicable to countries that haven't been defined in the shop's shipping zones.
+   * @deprecated This field is being retired. Price rules that set `includeRestOfWorld: true` will be converted to an explicit list of countries, and `countryCodes` will then return every country where the price rule applies.
+   */
   includeRestOfWorld: Scalars['Boolean']['output'];
   /** Whether the price rule applies to all shipping lines. */
   targetAllShippingLines: Scalars['Boolean']['output'];
@@ -46545,6 +54927,8 @@ export type Product = HasEvents & HasMetafieldDefinitions & HasMetafields & HasP
    * that are associated with a product in a bundle.
    */
   bundleComponents: ProductBundleComponentConnection;
+  /** A list of consolidated options for a product in a bundle. */
+  bundleConsolidatedOptions?: Maybe<Array<ComponentizedProductsBundleConsolidatedOption>>;
   /**
    * The category of a product
    * from [Shopify's Standard Product Taxonomy](https://shopify.github.io/product-taxonomy/releases/unstable/?categoryId=sg-4-17-2-17).
@@ -46622,6 +55006,8 @@ export type Product = HasEvents & HasMetafieldDefinitions & HasMetafields & HasP
    * to this product".
    */
   feedback?: Maybe<ResourceFeedback>;
+  /** The gift card settings for this product. Only available on gift card products. */
+  giftCardSettings?: Maybe<GiftCardProductSettings>;
   /** The [theme template](https://shopify.dev/docs/storefronts/themes/architecture/templates) that's used when customers view the gift card in a store. */
   giftCardTemplateSuffix?: Maybe<Scalars['String']['output']>;
   /**
@@ -46732,10 +55118,11 @@ export type Product = HasEvents & HasMetafieldDefinitions & HasMetafields & HasP
    */
   productType: Scalars['String']['output'];
   /**
-   * The number of
+   * The total number of
    * [publications](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication)
-   * that a resource is published to, without
+   * that a resource is published to, including publications with
    * [feedback errors](https://shopify.dev/docs/api/admin-graphql/latest/objects/ResourceFeedback).
+   * To get a count that excludes publications with feedback errors, use `availablePublicationsCount`.
    * @deprecated Use `resourcePublicationsCount` instead.
    */
   publicationCount: Scalars['Int']['output'];
@@ -46764,6 +55151,7 @@ export type Product = HasEvents & HasMetafieldDefinitions & HasMetafields & HasP
    * Whether the resource is published to the app's
    * [publication](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication).
    * For example, the resource might be published to the app's online store channel.
+   * @deprecated Use `publishedOnPublication` instead.
    */
   publishedOnCurrentPublication: Scalars['Boolean']['output'];
   /**
@@ -46775,12 +55163,13 @@ export type Product = HasEvents & HasMetafieldDefinitions & HasMetafields & HasP
    * Whether the product can only be purchased with
    * a [selling plan](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/selling-plans).
    * Products that are sold on subscription (`requiresSellingPlan: true`) can be updated only for online stores.
-   * If you update a product to be subscription-only (`requiresSellingPlan:false`), then the product is unpublished from all channels, except the online store.
+   * If you update a product to be subscription-only (`requiresSellingPlan: true`), then the product is unpublished from all channels, except the online store.
    */
   requiresSellingPlan: Scalars['Boolean']['output'];
   /**
    * The resource that's either published or staged to be published to
    * the [publication](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication).
+   * @deprecated Use `resourcePublications` instead.
    */
   resourcePublicationOnCurrentPublication?: Maybe<ResourcePublicationV2>;
   /**
@@ -46789,15 +55178,20 @@ export type Product = HasEvents & HasMetafieldDefinitions & HasMetafields & HasP
    */
   resourcePublications: ResourcePublicationConnection;
   /**
-   * The number of
+   * The total number of
    * [publications](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication)
-   * that a resource is published to, without
+   * that a resource is published to, including publications with
    * [feedback errors](https://shopify.dev/docs/api/admin-graphql/latest/objects/ResourceFeedback).
+   * To get a count that excludes publications with feedback errors, use `availablePublicationsCount`.
    */
   resourcePublicationsCount?: Maybe<Count>;
   /**
    * The list of resources that are either published or staged to be published to a
    * [publication](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication).
+   * By default, only publications to `APP` catalog types are returned.
+   * For `Product` and `ProductVariant`, use the `catalogType` argument to retrieve
+   * publications for other catalog types, such as `COMPANY_LOCATION` (B2B) or `MARKET`.
+   * `Collection` only supports publications to `APP` catalog types.
    */
   resourcePublicationsV2: ResourcePublicationV2Connection;
   /**
@@ -46905,6 +55299,20 @@ export type Product = HasEvents & HasMetafieldDefinitions & HasMetafields & HasP
    * that are associated with the product.
    */
   variantsCount?: Maybe<Count>;
+  /**
+   * A list of [variants](https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductVariant)
+   * associated with the product that are members of the specified
+   * [collection](https://shopify.dev/docs/api/admin-graphql/latest/objects/Collection).
+   *
+   * Returns null for products whose collection membership is product-scoped rather than variant-scoped.
+   */
+  variantsInCollection?: Maybe<ProductVariantConnection>;
+  /**
+   * The number of [variants](https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductVariant)
+   * associated with the product that are members of the specified
+   * [collection](https://shopify.dev/docs/api/admin-graphql/latest/objects/Collection).
+   */
+  variantsInCollectionCount?: Maybe<Count>;
   /** The name of the product's vendor. */
   vendor: Scalars['String']['output'];
 };
@@ -47462,6 +55870,42 @@ export type ProductVariantsArgs = {
   sortKey?: InputMaybe<ProductVariantSortKeys>;
 };
 
+
+/**
+ * The `Product` object lets you manage products in a merchant’s store.
+ *
+ * Products are the goods and services that merchants offer to customers. They can include various details such as title, description, price, images, and options such as size or color.
+ * You can use [product variants](https://shopify.dev/docs/api/admin-graphql/latest/objects/productvariant) to create or update different versions of the same product.
+ * You can also add or update product [media](https://shopify.dev/docs/api/admin-graphql/latest/interfaces/media).
+ * Products can be organized by grouping them into a [collection](https://shopify.dev/docs/api/admin-graphql/latest/objects/collection).
+ *
+ * Learn more about working with [Shopify's product model](https://shopify.dev/docs/apps/build/graphql/migrate/new-product-model/product-model-components),
+ * including limitations and considerations.
+ */
+export type ProductVariantsInCollectionArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  collectionId: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+/**
+ * The `Product` object lets you manage products in a merchant’s store.
+ *
+ * Products are the goods and services that merchants offer to customers. They can include various details such as title, description, price, images, and options such as size or color.
+ * You can use [product variants](https://shopify.dev/docs/api/admin-graphql/latest/objects/productvariant) to create or update different versions of the same product.
+ * You can also add or update product [media](https://shopify.dev/docs/api/admin-graphql/latest/interfaces/media).
+ * Products can be organized by grouping them into a [collection](https://shopify.dev/docs/api/admin-graphql/latest/objects/collection).
+ *
+ * Learn more about working with [Shopify's product model](https://shopify.dev/docs/apps/build/graphql/migrate/new-product-model/product-model-components),
+ * including limitations and considerations.
+ */
+export type ProductVariantsInCollectionCountArgs = {
+  collectionId: Scalars['ID']['input'];
+};
+
 /** The product's component information. */
 export type ProductBundleComponent = {
   __typename?: 'ProductBundleComponent';
@@ -47608,10 +56052,39 @@ export type ProductBundleComponentQuantityOptionValueInput = {
   quantity: Scalars['Int']['input'];
 };
 
+/** The input fields for mapping a consolidated option to a specific component option. */
+export type ProductBundleConsolidatedOptionComponentInput = {
+  /**
+   * The ID of the component option that this consolidated option maps to.
+   * If null, this selection targets the component's quantity option with the given name.
+   */
+  componentOptionId?: InputMaybe<Scalars['ID']['input']>;
+  /** The value to use for the component option (e.g., 'Small', 'Red'). */
+  componentOptionValue: Scalars['String']['input'];
+};
+
+/** The input fields for a consolidated option on a componentized product. */
+export type ProductBundleConsolidatedOptionInput = {
+  /** The name of the consolidated option (e.g., 'Size', 'Color'). */
+  optionName: Scalars['String']['input'];
+  /** The option selections that define how this consolidated option maps to component options. */
+  optionSelections: Array<ProductBundleConsolidatedOptionSelectionInput>;
+};
+
+/** The input fields for a consolidated option selection that maps to component options. */
+export type ProductBundleConsolidatedOptionSelectionInput = {
+  /** The component mappings that define how this option value maps to specific component options. */
+  components: Array<ProductBundleConsolidatedOptionComponentInput>;
+  /** The value for this consolidated option selection (e.g., 'Small', 'Medium', 'Large'). */
+  optionValue: Scalars['String']['input'];
+};
+
 /** The input fields for creating a componentized product. */
 export type ProductBundleCreateInput = {
   /** The component products to bundle with the bundle product. */
   components: Array<ProductBundleComponentInput>;
+  /** The consolidated options of the componentized product to create, if provided. */
+  consolidatedOptions?: InputMaybe<Array<ProductBundleConsolidatedOptionInput>>;
   /** The title of the product to create. */
   title: Scalars['String']['input'];
 };
@@ -47679,6 +56152,8 @@ export type ProductBundleOperation = Node & ProductOperation & {
 export type ProductBundleUpdateInput = {
   /** The components to update existing ones. If none provided, no changes occur. Note: This replaces, not adds to, current components. */
   components?: InputMaybe<Array<ProductBundleComponentInput>>;
+  /** The consolidated options of the componentized product to update, if provided. */
+  consolidatedOptions?: InputMaybe<Array<ProductBundleConsolidatedOptionInput>>;
   /** The ID of the componentized product to update. */
   productId: Scalars['ID']['input'];
   /** The title to rename the componentized product to, if provided. */
@@ -47906,7 +56381,7 @@ export type ProductCreateInput = {
    * Whether the product can only be purchased with
    * a [selling plan](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/selling-plans).
    * Products that are sold on subscription (`requiresSellingPlan: true`) can be updated only for online stores.
-   * If you update a product to be subscription-only (`requiresSellingPlan:false`), then the product is unpublished from all channels except the online store.
+   * If you update a product to be subscription-only (`requiresSellingPlan: true`), then the product is unpublished from all channels except the online store.
    */
   requiresSellingPlan?: InputMaybe<Scalars['Boolean']['input']>;
   /**
@@ -48033,6 +56508,56 @@ export type ProductDeletePayload = {
   userErrors: Array<UserError>;
 };
 
+/**
+ * Controls which product discounts can apply together on the same cart line. By
+ * default, only one product discount applies per line. Available only on a Shopify
+ * Plus plan.
+ *
+ * For discounts to apply together, they must match tags in both directions. Each
+ * discount has two tag sets: the tags that identify the discount, and the tags that
+ * it agrees to apply with. Use the `tags` field on the discount input to set the
+ * discount's own tags. Use this input object to set the tags that the discount can
+ * apply with. Two discounts apply together only if each one allows at least one tag
+ * that the other is tagged with. Any number of product discounts can apply to the
+ * same line if this two-way match holds for every pair in the group.
+ *
+ * Example: Discount A is tagged with `LOYALTY` and allows `SEASONAL`, and Discount B
+ * is tagged with `SEASONAL` and allows `LOYALTY`. They apply together. To add a
+ * third discount, it must meet the same mutual-match rule with both A and B.
+ *
+ * Buy X Get Y discounts stack only on the customer-gets products (GY), not the
+ * customer-buys products (BX). See
+ * [Limitations for discount combinations](https://help.shopify.com/manual/discounts/discount-combinations#considerations)
+ * for details.
+ */
+export type ProductDiscountsWithTagsOnSameCartLineInput = {
+  /**
+   * The tags to add to this discount's combination list. This field doesn't add
+   * tags to the discount itself. To change the tags on the discount, use the
+   * discount input's `tags` field or the
+   * [`tagsAdd`](https://shopify.dev/api/admin-graphql/latest/mutations/tagsadd)
+   * and [`tagsRemove`](https://shopify.dev/api/admin-graphql/latest/mutations/tagsremove)
+   * mutations.
+   *
+   * If another product discount has a matching tag and also allows at least one
+   * tag on this discount, then both discounts can apply to the same cart line.
+   */
+  add?: InputMaybe<Array<Scalars['String']['input']>>;
+  /**
+   * The tags to remove from this discount's combination list. This field doesn't
+   * remove tags from the discount itself. To change the tags on the discount, use
+   * the discount input's `tags` field or the
+   * [`tagsAdd`](https://shopify.dev/api/admin-graphql/latest/mutations/tagsadd)
+   * and [`tagsRemove`](https://shopify.dev/api/admin-graphql/latest/mutations/tagsremove)
+   * mutations.
+   *
+   * If this discount and another product discount still match tags in both
+   * directions after the removal, then both discounts can still apply to the same
+   * cart line.
+   */
+  remove?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
 /** Represents a product duplication job. */
 export type ProductDuplicateJob = {
   __typename?: 'ProductDuplicateJob';
@@ -48101,6 +56626,8 @@ export type ProductEdge = {
 /** A product feed. */
 export type ProductFeed = Node & {
   __typename?: 'ProductFeed';
+  /** The ID of the channel to associate with the product feed. */
+  channelId: Scalars['ID']['output'];
   /** The country of the product feed. */
   country?: Maybe<CountryCode>;
   /** A globally-unique ID. */
@@ -48187,6 +56714,8 @@ export type ProductFeedEdge = {
 
 /** The input fields required to create a product feed. */
 export type ProductFeedInput = {
+  /** The ID of the channel to associate with the product feed. */
+  channelId?: InputMaybe<Scalars['ID']['input']>;
   /** The country of the product feed. */
   country: CountryCode;
   /** The language of the product feed. */
@@ -48322,7 +56851,7 @@ export type ProductInput = {
    * Whether the product can only be purchased with
    * a [selling plan](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/selling-plans).
    * Products that are sold on subscription (`requiresSellingPlan: true`) can be updated only for online stores.
-   * If you update a product to be subscription-only (`requiresSellingPlan:false`), then the product is unpublished from all channels except the online store.
+   * If you update a product to be subscription-only (`requiresSellingPlan: true`), then the product is unpublished from all channels except the online store.
    */
   requiresSellingPlan?: InputMaybe<Scalars['Boolean']['input']>;
   /**
@@ -48878,6 +57407,8 @@ export type ProductReorderMediaPayload = {
  */
 export type ProductResourceFeedback = {
   __typename?: 'ProductResourceFeedback';
+  /** The channel this feedback is for. */
+  channel?: Maybe<Channel>;
   /**
    * The time when the feedback was generated. Used to help determine whether
    * incoming feedback is outdated compared to existing feedback.
@@ -48895,6 +57426,8 @@ export type ProductResourceFeedback = {
 
 /** The input fields used to create a product feedback. */
 export type ProductResourceFeedbackInput = {
+  /** The ID of the channel that the feedback is for. Used to scope feedback to a specific sales channel when the app has multiple channels. */
+  channelId?: InputMaybe<Scalars['ID']['input']>;
   /**
    * The date and time when the payload is constructed.
    * Used to help determine whether incoming feedback is outdated compared to feedback already received, and if it should be ignored upon arrival.
@@ -49251,6 +57784,16 @@ export type ProductUnpublishPayload = {
   userErrors: Array<UserError>;
 };
 
+/** The input fields required to identify a product for update. */
+export type ProductUpdateIdentifiers = {
+  /** Custom ID of product to update. */
+  customId?: InputMaybe<UniqueMetafieldValueInput>;
+  /** Handle of product to update. */
+  handle?: InputMaybe<Scalars['String']['input']>;
+  /** ID of product to update. */
+  id?: InputMaybe<Scalars['ID']['input']>;
+};
+
 /** The input fields for updating a product. */
 export type ProductUpdateInput = {
   /**
@@ -49302,7 +57845,7 @@ export type ProductUpdateInput = {
    * Whether the product can only be purchased with
    * a [selling plan](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/selling-plans).
    * Products that are sold on subscription (`requiresSellingPlan: true`) can be updated only for online stores.
-   * If you update a product to be subscription-only (`requiresSellingPlan:false`), then the product is unpublished from all channels except the online store.
+   * If you update a product to be subscription-only (`requiresSellingPlan: true`), then the product is unpublished from all channels except the online store.
    */
   requiresSellingPlan?: InputMaybe<Scalars['Boolean']['input']>;
   /**
@@ -49391,10 +57934,17 @@ export type ProductUpdatePayload = {
  *
  * Learn more about [Shopify's product model](https://shopify.dev/docs/apps/build/graphql/migrate/new-product-model/product-model-components).
  */
-export type ProductVariant = HasEvents & HasMetafieldDefinitions & HasMetafields & HasPublishedTranslations & LegacyInteroperability & Navigable & Node & {
+export type ProductVariant = HasEvents & HasMetafieldDefinitions & HasMetafields & HasPublishedTranslations & LegacyInteroperability & Navigable & Node & Publishable & {
   __typename?: 'ProductVariant';
   /** Whether the product variant is available for sale. */
   availableForSale: Scalars['Boolean']['output'];
+  /**
+   * The number of
+   * [publications](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication)
+   * that a resource is published to, without
+   * [feedback errors](https://shopify.dev/docs/api/admin-graphql/latest/objects/ResourceFeedback).
+   */
+  availablePublicationsCount?: Maybe<Count>;
   /** The value of the barcode associated with the product. */
   barcode?: Maybe<Scalars['String']['output']>;
   /** The compare-at price of the variant in the default shop currency. */
@@ -49460,11 +58010,66 @@ export type ProductVariant = HasEvents & HasMetafieldDefinitions & HasMetafields
   /** A list of the product variant components. */
   productVariantComponents: ProductVariantComponentConnection;
   /**
+   * The total number of
+   * [publications](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication)
+   * that a resource is published to, including publications with
+   * [feedback errors](https://shopify.dev/docs/api/admin-graphql/latest/objects/ResourceFeedback).
+   * To get a count that excludes publications with feedback errors, use `availablePublicationsCount`.
+   * @deprecated Use `resourcePublicationsCount` instead.
+   */
+  publicationCount: Scalars['Int']['output'];
+  /**
+   * Whether the resource is published to a specific channel.
+   * @deprecated Use `publishedOnPublication` instead.
+   */
+  publishedOnChannel: Scalars['Boolean']['output'];
+  /**
+   * Whether the resource is published to a
+   * [channel](https://shopify.dev/docs/api/admin-graphql/latest/objects/Channel).
+   * For example, the resource might be published to the online store channel.
+   * @deprecated Use `publishedOnCurrentPublication` instead.
+   */
+  publishedOnCurrentChannel: Scalars['Boolean']['output'];
+  /**
+   * Whether the resource is published to the app's
+   * [publication](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication).
+   * For example, the resource might be published to the app's online store channel.
+   * @deprecated Use `publishedOnPublication` instead.
+   */
+  publishedOnCurrentPublication: Scalars['Boolean']['output'];
+  /**
+   * Whether the resource is published to a specified
+   * [publication](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication).
+   */
+  publishedOnPublication: Scalars['Boolean']['output'];
+  /**
    * Whether a product variant requires components. The default value is `false`.
    * If `true`, then the product variant can only be purchased as a parent bundle with components and it will be omitted
    * from channels that don't support bundles.
    */
   requiresComponents: Scalars['Boolean']['output'];
+  /**
+   * The list of resources that are published to a
+   * [publication](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication).
+   */
+  resourcePublications: ResourcePublicationConnection;
+  /**
+   * The total number of
+   * [publications](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication)
+   * that a resource is published to, including publications with
+   * [feedback errors](https://shopify.dev/docs/api/admin-graphql/latest/objects/ResourceFeedback).
+   * To get a count that excludes publications with feedback errors, use `availablePublicationsCount`.
+   */
+  resourcePublicationsCount?: Maybe<Count>;
+  /**
+   * The list of resources that are either published or staged to be published to a
+   * [publication](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication).
+   * By default, only publications to `APP` catalog types are returned.
+   * For `Product` and `ProductVariant`, use the `catalogType` argument to retrieve
+   * publications for other catalog types, such as `COMPANY_LOCATION` (B2B) or `MARKET`.
+   * `Collection` only supports publications to `APP` catalog types.
+   */
+  resourcePublicationsV2: ResourcePublicationV2Connection;
   /** List of product options applied to the variant. */
   selectedOptions: Array<SelectedOption>;
   /**
@@ -49511,6 +58116,16 @@ export type ProductVariant = HasEvents & HasMetafieldDefinitions & HasMetafields
   unitPrice?: Maybe<MoneyV2>;
   /** The unit price measurement for the variant. */
   unitPriceMeasurement?: Maybe<UnitPriceMeasurement>;
+  /**
+   * The list of channels that the resource is not published to.
+   * @deprecated Use `unpublishedPublications` instead.
+   */
+  unpublishedChannels: ChannelConnection;
+  /**
+   * The list of [publications](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication)
+   * that the resource isn't published to.
+   */
+  unpublishedPublications: PublicationConnection;
   /** The date and time (ISO 8601 format) when the product variant was last modified. */
   updatedAt: Scalars['DateTime']['output'];
 };
@@ -49890,6 +58505,221 @@ export type ProductVariantProductVariantComponentsArgs = {
  *
  * Learn more about [Shopify's product model](https://shopify.dev/docs/apps/build/graphql/migrate/new-product-model/product-model-components).
  */
+export type ProductVariantPublicationCountArgs = {
+  onlyPublished?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * The `ProductVariant` object represents a version of a
+ * [product](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product)
+ * that comes in more than one [option](https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductOption),
+ * such as size or color. For example, if a merchant sells t-shirts with options for size and color, then a small,
+ * blue t-shirt would be one product variant and a large, blue t-shirt would be another.
+ *
+ * Use the `ProductVariant` object to manage the full lifecycle and configuration of a product's variants. Common
+ * use cases for using the `ProductVariant` object include:
+ *
+ * - Tracking inventory for each variant
+ * - Setting unique prices for each variant
+ * - Assigning barcodes and SKUs to connect variants to fulfillment services
+ * - Attaching variant-specific images and media
+ * - Setting delivery and tax requirements
+ * - Supporting product bundles, subscriptions, and selling plans
+ *
+ * A `ProductVariant` is associated with a parent
+ * [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) object.
+ * `ProductVariant` serves as the central link between a product's merchandising configuration, inventory,
+ * pricing, fulfillment, and sales channels within the GraphQL Admin API schema. Each variant
+ * can reference other GraphQL types such as:
+ *
+ * - [`InventoryItem`](https://shopify.dev/docs/api/admin-graphql/latest/objects/InventoryItem): Used for inventory tracking
+ * - [`Image`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Image): Used for variant-specific images
+ * - [`SellingPlanGroup`](https://shopify.dev/docs/api/admin-graphql/latest/objects/SellingPlanGroup): Used for subscriptions and selling plans
+ *
+ * Learn more about [Shopify's product model](https://shopify.dev/docs/apps/build/graphql/migrate/new-product-model/product-model-components).
+ */
+export type ProductVariantPublishedOnChannelArgs = {
+  channelId: Scalars['ID']['input'];
+};
+
+
+/**
+ * The `ProductVariant` object represents a version of a
+ * [product](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product)
+ * that comes in more than one [option](https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductOption),
+ * such as size or color. For example, if a merchant sells t-shirts with options for size and color, then a small,
+ * blue t-shirt would be one product variant and a large, blue t-shirt would be another.
+ *
+ * Use the `ProductVariant` object to manage the full lifecycle and configuration of a product's variants. Common
+ * use cases for using the `ProductVariant` object include:
+ *
+ * - Tracking inventory for each variant
+ * - Setting unique prices for each variant
+ * - Assigning barcodes and SKUs to connect variants to fulfillment services
+ * - Attaching variant-specific images and media
+ * - Setting delivery and tax requirements
+ * - Supporting product bundles, subscriptions, and selling plans
+ *
+ * A `ProductVariant` is associated with a parent
+ * [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) object.
+ * `ProductVariant` serves as the central link between a product's merchandising configuration, inventory,
+ * pricing, fulfillment, and sales channels within the GraphQL Admin API schema. Each variant
+ * can reference other GraphQL types such as:
+ *
+ * - [`InventoryItem`](https://shopify.dev/docs/api/admin-graphql/latest/objects/InventoryItem): Used for inventory tracking
+ * - [`Image`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Image): Used for variant-specific images
+ * - [`SellingPlanGroup`](https://shopify.dev/docs/api/admin-graphql/latest/objects/SellingPlanGroup): Used for subscriptions and selling plans
+ *
+ * Learn more about [Shopify's product model](https://shopify.dev/docs/apps/build/graphql/migrate/new-product-model/product-model-components).
+ */
+export type ProductVariantPublishedOnPublicationArgs = {
+  publicationId: Scalars['ID']['input'];
+};
+
+
+/**
+ * The `ProductVariant` object represents a version of a
+ * [product](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product)
+ * that comes in more than one [option](https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductOption),
+ * such as size or color. For example, if a merchant sells t-shirts with options for size and color, then a small,
+ * blue t-shirt would be one product variant and a large, blue t-shirt would be another.
+ *
+ * Use the `ProductVariant` object to manage the full lifecycle and configuration of a product's variants. Common
+ * use cases for using the `ProductVariant` object include:
+ *
+ * - Tracking inventory for each variant
+ * - Setting unique prices for each variant
+ * - Assigning barcodes and SKUs to connect variants to fulfillment services
+ * - Attaching variant-specific images and media
+ * - Setting delivery and tax requirements
+ * - Supporting product bundles, subscriptions, and selling plans
+ *
+ * A `ProductVariant` is associated with a parent
+ * [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) object.
+ * `ProductVariant` serves as the central link between a product's merchandising configuration, inventory,
+ * pricing, fulfillment, and sales channels within the GraphQL Admin API schema. Each variant
+ * can reference other GraphQL types such as:
+ *
+ * - [`InventoryItem`](https://shopify.dev/docs/api/admin-graphql/latest/objects/InventoryItem): Used for inventory tracking
+ * - [`Image`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Image): Used for variant-specific images
+ * - [`SellingPlanGroup`](https://shopify.dev/docs/api/admin-graphql/latest/objects/SellingPlanGroup): Used for subscriptions and selling plans
+ *
+ * Learn more about [Shopify's product model](https://shopify.dev/docs/apps/build/graphql/migrate/new-product-model/product-model-components).
+ */
+export type ProductVariantResourcePublicationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  onlyPublished?: InputMaybe<Scalars['Boolean']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * The `ProductVariant` object represents a version of a
+ * [product](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product)
+ * that comes in more than one [option](https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductOption),
+ * such as size or color. For example, if a merchant sells t-shirts with options for size and color, then a small,
+ * blue t-shirt would be one product variant and a large, blue t-shirt would be another.
+ *
+ * Use the `ProductVariant` object to manage the full lifecycle and configuration of a product's variants. Common
+ * use cases for using the `ProductVariant` object include:
+ *
+ * - Tracking inventory for each variant
+ * - Setting unique prices for each variant
+ * - Assigning barcodes and SKUs to connect variants to fulfillment services
+ * - Attaching variant-specific images and media
+ * - Setting delivery and tax requirements
+ * - Supporting product bundles, subscriptions, and selling plans
+ *
+ * A `ProductVariant` is associated with a parent
+ * [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) object.
+ * `ProductVariant` serves as the central link between a product's merchandising configuration, inventory,
+ * pricing, fulfillment, and sales channels within the GraphQL Admin API schema. Each variant
+ * can reference other GraphQL types such as:
+ *
+ * - [`InventoryItem`](https://shopify.dev/docs/api/admin-graphql/latest/objects/InventoryItem): Used for inventory tracking
+ * - [`Image`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Image): Used for variant-specific images
+ * - [`SellingPlanGroup`](https://shopify.dev/docs/api/admin-graphql/latest/objects/SellingPlanGroup): Used for subscriptions and selling plans
+ *
+ * Learn more about [Shopify's product model](https://shopify.dev/docs/apps/build/graphql/migrate/new-product-model/product-model-components).
+ */
+export type ProductVariantResourcePublicationsCountArgs = {
+  onlyPublished?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * The `ProductVariant` object represents a version of a
+ * [product](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product)
+ * that comes in more than one [option](https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductOption),
+ * such as size or color. For example, if a merchant sells t-shirts with options for size and color, then a small,
+ * blue t-shirt would be one product variant and a large, blue t-shirt would be another.
+ *
+ * Use the `ProductVariant` object to manage the full lifecycle and configuration of a product's variants. Common
+ * use cases for using the `ProductVariant` object include:
+ *
+ * - Tracking inventory for each variant
+ * - Setting unique prices for each variant
+ * - Assigning barcodes and SKUs to connect variants to fulfillment services
+ * - Attaching variant-specific images and media
+ * - Setting delivery and tax requirements
+ * - Supporting product bundles, subscriptions, and selling plans
+ *
+ * A `ProductVariant` is associated with a parent
+ * [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) object.
+ * `ProductVariant` serves as the central link between a product's merchandising configuration, inventory,
+ * pricing, fulfillment, and sales channels within the GraphQL Admin API schema. Each variant
+ * can reference other GraphQL types such as:
+ *
+ * - [`InventoryItem`](https://shopify.dev/docs/api/admin-graphql/latest/objects/InventoryItem): Used for inventory tracking
+ * - [`Image`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Image): Used for variant-specific images
+ * - [`SellingPlanGroup`](https://shopify.dev/docs/api/admin-graphql/latest/objects/SellingPlanGroup): Used for subscriptions and selling plans
+ *
+ * Learn more about [Shopify's product model](https://shopify.dev/docs/apps/build/graphql/migrate/new-product-model/product-model-components).
+ */
+export type ProductVariantResourcePublicationsV2Args = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  catalogType?: InputMaybe<CatalogType>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  onlyPublished?: InputMaybe<Scalars['Boolean']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * The `ProductVariant` object represents a version of a
+ * [product](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product)
+ * that comes in more than one [option](https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductOption),
+ * such as size or color. For example, if a merchant sells t-shirts with options for size and color, then a small,
+ * blue t-shirt would be one product variant and a large, blue t-shirt would be another.
+ *
+ * Use the `ProductVariant` object to manage the full lifecycle and configuration of a product's variants. Common
+ * use cases for using the `ProductVariant` object include:
+ *
+ * - Tracking inventory for each variant
+ * - Setting unique prices for each variant
+ * - Assigning barcodes and SKUs to connect variants to fulfillment services
+ * - Attaching variant-specific images and media
+ * - Setting delivery and tax requirements
+ * - Supporting product bundles, subscriptions, and selling plans
+ *
+ * A `ProductVariant` is associated with a parent
+ * [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) object.
+ * `ProductVariant` serves as the central link between a product's merchandising configuration, inventory,
+ * pricing, fulfillment, and sales channels within the GraphQL Admin API schema. Each variant
+ * can reference other GraphQL types such as:
+ *
+ * - [`InventoryItem`](https://shopify.dev/docs/api/admin-graphql/latest/objects/InventoryItem): Used for inventory tracking
+ * - [`Image`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Image): Used for variant-specific images
+ * - [`SellingPlanGroup`](https://shopify.dev/docs/api/admin-graphql/latest/objects/SellingPlanGroup): Used for subscriptions and selling plans
+ *
+ * Learn more about [Shopify's product model](https://shopify.dev/docs/apps/build/graphql/migrate/new-product-model/product-model-components).
+ */
 export type ProductVariantSellingPlanGroupsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -49931,6 +58761,82 @@ export type ProductVariantSellingPlanGroupsArgs = {
 export type ProductVariantTranslationsArgs = {
   locale: Scalars['String']['input'];
   marketId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+/**
+ * The `ProductVariant` object represents a version of a
+ * [product](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product)
+ * that comes in more than one [option](https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductOption),
+ * such as size or color. For example, if a merchant sells t-shirts with options for size and color, then a small,
+ * blue t-shirt would be one product variant and a large, blue t-shirt would be another.
+ *
+ * Use the `ProductVariant` object to manage the full lifecycle and configuration of a product's variants. Common
+ * use cases for using the `ProductVariant` object include:
+ *
+ * - Tracking inventory for each variant
+ * - Setting unique prices for each variant
+ * - Assigning barcodes and SKUs to connect variants to fulfillment services
+ * - Attaching variant-specific images and media
+ * - Setting delivery and tax requirements
+ * - Supporting product bundles, subscriptions, and selling plans
+ *
+ * A `ProductVariant` is associated with a parent
+ * [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) object.
+ * `ProductVariant` serves as the central link between a product's merchandising configuration, inventory,
+ * pricing, fulfillment, and sales channels within the GraphQL Admin API schema. Each variant
+ * can reference other GraphQL types such as:
+ *
+ * - [`InventoryItem`](https://shopify.dev/docs/api/admin-graphql/latest/objects/InventoryItem): Used for inventory tracking
+ * - [`Image`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Image): Used for variant-specific images
+ * - [`SellingPlanGroup`](https://shopify.dev/docs/api/admin-graphql/latest/objects/SellingPlanGroup): Used for subscriptions and selling plans
+ *
+ * Learn more about [Shopify's product model](https://shopify.dev/docs/apps/build/graphql/migrate/new-product-model/product-model-components).
+ */
+export type ProductVariantUnpublishedChannelsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * The `ProductVariant` object represents a version of a
+ * [product](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product)
+ * that comes in more than one [option](https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductOption),
+ * such as size or color. For example, if a merchant sells t-shirts with options for size and color, then a small,
+ * blue t-shirt would be one product variant and a large, blue t-shirt would be another.
+ *
+ * Use the `ProductVariant` object to manage the full lifecycle and configuration of a product's variants. Common
+ * use cases for using the `ProductVariant` object include:
+ *
+ * - Tracking inventory for each variant
+ * - Setting unique prices for each variant
+ * - Assigning barcodes and SKUs to connect variants to fulfillment services
+ * - Attaching variant-specific images and media
+ * - Setting delivery and tax requirements
+ * - Supporting product bundles, subscriptions, and selling plans
+ *
+ * A `ProductVariant` is associated with a parent
+ * [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) object.
+ * `ProductVariant` serves as the central link between a product's merchandising configuration, inventory,
+ * pricing, fulfillment, and sales channels within the GraphQL Admin API schema. Each variant
+ * can reference other GraphQL types such as:
+ *
+ * - [`InventoryItem`](https://shopify.dev/docs/api/admin-graphql/latest/objects/InventoryItem): Used for inventory tracking
+ * - [`Image`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Image): Used for variant-specific images
+ * - [`SellingPlanGroup`](https://shopify.dev/docs/api/admin-graphql/latest/objects/SellingPlanGroup): Used for subscriptions and selling plans
+ *
+ * Learn more about [Shopify's product model](https://shopify.dev/docs/apps/build/graphql/migrate/new-product-model/product-model-components).
+ */
+export type ProductVariantUnpublishedPublicationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** The input fields required to append media to a single variant. */
@@ -50264,6 +59170,8 @@ export type ProductVariantSetInput = {
   position?: InputMaybe<Scalars['Int']['input']>;
   /** The price of the variant. */
   price?: InputMaybe<Scalars['Money']['input']>;
+  /** Indicates whether the product variant is created as published or unpublished. This option is only available for new product variants. */
+  published?: InputMaybe<Scalars['Boolean']['input']>;
   /**
    * Whether a product variant requires components. The default value is `false`.
    * If `true`, then the product variant can only be purchased as a parent bundle with components and it will be omitted
@@ -50360,6 +59268,8 @@ export enum ProductVariantsBulkCreateUserErrorCode {
   InvalidInput = 'INVALID_INPUT',
   /** Inventory quantity input exceeds the limit of 50000. Consider using separate `inventorySetQuantities` mutations. */
   InventoryQuantitiesLimitExceeded = 'INVENTORY_QUANTITIES_LIMIT_EXCEEDED',
+  /** Price must be 0 for variants of products with a gift card issuance currency. */
+  LocalCurrencyGiftCardPriceMustBeZero = 'LOCAL_CURRENCY_GIFT_CARD_PRICE_MUST_BE_ZERO',
   /** Input must be for this product. */
   MustBeForThisProduct = 'MUST_BE_FOR_THIS_PRODUCT',
   /** Variant options are not enough. */
@@ -50452,6 +59362,10 @@ export type ProductVariantsBulkInput = {
   optionValues?: InputMaybe<Array<VariantOptionValueInput>>;
   /** The price of the variant. */
   price?: InputMaybe<Scalars['Money']['input']>;
+  /** Indicates whether the product variant is created as published or unpublished. This option is only available for new product variants. */
+  published?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Adjust inventory quantities with deltas. */
+  quantityAdjustments?: InputMaybe<Array<InventoryAdjustmentInput>>;
   /**
    * Whether a product variant requires components. The default value is `false`.
    * If `true`, then the product variant can only be purchased as a parent bundle with components and it will be
@@ -50540,6 +59454,8 @@ export enum ProductVariantsBulkUpdateUserErrorCode {
   InvalidValue = 'INVALID_VALUE',
   /** Inventory quantity input exceeds the limit of 50000. Consider using separate `inventorySetQuantities` mutations. */
   InventoryQuantitiesLimitExceeded = 'INVENTORY_QUANTITIES_LIMIT_EXCEEDED',
+  /** Price must be 0 for variants of products with a gift card issuance currency. */
+  LocalCurrencyGiftCardPriceMustBeZero = 'LOCAL_CURRENCY_GIFT_CARD_PRICE_MUST_BE_ZERO',
   /** Input must be for this product. */
   MustBeForThisProduct = 'MUST_BE_FOR_THIS_PRODUCT',
   /** Mandatory field input field missing. */
@@ -50656,6 +59572,8 @@ export type PubSubWebhookSubscriptionInput = {
   metafieldNamespaces?: InputMaybe<Array<Scalars['String']['input']>>;
   /** A list of identifiers specifying metafields to include in the webhook payload. */
   metafields?: InputMaybe<Array<HasMetafieldsMetafieldIdentifierInput>>;
+  /** A human-readable name for the webhook subscription. */
+  name?: InputMaybe<Scalars['String']['input']>;
   /** The Pub/Sub project ID. */
   pubSubProject: Scalars['String']['input'];
   /** The Pub/Sub topic ID. */
@@ -50708,6 +59626,8 @@ export type Publication = Node & {
   autoPublish: Scalars['Boolean']['output'];
   /** The catalog associated with the publication. */
   catalog?: Maybe<Catalog>;
+  /** The channels associated with the publication. */
+  channels?: Maybe<ChannelConnection>;
   /** The list of collection publication records, each representing the publication status and details for a collection published to this publication (typically channel). */
   collectionPublicationsV3: ResourcePublicationConnection;
   /** The list of collections published to the publication. */
@@ -50733,6 +59653,22 @@ export type Publication = Node & {
   products: ProductConnection;
   /** Whether the publication supports future publishing. */
   supportsFuturePublishing: Scalars['Boolean']['output'];
+};
+
+
+/**
+ * A group of [products](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) and [collections](https://shopify.dev/docs/api/admin-graphql/latest/objects/Collection) that are published to an app.
+ *
+ * Each publication manages which products and collections display on its associated [`Channel`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Channel). Merchants can automatically publish products when they're created if [`autoPublish`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication#field-Publication.fields.autoPublish) is enabled, or manually control publication through publication records.
+ *
+ * Publications support scheduled publishing through future publish dates for online store channels, allowing merchants to coordinate product launches and promotional campaigns. The [`catalog`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication#field-Publication.fields.catalog) field links to pricing and availability rules specific to that publication's context.
+ */
+export type PublicationChannelsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -50961,6 +59897,8 @@ export type PublicationUserError = DisplayableError & {
 export enum PublicationUserErrorCode {
   /** The input value is blank. */
   Blank = 'BLANK',
+  /** Products and variants cannot be updated together. */
+  CannotCombineProductsAndVariants = 'CANNOT_COMBINE_PRODUCTS_AND_VARIANTS',
   /** Cannot modify a catalog for an app. */
   CannotModifyAppCatalog = 'CANNOT_MODIFY_APP_CATALOG',
   /** Can't modify a publication that belongs to an app catalog. */
@@ -50977,6 +59915,8 @@ export enum PublicationUserErrorCode {
   InvalidPublishableId = 'INVALID_PUBLISHABLE_ID',
   /** Market does not exist. */
   MarketNotFound = 'MARKET_NOT_FOUND',
+  /** The product is currently being modified. Please try again later. */
+  ProductLockError = 'PRODUCT_LOCK_ERROR',
   /** A product publication cannot be created because the catalog type associated with this publication does not permit publications of this product type. */
   ProductTypeIncompatibleWithCatalogType = 'PRODUCT_TYPE_INCOMPATIBLE_WITH_CATALOG_TYPE',
   /** The publication is currently being modified. Please try again later. */
@@ -50994,7 +59934,11 @@ export enum PublicationUserErrorCode {
   /** Can't perform this action on a publication. */
   UnsupportedPublicationAction = 'UNSUPPORTED_PUBLICATION_ACTION',
   /** A catalog publication can only contain products. */
-  UnsupportedPublishableType = 'UNSUPPORTED_PUBLISHABLE_TYPE'
+  UnsupportedPublishableType = 'UNSUPPORTED_PUBLISHABLE_TYPE',
+  /** Variants in a single operation must belong to the same product. */
+  VariantsBelongToMultipleProducts = 'VARIANTS_BELONG_TO_MULTIPLE_PRODUCTS',
+  /** Variant publishing is not supported for this product type. */
+  VariantPublishingUnsupportedProductType = 'VARIANT_PUBLISHING_UNSUPPORTED_PRODUCT_TYPE'
 }
 
 /**
@@ -51010,10 +59954,11 @@ export type Publishable = {
    */
   availablePublicationsCount?: Maybe<Count>;
   /**
-   * The number of
+   * The total number of
    * [publications](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication)
-   * that a resource is published to, without
+   * that a resource is published to, including publications with
    * [feedback errors](https://shopify.dev/docs/api/admin-graphql/latest/objects/ResourceFeedback).
+   * To get a count that excludes publications with feedback errors, use `availablePublicationsCount`.
    * @deprecated Use `resourcePublicationsCount` instead.
    */
   publicationCount: Scalars['Int']['output'];
@@ -51033,6 +59978,7 @@ export type Publishable = {
    * Whether the resource is published to the app's
    * [publication](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication).
    * For example, the resource might be published to the app's online store channel.
+   * @deprecated Use `publishedOnPublication` instead.
    */
   publishedOnCurrentPublication: Scalars['Boolean']['output'];
   /**
@@ -51046,15 +59992,20 @@ export type Publishable = {
    */
   resourcePublications: ResourcePublicationConnection;
   /**
-   * The number of
+   * The total number of
    * [publications](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication)
-   * that a resource is published to, without
+   * that a resource is published to, including publications with
    * [feedback errors](https://shopify.dev/docs/api/admin-graphql/latest/objects/ResourceFeedback).
+   * To get a count that excludes publications with feedback errors, use `availablePublicationsCount`.
    */
   resourcePublicationsCount?: Maybe<Count>;
   /**
    * The list of resources that are either published or staged to be published to a
    * [publication](https://shopify.dev/docs/api/admin-graphql/latest/objects/Publication).
+   * By default, only publications to `APP` catalog types are returned.
+   * For `Product` and `ProductVariant`, use the `catalogType` argument to retrieve
+   * publications for other catalog types, such as `COMPANY_LOCATION` (B2B) or `MARKET`.
+   * `Collection` only supports publications to `APP` catalog types.
    */
   resourcePublicationsV2: ResourcePublicationV2Connection;
   /**
@@ -51340,6 +60291,10 @@ export enum QuantityPricingByVariantUserErrorCode {
   PriceAddCurrencyMismatch = 'PRICE_ADD_CURRENCY_MISMATCH',
   /** Prices to add inputs must be unique by variant id. */
   PriceAddDuplicateInputForVariant = 'PRICE_ADD_DUPLICATE_INPUT_FOR_VARIANT',
+  /** The issuance currency of a local currency gift card must match the price list currency. */
+  PriceAddLocalCurrencyGiftCardIssuanceCurrencyMismatch = 'PRICE_ADD_LOCAL_CURRENCY_GIFT_CARD_ISSUANCE_CURRENCY_MISMATCH',
+  /** The price of a local currency gift card cannot exceed the maximum gift card purchase limit. */
+  PriceAddLocalCurrencyGiftCardLimitExceeded = 'PRICE_ADD_LOCAL_CURRENCY_GIFT_CARD_LIMIT_EXCEEDED',
   /** Fixed price's variant not found. */
   PriceAddVariantNotFound = 'PRICE_ADD_VARIANT_NOT_FOUND',
   /** Price is not fixed. */
@@ -51630,7 +60585,10 @@ export type QueryRoot = {
    * @deprecated Use `automaticDiscountNode` instead.
    */
   automaticDiscount?: Maybe<DiscountAutomatic>;
-  /** Returns a `DiscountAutomaticNode` resource by ID. */
+  /**
+   * Returns a `DiscountAutomaticNode` resource by ID.
+   * @deprecated Use `discountNode` instead.
+   */
   automaticDiscountNode?: Maybe<DiscountAutomaticNode>;
   /**
    * Returns a list of [automatic discounts](https://help.shopify.com/manual/discounts/discount-types#automatic-discounts).
@@ -51641,7 +60599,7 @@ export type QueryRoot = {
   automaticDiscountSavedSearches: SavedSearchConnection;
   /**
    * Returns a list of automatic discounts that are applied in the cart and at checkout without requiring a discount code.
-   * @deprecated Use `automaticDiscountNodes` instead.
+   * @deprecated Use `automaticDiscountNodes` instead. This will be removed in 2027-01.
    */
   automaticDiscounts: DiscountAutomaticConnection;
   /** The geographic regions that you can set as the [`Shop`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Shop)'s backup region. The backup region serves as a fallback when the system can't determine a buyer's actual location. */
@@ -51662,6 +60620,10 @@ export type QueryRoot = {
   blogs: BlogConnection;
   /** Count of blogs. Limited to a maximum of 10000 by default. */
   blogsCount?: Maybe<Count>;
+  /** Returns a `BulkOperation` resource by ID. */
+  bulkOperation?: Maybe<BulkOperation>;
+  /** Returns the app's bulk operations meeting the specified filters. Defaults to sorting by created_at, with newest operations first. */
+  bulkOperations: BulkOperationConnection;
   /**
    * Returns the list of [business entities](https://shopify.dev/docs/api/admin-graphql/latest/objects/BusinessEntity) associated with the shop. Use this query to retrieve business entities for assigning to markets, managing payment providers per entity, or viewing entity attribution on orders.
    *
@@ -51686,6 +60648,16 @@ export type QueryRoot = {
    * Learn more about [managing cart transforms](https://shopify.dev/docs/api/functions/latest/cart-transform).
    */
   cartTransforms: CartTransformConnection;
+  /** Returns a `CashDrawer` resource by ID. */
+  cashDrawer?: Maybe<CashDrawer>;
+  /** A list of cash drawers in the shop. */
+  cashDrawers: CashDrawerConnection;
+  /** Summary of cash management data for a location. Data is returned only if the location has a POS Pro subscription. */
+  cashManagementLocationSummary: CashManagementSummary;
+  /** Returns the cash management reason codes for the shop. */
+  cashManagementReasonCodes: CashManagementReasonCodeConnection;
+  /** Summary of cash management data across all locations with a POS Pro subscription for a shop, filtered by currency. */
+  cashManagementShopSummary: CashManagementSummary;
   /** Returns a `CashTrackingSession` resource by ID. */
   cashTrackingSession?: Maybe<CashTrackingSession>;
   /**
@@ -51728,21 +60700,37 @@ export type QueryRoot = {
   catalogs: CatalogConnection;
   /** The count of catalogs belonging to the shop. Limited to a maximum of 10000 by default. */
   catalogsCount?: Maybe<Count>;
-  /** Returns a `Channel` resource by ID. */
+  /** Returns a [`Channel`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Channel) by ID. The channel must belong to the calling application. */
   channel?: Maybe<Channel>;
-  /** Returns active [channels](https://shopify.dev/docs/api/admin-graphql/latest/objects/Channel) where merchants sell products and collections. Each channel is an authenticated link to an external platform such as marketplaces, social media platforms, online stores, or point-of-sale systems. */
+  /** Returns a [`Channel`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Channel) by its unique string handle. The handle is either set explicitly during [`channelCreate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/channelCreate) or auto-generated from the specification handle and account ID. The channel must belong to the calling application. */
+  channelByHandle?: Maybe<Channel>;
+  /** The list of [`Channel`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Channel) objects on the shop. When the calling application supports multi-channel, only channels established by the calling application are returned. Each channel represents an authenticated connection to an external selling platform such as a marketplace, social media platform, online store, or point-of-sale system. */
   channels: ChannelConnection;
+  /** A checkout and accounts configuration for a shop. */
+  checkoutAndAccountsConfiguration?: Maybe<CheckoutAndAccountsConfiguration>;
+  /** List of checkout and accounts configurations on a shop. */
+  checkoutAndAccountsConfigurations?: Maybe<CheckoutAndAccountsConfigurationConnection>;
   /**
    * Returns the visual customizations for checkout for a given [checkout profile](https://shopify.dev/docs/api/admin-graphql/latest/objects/CheckoutProfile).
    *
    * To update checkout branding settings, use the [`checkoutBrandingUpsert`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/checkoutBrandingUpsert) mutation. Learn more about [customizing checkout's appearance](https://shopify.dev/docs/apps/build/checkout/styling).
+   * @deprecated Use `checkoutAndAccountsConfiguration` instead.
    */
   checkoutBranding?: Maybe<CheckoutBranding>;
-  /** Returns a [`CheckoutProfile`](https://shopify.dev/docs/api/admin-graphql/latest/objects/CheckoutProfile). Checkout profiles define the branding settings and UI extensions for a store's checkout experience. Stores can have one published profile that renders on their live checkout and multiple draft profiles for testing customizations in the checkout editor. */
+  /**
+   * Returns a [`CheckoutProfile`](https://shopify.dev/docs/api/admin-graphql/latest/objects/CheckoutProfile). Checkout profiles define the branding settings and UI extensions for a store's checkout experience. Stores can have one published profile that renders on their live checkout and multiple draft profiles for testing customizations in the checkout editor.
+   * @deprecated Use `checkoutAndAccountsConfiguration` instead.
+   */
   checkoutProfile?: Maybe<CheckoutProfile>;
-  /** List of checkout profiles on a shop. */
+  /**
+   * List of checkout profiles on a shop.
+   * @deprecated Use `checkoutAndAccountsConfigurations` instead.
+   */
   checkoutProfiles: CheckoutProfileConnection;
-  /** Returns a [code discount](https://help.shopify.com/manual/discounts/discount-types#discount-codes) resource by ID. */
+  /**
+   * Returns a [code discount](https://help.shopify.com/manual/discounts/discount-types#discount-codes) resource by ID.
+   * @deprecated Use `discountNode` instead.
+   */
   codeDiscountNode?: Maybe<DiscountCodeNode>;
   /**
    * Retrieves a [code discount](https://help.shopify.com/manual/discounts/discount-types#discount-codes) by its discount code. The search is case-insensitive, enabling you to find discounts regardless of how customers enter the code.
@@ -51769,12 +60757,12 @@ export type QueryRoot = {
    *
    * - Manage collection publishing across sales channels
    * - Access collection metadata and SEO information
-   * - Work with collection rules and product relationships
+   * - Work with collection conditions and product relationships
    *
-   * A collection can be either a custom ([manual](https://help.shopify.com/manual/products/collections/manual-shopify-collection))
-   * collection where products are manually added, or a smart ([automated](https://help.shopify.com/manual/products/collections/automated-collections))
-   * collection where products are automatically included based on defined rules. Each collection has associated metadata including
-   * title, description, handle, image, and [metafields](https://shopify.dev/docs/apps/build/custom-data/metafields).
+   * A collection determines which products it includes through conditions that automatically include
+   * products that match, and through manual selections of individual products. Each collection has
+   * associated metadata including title, description, handle, image, and
+   * [metafields](https://shopify.dev/docs/apps/build/custom-data/metafields).
    */
   collection?: Maybe<Collection>;
   /**
@@ -51795,7 +60783,16 @@ export type QueryRoot = {
   collectionByHandle?: Maybe<Collection>;
   /** Return a collection by an identifier. */
   collectionByIdentifier?: Maybe<Collection>;
-  /** Lists all rules that can be used to create smart collections. */
+  /** Lists all metafield definitions that can be used to create collection conditions. */
+  collectionConditionMetafieldDefinitions: Array<CollectionConditionMetafieldDefinitionInterface>;
+  /** Returns the shareable collection sources owned by the given app for the shop. */
+  collectionConditionsSources: CollectionConditionsSourceConnection;
+  /** Returns the apps that publish shareable collection sources for the shop, paginated. */
+  collectionConditionsSourcesByApp: CollectionConditionsSourcesByAppConnection;
+  /**
+   * Lists all rules that can be used to create collections.
+   * @deprecated Use `CollectionSourceInclusionCondition*` and `CollectionSourceExclusionCondition*` types instead.
+   */
   collectionRulesConditions: Array<CollectionRuleConditions>;
   /** Returns a list of the shop's collection saved searches. */
   collectionSavedSearches: SavedSearchConnection;
@@ -51811,8 +60808,6 @@ export type QueryRoot = {
    * - Build a browsing interface for a store's product groupings.
    * - Create collection searching, sorting, and filtering experiences (for example, by title, type, or published status).
    * - Sync collection data with external systems.
-   * - Manage both custom ([manual](https://help.shopify.com/manual/products/collections/manual-shopify-collection))
-   * and smart ([automated](https://help.shopify.com/manual/products/collections/automated-collections)) collections.
    *
    * The `collections` query supports [pagination](https://shopify.dev/docs/api/usage/pagination-graphql)
    * for large catalogs and [saved searches](https://shopify.dev/docs/api/admin-graphql/latest/queries/collections#arguments-savedSearchId)
@@ -51823,11 +60818,11 @@ export type QueryRoot = {
    * - Basic collection information (title, description, handle, and type)
    * - Collection image and SEO metadata
    * - Product count and product relationships
-   * - Collection rules (for smart collections)
+   * - Collection rules or conditions
    * - Publishing status and publication details
    * - Metafields and custom attributes
    *
-   * Learn more about [using metafields with smart collections](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
+   * Learn more about [using metafields with collection conditions](https://shopify.dev/docs/apps/build/custom-data/metafields/use-metafield-capabilities).
    */
   collections: CollectionConnection;
   /** Count of collections. Limited to a maximum of 10000 by default. */
@@ -51871,7 +60866,7 @@ export type QueryRoot = {
    */
   currentAppInstallation: AppInstallation;
   /**
-   * Returns the current app's most recent [`BulkOperation`](https://shopify.dev/docs/api/admin-graphql/latest/objects/BulkOperation). Apps can run one bulk query and one bulk mutation operation at a time per shop.
+   * Returns the current app's most recent [`BulkOperation`](https://shopify.dev/docs/api/admin-graphql/latest/objects/BulkOperation). Bulk query and bulk mutation operations can run at the same time per shop. The number of concurrent operations that an app can run depends on the API version. For the applicable concurrency limits, refer to the [bulk operations guide](https://shopify.dev/docs/api/usage/bulk-operations/queries).
    *
    * The operation type parameter determines whether to retrieve the most recent query or mutation bulk operation. Use this query to check the operation's status, track its progress, and retrieve the result URL when it completes.
    * @deprecated Use `bulkOperations` with status filter instead.
@@ -51889,11 +60884,26 @@ export type QueryRoot = {
   customerByIdentifier?: Maybe<Customer>;
   /** Returns the status of a customer merge request job. */
   customerMergeJobStatus?: Maybe<CustomerMergeRequest>;
-  /** Returns a preview of a customer merge request. */
+  /**
+   * Returns a preview of a customer merge request.
+   *
+   * The `customerOneId` and `customerTwoId` arguments don't guarantee which customer is kept. Shopify
+   * selects the resulting customer in this order:
+   * 1. If `overrideFields.customerIdOfEmailToKeep` is provided and valid, then the selected customer is kept.
+   * 2. If exactly one customer has an email address, then that customer is kept.
+   * 3. If both customers have email addresses, then account state and email marketing consent determine
+   *    the customer that's kept: an `enabled` account wins over other account states; otherwise, an
+   *    `invited` account can win when consent doesn't already prefer `subscribed` or `pending`; otherwise
+   *    the consent result is used. If those rules don't prefer either customer, then `customerTwoId` is kept.
+   * 4. If neither customer has an email address, then `customerTwoId` is kept.
+   */
   customerMergePreview: CustomerMergePreview;
-  /** Returns a CustomerPaymentMethod resource by its ID. */
+  /** Returns a vaulted customer payment method by its ID, including the instrument type (credit card, PayPal, etc.), billing address, and current status. Optionally includes revoked payment methods. Use this to look up a specific saved payment method for a customer — for example, to check whether a subscription's payment method is still valid or to display stored payment details. */
   customerPaymentMethod?: Maybe<CustomerPaymentMethod>;
-  /** List of the shop's customer saved searches. */
+  /**
+   * List of the shop's customer saved searches.
+   * @deprecated Use `segments` instead.
+   */
   customerSavedSearches: SavedSearchConnection;
   /**
    * A paginated list of customers that belong to an individual [`Segment`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Segment). Segments group customers based on criteria defined through [ShopifyQL queries](https://shopify.dev/docs/api/shopifyql/segment-query-language-reference). Access segment members with their profile information and purchase summary data. The connection includes statistics for analyzing segment attributes (such as average and sum calculations) and a total count of all members.
@@ -51941,8 +60951,6 @@ export type QueryRoot = {
   deliveryPromiseProvider?: Maybe<DeliveryPromiseProvider>;
   /** Represents the delivery promise settings for a shop. */
   deliveryPromiseSettings: DeliveryPromiseSetting;
-  /** Returns the shop-wide shipping settings. */
-  deliverySettings?: Maybe<DeliverySetting>;
   /** The total number of discount codes for the shop. Limited to a maximum of 10000 by default. */
   discountCodesCount?: Maybe<Count>;
   /** Returns a `DiscountNode` resource by ID. */
@@ -51955,11 +60963,13 @@ export type QueryRoot = {
   discountRedeemCodeBulkCreation?: Maybe<DiscountRedeemCodeBulkCreation>;
   /** List of the shop's redeemed discount code saved searches. */
   discountRedeemCodeSavedSearches: SavedSearchConnection;
+  /** List of tags associated to discounts. */
+  discountTags: StringConnection;
   /** Returns a `ShopifyPaymentsDispute` resource by ID. */
   dispute?: Maybe<ShopifyPaymentsDispute>;
   /** Returns a `ShopifyPaymentsDisputeEvidence` resource by ID. */
   disputeEvidence?: Maybe<ShopifyPaymentsDisputeEvidence>;
-  /** All disputes related to the Shop. */
+  /** Returns a paginated list of all Shopify Payments disputes for the shop. Disputes occur when a buyer files a complaint with their payments provider, and the merchant must provide evidence to contest it. Each dispute includes the status, amount, reason, and associated order. Use this to monitor and manage open chargebacks and track dispute resolution outcomes. */
   disputes: ShopifyPaymentsDisputeConnection;
   /** Returns a `Domain` resource by ID. */
   domain?: Maybe<Domain>;
@@ -52033,7 +61043,7 @@ export type QueryRoot = {
   files: FileConnection;
   /** Returns the access policy for a finance app . */
   financeAppAccessPolicy: FinanceAppAccessPolicy;
-  /** Returns the KYC information for the shop's Shopify Payments account, used in embedded finance apps. */
+  /** Returns Know Your Customer (KYC) information for the shop's Shopify Payments account. KYC data includes verified identity and business details collected during onboarding. This is primarily used by embedded finance apps (e.g., Shopify Balance, Bill Pay) that need to verify the merchant's identity without requiring a separate KYC process. */
   financeKycInformation?: Maybe<FinanceKycInformation>;
   /**
    * Retrieves a [`Fulfillment`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Fulfillment) by its ID. A fulfillment is a record that the merchant has completed their work required for one or more line items in an [`Order`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Order). It includes tracking information, [`LineItem`](https://shopify.dev/docs/api/admin-graphql/latest/objects/LineItem) objects, and the status of the fulfillment.
@@ -52081,7 +61091,7 @@ export type QueryRoot = {
    * You can filter gift cards by attributes such as status, last characters of the code, balance status, and other values using the [`query`](https://shopify.dev/docs/api/admin-graphql/latest/queries/giftCards#arguments-query) parameter. You can also apply [`SavedSearch`](https://shopify.dev/docs/api/admin-graphql/latest/objects/SavedSearch) objects to filter results.
    */
   giftCards: GiftCardConnection;
-  /** The total number of gift cards issued for the shop. Limited to a maximum of 10000 by default. */
+  /** Returns the total count of gift cards that have been issued by the shop. Use this for dashboard summaries or to understand the scale of a merchant's gift card program. The count includes all gift cards regardless of status (active, disabled, or fully redeemed). Limited to a maximum of 10000 by default. */
   giftCardsCount?: Maybe<Count>;
   /**
    * Returns an
@@ -52101,6 +61111,12 @@ export type QueryRoot = {
   inventoryProperties: InventoryProperties;
   /** Retrieves an [`InventoryShipment`](https://shopify.dev/docs/api/admin-graphql/latest/objects/InventoryShipment) by ID. Returns tracking details, [`InventoryShipmentLineItem`](https://shopify.dev/docs/api/admin-graphql/latest/objects/InventoryShipmentLineItem) objects with quantities, and the shipment's current [`InventoryShipmentStatus`](https://shopify.dev/docs/api/admin-graphql/latest/enums/InventoryShipmentStatus). */
   inventoryShipment?: Maybe<InventoryShipment>;
+  /**
+   * Returns a paginated list of [`InventoryShipment`](https://shopify.dev/docs/api/admin-graphql/latest/objects/InventoryShipment) objects.
+   *
+   * Supports filtering by barcode (e.g. `barcode:"12345"`), status (e.g. `status:"draft"` or `status:"in_transit"`), and destination (e.g. `destination_id:12345`).
+   */
+  inventoryShipments?: Maybe<InventoryShipmentConnection>;
   /** Returns an [`InventoryTransfer`](https://shopify.dev/docs/api/admin-graphql/latest/objects/InventoryTransfer) by ID. Inventory transfers track the movement of inventory between locations, including origin and destination details, [`InventoryTransferLineItem`](https://shopify.dev/docs/api/admin-graphql/latest/objects/InventoryTransferLineItem) objects, quantities, and [`InventoryTransferStatus`](https://shopify.dev/docs/api/admin-graphql/latest/enums/InventoryTransferStatus) values. */
   inventoryTransfer?: Maybe<InventoryTransfer>;
   /**
@@ -52210,7 +61226,9 @@ export type QueryRoot = {
   /**
    * Returns a paginated list of [`Metaobject`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Metaobject) entries for a specific type. Metaobjects are custom data structures that extend Shopify's data model with merchant or app-specific data types.
    *
-   * Filter results using the query parameter with a search syntax for metaobject fields. Use `fields.{key}:{value}` to filter by field values, supporting any field previously marked as filterable. The `sortKey` parameter accepts `id`, `type`, `updated_at`, or `display_name` to control result ordering.
+   * Filter results using the query parameter with a search syntax for metaobject fields. Use `fields.{key}:{value}` to filter by field values, supporting any field previously marked as filterable.
+   *
+   * Results are ordered by metaobject ID in ascending order by default. The `sortKey` parameter accepts `id`, `type`, `updated_at`, or `display_name` to control result ordering. Pass `reverse: true` to invert the order.
    *
    * Learn more about [querying metaobjects by field value](https://shopify.dev/docs/apps/build/custom-data/metafields/query-by-metafield-value).
    */
@@ -52253,6 +61271,11 @@ export type QueryRoot = {
    * Learn more about [creating orders](https://shopify.dev/docs/api/admin-graphql/latest/mutations/ordercreate) and [building order management apps](https://shopify.dev/docs/apps/build/orders-fulfillment).
    */
   order?: Maybe<Order>;
+  /**
+   * Returns approved order attribution definitions for the calling app on the current shop.
+   * Learn more in the [order attribution guide](https://shopify.dev/docs/apps/build/sales-channels/order-attribution).
+   */
+  orderAttributionDefinitions: OrderAttributionDefinitionConnection;
   /** Return an order by an identifier. */
   orderByIdentifier?: Maybe<Order>;
   /** Returns a `OrderEditSession` resource by ID. */
@@ -52300,6 +61323,10 @@ export type QueryRoot = {
   pendingOrdersCount?: Maybe<Count>;
   /** Returns a `PointOfSaleDevice` resource by ID. */
   pointOfSaleDevice?: Maybe<PointOfSaleDevice>;
+  /** Lookup a point of sale device payment session by ID. */
+  pointOfSaleDevicePaymentSession?: Maybe<PointOfSaleDevicePaymentSession>;
+  /** A list of point of sale device payment sessions in the shop. Cash management data is returned only for locations with a POS Pro subscription. */
+  pointOfSaleDevicePaymentSessions: PointOfSaleDevicePaymentSessionConnection;
   /**
    * Returns a [`PriceList`](https://shopify.dev/docs/api/admin-graphql/latest/objects/PriceList) by ID. You can use price lists to specify either fixed prices or adjusted relative prices that override initial [`Product`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Product) prices.
    *
@@ -52551,6 +61578,17 @@ export type QueryRoot = {
    * Learn more about building for [return management](https://shopify.dev/docs/apps/build/orders-fulfillment/returns-apps/build-return-management).
    */
   returnCalculate?: Maybe<CalculatedReturn>;
+  /**
+   * Returns the full library of available return reason definitions.
+   *
+   * Use this query to retrieve the standardized return reasons available for creating returns.
+   * Filter by IDs or handles to get specific definitions.
+   *
+   * Only non-deleted reasons should be shown to customers when creating new returns.
+   * Deleted reasons have been replaced with better alternatives and are no longer recommended.
+   * However, they remain valid options and may still appear on existing returns.
+   */
+  returnReasonDefinitions: ReturnReasonDefinitionConnection;
   /** Returns a `ReturnableFulfillment` resource by ID. */
   returnableFulfillment?: Maybe<ReturnableFulfillment>;
   /** List of returnable fulfillments. */
@@ -52563,9 +61601,6 @@ export type QueryRoot = {
    * <div class="note"><h4>Theme app extensions</h4>
    *   <p>If your app integrates with a Shopify theme and you plan to submit it to the Shopify App Store, you must use theme app extensions instead of Script tags. Script tags can only be used with vintage themes. <a href="/apps/online-store#what-integration-method-should-i-use" target="_blank">Learn more</a>.</p></div>
    *
-   * <div class="note"><h4>Script tag deprecation</h4>
-   *   <p>Script tags will be sunset for the <b>Order status</b> page on August 28, 2025. <a href="https://www.shopify.com/plus/upgrading-to-checkout-extensibility">Upgrade to Checkout Extensibility</a> before this date. <a href="/docs/api/liquid/objects#script">Shopify Scripts</a> will continue to work alongside Checkout Extensibility until August 28, 2025.</p></div>
-   *
    *
    * Returns a `ScriptTag` resource by ID.
    */
@@ -52573,9 +61608,6 @@ export type QueryRoot = {
   /**
    * <div class="note"><h4>Theme app extensions</h4>
    *   <p>If your app integrates with a Shopify theme and you plan to submit it to the Shopify App Store, you must use theme app extensions instead of Script tags. Script tags can only be used with vintage themes. <a href="/apps/online-store#what-integration-method-should-i-use" target="_blank">Learn more</a>.</p></div>
-   *
-   * <div class="note"><h4>Script tag deprecation</h4>
-   *   <p>Script tags will be sunset for the <b>Order status</b> page on August 28, 2025. <a href="https://www.shopify.com/plus/upgrading-to-checkout-extensibility">Upgrade to Checkout Extensibility</a> before this date. <a href="/docs/api/liquid/objects#script">Shopify Scripts</a> will continue to work alongside Checkout Extensibility until August 28, 2025.</p></div>
    *
    *
    * A list of script tags.
@@ -52591,7 +61623,10 @@ export type QueryRoot = {
   segmentFilterSuggestions: SegmentFilterConnection;
   /** A list of filters. */
   segmentFilters: SegmentFilterConnection;
-  /** A list of a shop's segment migrations. */
+  /**
+   * A list of a shop's segment migrations.
+   * @deprecated Use the migrated segment ID and query `segment` directly.
+   */
   segmentMigrations: SegmentMigrationConnection;
   /** The list of suggested values corresponding to a particular filter for a segment. A segment is a group of members, such as customers, that meet specific criteria. */
   segmentValueSuggestions: SegmentValueConnection;
@@ -52615,6 +61650,8 @@ export type QueryRoot = {
   sellingPlanGroups: SellingPlanGroupConnection;
   /** The server pixel configured by the app. */
   serverPixel?: Maybe<ServerPixel>;
+  /** Returns a `ShippingLabel` resource by ID. */
+  shippingLabel?: Maybe<ShippingLabel>;
   /**
    * Returns the Shop resource corresponding to the access token used in the request. The Shop resource contains
    * business and store management settings for the shop.
@@ -52628,9 +61665,9 @@ export type QueryRoot = {
    * Use the optional `published` argument to filter for only the locales that are visible to customers. The response includes the ISO locale code, whether it's the shop's primary locale, and which [`MarketWebPresence`](https://shopify.dev/docs/api/admin-graphql/latest/objects/MarketWebPresence) objects use each locale.
    */
   shopLocales: Array<ShopLocale>;
-  /** Returns a Shop Pay payment request receipt. */
+  /** Returns a single Shop Pay payment request receipt by its ID. Payment request receipts document completed Shop Pay transactions, including the amount, customer details, and payment status. Use this to look up a specific Shop Pay transaction for order reconciliation or customer support. */
   shopPayPaymentRequestReceipt?: Maybe<ShopPayPaymentRequestReceipt>;
-  /** Returns a list of Shop Pay payment request receipts. */
+  /** Returns a paginated list of Shop Pay payment request receipts for the shop. Each receipt documents a completed Shop Pay transaction. Use this to review Shop Pay transaction history, generate reports, or audit Shop Pay payment activity. */
   shopPayPaymentRequestReceipts?: Maybe<ShopPayPaymentRequestReceiptConnection>;
   /**
    * Returns a Shopify Function by its ID.
@@ -52686,6 +61723,8 @@ export type QueryRoot = {
   standardMetafieldDefinitionTemplates: StandardMetafieldDefinitionTemplateConnection;
   /** Retrieves a [`StoreCreditAccount`](https://shopify.dev/docs/api/admin-graphql/latest/objects/StoreCreditAccount) by ID. Store credit accounts hold monetary balances that account owners can use at checkout. The owner is either a [`Customer`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Customer) or a [`CompanyLocation`](https://shopify.dev/docs/api/admin-graphql/latest/objects/CompanyLocation). */
   storeCreditAccount?: Maybe<StoreCreditAccount>;
+  /** Returns the store credit configuration for a shop, including whether store credit is enabled for customers at checkout. Use this to display the current state of a merchant's store credit program or check eligibility before issuing store credit to customers. */
+  storeCreditConfiguration: StoreCreditConfiguration;
   /** Returns a `SubscriptionBillingAttempt` resource by ID. */
   subscriptionBillingAttempt?: Maybe<SubscriptionBillingAttempt>;
   /** Returns subscription billing attempts on a store. */
@@ -52711,7 +61750,10 @@ export type QueryRoot = {
    * Filter results with the [`query`](https://shopify.dev/docs/api/admin-graphql/latest/queries/subscriptionContracts#arguments-query) argument. You can paginate results using standard [cursor-based pagination](https://shopify.dev/docs/api/usage/pagination-graphql).
    */
   subscriptionContracts: SubscriptionContractConnection;
-  /** Returns a Subscription Draft resource by ID. */
+  /**
+   * Returns a Subscription Draft resource by ID.
+   * @deprecated Use the [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api) instead.
+   */
   subscriptionDraft?: Maybe<SubscriptionDraft>;
   /**
    * Access to Shopify's [standardized product taxonomy](https://shopify.github.io/product-taxonomy/releases/unstable/?categoryId=sg-4-17-2-17) for categorizing products. The [`Taxonomy`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Taxonomy) organizes products into a hierarchical tree structure with categories, attributes, and values.
@@ -53009,6 +62051,24 @@ export type QueryRootBlogsCountArgs = {
 
 
 /** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootBulkOperationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootBulkOperationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+  sortKey?: InputMaybe<BulkOperationsSortKeys>;
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
 export type QueryRootBusinessEntityArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
 };
@@ -53039,6 +62099,48 @@ export type QueryRootCartTransformsArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootCashDrawerArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootCashDrawersArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootCashManagementLocationSummaryArgs = {
+  endDate: Scalars['Date']['input'];
+  locationId: Scalars['ID']['input'];
+  startDate: Scalars['Date']['input'];
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootCashManagementReasonCodesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootCashManagementShopSummaryArgs = {
+  currencyCode: CurrencyCode;
+  endDate: Scalars['Date']['input'];
+  startDate: Scalars['Date']['input'];
 };
 
 
@@ -53094,12 +62196,36 @@ export type QueryRootChannelArgs = {
 
 
 /** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootChannelByHandleArgs = {
+  handle: Scalars['String']['input'];
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
 export type QueryRootChannelsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootCheckoutAndAccountsConfigurationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootCheckoutAndAccountsConfigurationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+  sortKey?: InputMaybe<CheckoutAndAccountsConfigurationsGraphQlSortKeys>;
 };
 
 
@@ -53177,6 +62303,27 @@ export type QueryRootCollectionByHandleArgs = {
 /** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
 export type QueryRootCollectionByIdentifierArgs = {
   identifier: CollectionIdentifierInput;
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootCollectionConditionsSourcesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  appId: Scalars['ID']['input'];
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootCollectionConditionsSourcesByAppArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -53525,6 +62672,18 @@ export type QueryRootDiscountRedeemCodeSavedSearchesArgs = {
 
 
 /** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootDiscountTagsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+  sortKey?: InputMaybe<DiscountTagSortKeys>;
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
 export type QueryRootDisputeArgs = {
   id: Scalars['ID']['input'];
 };
@@ -53737,6 +62896,17 @@ export type QueryRootInventoryLevelArgs = {
 /** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
 export type QueryRootInventoryShipmentArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootInventoryShipmentsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  sortKey?: InputMaybe<InventoryShipmentSortKeys>;
 };
 
 
@@ -54042,6 +63212,16 @@ export type QueryRootOrderArgs = {
 
 
 /** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootOrderAttributionDefinitionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
 export type QueryRootOrderByIdentifierArgs = {
   identifier: OrderIdentifierInput;
 };
@@ -54146,6 +63326,24 @@ export type QueryRootPointOfSaleDeviceArgs = {
 
 
 /** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootPointOfSaleDevicePaymentSessionArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootPointOfSaleDevicePaymentSessionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+  sortKey?: InputMaybe<PointOfSaleDevicePaymentSessionSortKeys>;
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
 export type QueryRootPriceListArgs = {
   id: Scalars['ID']['input'];
 };
@@ -54210,6 +63408,7 @@ export type QueryRootProductOperationArgs = {
 
 /** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
 export type QueryRootProductResourceFeedbackArgs = {
+  channelId?: InputMaybe<Scalars['ID']['input']>;
   id: Scalars['ID']['input'];
 };
 
@@ -54357,6 +63556,20 @@ export type QueryRootReturnCalculateArgs = {
 
 
 /** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootReturnReasonDefinitionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  handles?: InputMaybe<Array<Scalars['String']['input']>>;
+  ids?: InputMaybe<Array<Scalars['ID']['input']>>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+  sortKey?: InputMaybe<ReturnReasonDefinitionSortKeys>;
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
 export type QueryRootReturnableFulfillmentArgs = {
   id: Scalars['ID']['input'];
 };
@@ -54481,6 +63694,12 @@ export type QueryRootSellingPlanGroupsArgs = {
   query?: InputMaybe<Scalars['String']['input']>;
   reverse?: InputMaybe<Scalars['Boolean']['input']>;
   sortKey?: InputMaybe<SellingPlanGroupSortKeys>;
+};
+
+
+/** The schema's entry-point for queries. This acts as the public, top-level API from which all queries must start. */
+export type QueryRootShippingLabelArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -54855,6 +64074,8 @@ export type Refund = LegacyInteroperability & Node & {
   order: Order;
   /** The order adjustments that are attached with the refund. */
   orderAdjustments: OrderAdjustmentConnection;
+  /** The date and time when the refund was processed. */
+  processedAt: Scalars['DateTime']['output'];
   /** The `RefundLineItem` resources attached to the refund. */
   refundLineItems: RefundLineItemConnection;
   /** The `RefundShippingLine` resources attached to the refund. */
@@ -55159,6 +64380,8 @@ export type RefundInput = {
   notify?: InputMaybe<Scalars['Boolean']['input']>;
   /** The ID of the order that's being refunded. */
   orderId: Scalars['ID']['input'];
+  /** The date and time when the refund is being processed. If not provided, it will be set to the current time. */
+  processedAt?: InputMaybe<Scalars['DateTime']['input']>;
   /** A list of duties to refund. */
   refundDuties?: InputMaybe<Array<RefundDutyInput>>;
   /** A list of line items to refund. */
@@ -55348,11 +64571,8 @@ export type RegionsConditionRegionsArgs = {
 
 /** The input fields for a remote Authorize.net customer payment profile. */
 export type RemoteAuthorizeNetCustomerPaymentProfileInput = {
-  /**
-   * The customerPaymentProfileId value from the Authorize.net API. Starting on 2025,
-   * customer_payment_profile_id will become mandatory for all API versions.
-   */
-  customerPaymentProfileId?: InputMaybe<Scalars['String']['input']>;
+  /** The customerPaymentProfileId value from the Authorize.net API. */
+  customerPaymentProfileId: Scalars['String']['input'];
   /** The customerProfileId value from the Authorize.net API. */
   customerProfileId: Scalars['String']['input'];
 };
@@ -55361,22 +64581,16 @@ export type RemoteAuthorizeNetCustomerPaymentProfileInput = {
 export type RemoteBraintreePaymentMethodInput = {
   /** The `customer_id` value from the Braintree API. */
   customerId: Scalars['String']['input'];
-  /**
-   * The `payment_method_token` value from the Braintree API. Starting on 2025,
-   * payment_method_token will become mandatory for all API versions.
-   */
-  paymentMethodToken?: InputMaybe<Scalars['String']['input']>;
+  /** The `payment_method_token` value from the Braintree API. */
+  paymentMethodToken: Scalars['String']['input'];
 };
 
 /** The input fields for a remote stripe payment method. */
 export type RemoteStripePaymentMethodInput = {
   /** The customer_id value from the Stripe API. */
   customerId: Scalars['String']['input'];
-  /**
-   * The payment_method_id value from the Stripe API. Starting on 2025,
-   * payment_method_id will become mandatory for all API versions.
-   */
-  paymentMethodId?: InputMaybe<Scalars['String']['input']>;
+  /** The payment_method_id value from the Stripe API. */
+  paymentMethodId: Scalars['String']['input'];
 };
 
 /** Return type for `removeFromReturn` mutation. */
@@ -55476,6 +64690,8 @@ export type ResourceFeedback = {
 
 /** The input fields for a resource feedback object. */
 export type ResourceFeedbackCreateInput = {
+  /** The ID of the channel that the feedback is for. Used to scope feedback to a specific sales channel when the app has multiple channels. */
+  channelId?: InputMaybe<Scalars['ID']['input']>;
   /**
    * The date and time when the feedback was generated. Used to help determine whether
    * incoming feedback is outdated compared to existing feedback.
@@ -55690,6 +64906,8 @@ export type Return = Node & {
   returnShippingFees: Array<ReturnShippingFee>;
   /** The list of reverse fulfillment orders for the return. */
   reverseFulfillmentOrders: ReverseFulfillmentOrderConnection;
+  /** The staff member that created the return. */
+  staffMember?: Maybe<StaffMember>;
   /** The status of the return. */
   status: ReturnStatus;
   /** A suggested financial outcome for the return. */
@@ -55701,6 +64919,8 @@ export type Return = Node & {
   suggestedRefund?: Maybe<SuggestedReturnRefund>;
   /** The sum of all return line item quantities for the return. */
   totalQuantity: Scalars['Int']['output'];
+  /** The order transactions created from the return. */
+  transactions: OrderTransactionConnection;
 };
 
 
@@ -55867,6 +65087,33 @@ export type ReturnSuggestedRefundArgs = {
   returnRefundLineItems: Array<ReturnRefundLineItemInput>;
 };
 
+
+/**
+ * The `Return` object represents the intent of a buyer to ship one or more items from an order back to a merchant
+ * or a third-party fulfillment location. A return is associated with an [order](https://shopify.dev/docs/api/admin-graphql/latest/objects/Order)
+ * and can include multiple return [line items](https://shopify.dev/docs/api/admin-graphql/latest/objects/LineItem).
+ * Each return has a [status](https://shopify.dev/docs/apps/build/orders-fulfillment/returns-apps#return-statuses),
+ * which indicates the state of the return.
+ *
+ * Use the `Return` object to capture the financial, logistical,
+ * and business intent of a return. For example, you can identify eligible items for a return and issue customers
+ * a refund for returned items on behalf of the merchant.
+ *
+ * Learn more about providing a
+ * [return management workflow](https://shopify.dev/docs/apps/build/orders-fulfillment/returns-apps/build-return-management)
+ * for merchants. You can also manage [exchanges](https://shopify.dev/docs/apps/build/orders-fulfillment/returns-apps/manage-exchanges),
+ * [reverse fulfillment orders](https://shopify.dev/docs/apps/build/orders-fulfillment/returns-apps/manage-reverse-fulfillment-orders),
+ * and [reverse deliveries](https://shopify.dev/docs/apps/build/orders-fulfillment/returns-apps/manage-reverse-deliveries)
+ * on behalf of merchants.
+ */
+export type ReturnTransactionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 /** An agreement between the merchant and customer for a return. */
 export type ReturnAgreement = SalesAgreement & {
   __typename?: 'ReturnAgreement';
@@ -56030,6 +65277,8 @@ export enum ReturnErrorCode {
   GreaterThanOrEqualTo = 'GREATER_THAN_OR_EQUAL_TO',
   /** The input value isn't included in the list. */
   Inclusion = 'INCLUSION',
+  /** The requested configuration cannot be applied to this standard return policy which is managed for you in compliance with relevant regulations. */
+  IncompatibleWithStandardPolicy = 'INCOMPATIBLE_WITH_STANDARD_POLICY',
   /** Unexpected internal error happened. */
   InternalError = 'INTERNAL_ERROR',
   /** The input value is invalid. */
@@ -56107,8 +65356,13 @@ export type ReturnLineItem = Node & ReturnLineItemType & {
   refundedQuantity: Scalars['Int']['output'];
   /** The restocking fee for the return line item. */
   restockingFee?: Maybe<RestockingFee>;
-  /** The reason for returning the item. */
+  /**
+   * The reason for returning the item.
+   * @deprecated Use `returnReasonDefinition` instead. This field will be removed in the future.
+   */
   returnReason: ReturnReason;
+  /** The standardized reason for why the item is being returned. */
+  returnReasonDefinition?: Maybe<ReturnReasonDefinition>;
   /** Additional information about the reason for the return. Maximum length: 255 characters. */
   returnReasonNote: Scalars['String']['output'];
   /** The total weight of the item. */
@@ -56130,8 +65384,8 @@ export type ReturnLineItemInput = {
   quantity: Scalars['Int']['input'];
   /** The restocking fee to capture. */
   restockingFee?: InputMaybe<RestockingFeeInput>;
-  /** The reason for the item to be returned. */
-  returnReason: ReturnReason;
+  /** The ID of a [`ReturnReasonDefinition`](https://shopify.dev/docs/api/admin-graphql/latest/objects/ReturnReasonDefinition). Accepts any ID from the full library of reasons available via [`returnReasonDefinitions`](https://shopify.dev/docs/api/admin-graphql/latest/queries/returnReasonDefinitions), not limited to the suggested reasons for the line item. */
+  returnReasonDefinitionId?: InputMaybe<Scalars['ID']['input']>;
   /**
    * A note about the reason that the item is being returned.
    * Maximum length: 255 characters.
@@ -56172,8 +65426,13 @@ export type ReturnLineItemType = {
   refundableQuantity: Scalars['Int']['output'];
   /** The quantity that was refunded. */
   refundedQuantity: Scalars['Int']['output'];
-  /** The reason for returning the item. */
+  /**
+   * The reason for returning the item.
+   * @deprecated Use `returnReasonDefinition` instead. This field will be removed in the future.
+   */
   returnReason: ReturnReason;
+  /** The standardized reason for why the item is being returned. */
+  returnReasonDefinition?: Maybe<ReturnReasonDefinition>;
   /** Additional information about the reason for the return. Maximum length: 255 characters. */
   returnReasonNote: Scalars['String']['output'];
   /** The quantity that has't been processed. */
@@ -56300,6 +65559,72 @@ export enum ReturnReason {
   WrongItem = 'WRONG_ITEM'
 }
 
+/**
+ * A standardized reason for returning an item.
+ *
+ * - Shopify offers an expanded library of return reasons available to all merchants
+ * - For each product, Shopify suggests a curated subset of reasons based on the product's category
+ * - Suggested reasons aren't the only valid options. When creating a return via the API, you can use any reason from the [full library](https://shopify.dev/docs/api/admin-graphql/latest/queries/returnReasonDefinitions).
+ */
+export type ReturnReasonDefinition = Node & {
+  __typename?: 'ReturnReasonDefinition';
+  /**
+   * Whether the return reason has been removed from taxonomy.
+   *
+   * Deleted reasons should not be presented to customers when creating new returns, but may still
+   * appear on existing returns that were created before the reason was deleted. This field enables
+   * graceful deprecation of return reasons without breaking historical data.
+   */
+  deleted: Scalars['Boolean']['output'];
+  /**
+   * A unique, human-readable, stable identifier for the return reason.
+   *
+   * Example values include "arrived-late", "comfort", "too-tight", "color-too-bright", and "quality".
+   * The handle remains consistent across API versions and localizations, making it suitable for programmatic use.
+   */
+  handle: Scalars['String']['output'];
+  /** A globally-unique ID. */
+  id: Scalars['ID']['output'];
+  /**
+   * The localized, user-facing name of the return reason.
+   *
+   * This field returns the reason name in the requested locale, automatically falling back to
+   * English if no translation is available. Use this field when displaying return reasons to
+   * customers or merchants.
+   */
+  name: Scalars['String']['output'];
+};
+
+/** An auto-generated type for paginating through multiple ReturnReasonDefinitions. */
+export type ReturnReasonDefinitionConnection = {
+  __typename?: 'ReturnReasonDefinitionConnection';
+  /** The connection between the node and its parent. Each edge contains a minimum of the edge's cursor and the node. */
+  edges: Array<ReturnReasonDefinitionEdge>;
+  /** A list of nodes that are contained in ReturnReasonDefinitionEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve. */
+  nodes: Array<ReturnReasonDefinition>;
+  /** An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page. */
+  pageInfo: PageInfo;
+};
+
+/** An auto-generated type which holds one ReturnReasonDefinition and a cursor during pagination. */
+export type ReturnReasonDefinitionEdge = {
+  __typename?: 'ReturnReasonDefinitionEdge';
+  /** The position of each node in an array, used in [pagination](https://shopify.dev/api/usage/pagination-graphql). */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of ReturnReasonDefinitionEdge. */
+  node: ReturnReasonDefinition;
+};
+
+/** The set of valid sort keys for the ReturnReasonDefinition query. */
+export enum ReturnReasonDefinitionSortKeys {
+  /** Sort by the `handle` value. */
+  Handle = 'HANDLE',
+  /** Sort by the `id` value. */
+  Id = 'ID',
+  /** Sort by the `name` value. */
+  Name = 'NAME'
+}
+
 /** The input fields to refund a return. */
 export type ReturnRefundInput = {
   /** Whether to send a refund notification to the customer. */
@@ -56377,8 +65702,8 @@ export type ReturnRequestLineItemInput = {
   quantity: Scalars['Int']['input'];
   /** The restocking fee to capture. */
   restockingFee?: InputMaybe<RestockingFeeInput>;
-  /** The reason why the line item is being returned. */
-  returnReason: ReturnReason;
+  /** The ID of a [`ReturnReasonDefinition`](https://shopify.dev/docs/api/admin-graphql/latest/objects/ReturnReasonDefinition). Accepts any ID from the full library of reasons available via [`returnReasonDefinitions`](https://shopify.dev/docs/api/admin-graphql/latest/queries/returnReasonDefinitions), not limited to the suggested reasons for the line item. */
+  returnReasonDefinitionId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** Return type for `returnRequest` mutation. */
@@ -56858,7 +66183,7 @@ export enum ReverseFulfillmentOrderThirdPartyConfirmationStatus {
   Rejected = 'REJECTED'
 }
 
-/** List of possible values for a RiskAssessment result. */
+/** Possible risk levels for an order risk assessment. */
 export enum RiskAssessmentResult {
   /** Indicates a high likelihood that the order is fraudulent. */
   High = 'HIGH',
@@ -56872,20 +66197,20 @@ export enum RiskAssessmentResult {
   Pending = 'PENDING'
 }
 
-/** A risk fact belongs to a single risk assessment and serves to provide additional context for an assessment. Risk facts are not necessarily tied to the result of the recommendation. */
+/** Additional context provided with an order risk assessment. Facts may not affect the order's risk recommendation. */
 export type RiskFact = {
   __typename?: 'RiskFact';
-  /** A description of the fact. */
+  /** Descriptions longer than 256 characters are truncated. */
   description: Scalars['String']['output'];
-  /** Indicates whether the fact is a negative, neutral or positive contributor with regards to risk. */
+  /** Indicates whether the fact contributes negatively, neutrally, or positively to risk. */
   sentiment: RiskFactSentiment;
 };
 
-/** List of possible values for a RiskFact sentiment. */
+/** Possible sentiments for a risk fact. */
 export enum RiskFactSentiment {
   /** A negative contributor that increases the risk. */
   Negative = 'NEGATIVE',
-  /** A neutral contributor with regards to risk. */
+  /** A neutral contributor with regard to risk. */
   Neutral = 'NEUTRAL',
   /** A positive contributor that lowers the risk. */
   Positive = 'POSITIVE'
@@ -57203,9 +66528,6 @@ export type ScriptDiscountApplication = DiscountApplication & {
  * <div class="note"><h4>Theme app extensions</h4>
  *   <p>If your app integrates with a Shopify theme and you plan to submit it to the Shopify App Store, you must use theme app extensions instead of Script tags. Script tags can only be used with vintage themes. <a href="/apps/online-store#what-integration-method-should-i-use" target="_blank">Learn more</a>.</p></div>
  *
- * <div class="note"><h4>Script tag deprecation</h4>
- *   <p>Script tags will be sunset for the <b>Order status</b> page on August 28, 2025. <a href="https://www.shopify.com/plus/upgrading-to-checkout-extensibility">Upgrade to Checkout Extensibility</a> before this date. <a href="/docs/api/liquid/objects#script">Shopify Scripts</a> will continue to work alongside Checkout Extensibility until August 28, 2025.</p></div>
- *
  *
  * A script tag represents remote JavaScript code that is loaded into the pages of a shop's storefront or the **Order status** page of checkout.
  */
@@ -57385,6 +66707,8 @@ export enum SearchResultType {
   DraftOrder = 'DRAFT_ORDER',
   /** A file. */
   File = 'FILE',
+  /** An inventory transfer. */
+  InventoryTransfer = 'INVENTORY_TRANSFER',
   Order = 'ORDER',
   /** A page. */
   Page = 'PAGE',
@@ -58152,7 +67476,7 @@ export type SellingPlanFixedDeliveryPolicy = {
 export type SellingPlanFixedDeliveryPolicyInput = {
   /** The specific anchor dates upon which the delivery interval calculations should be made. */
   anchors?: InputMaybe<Array<SellingPlanAnchorInput>>;
-  /** A buffer period for orders to be included in a cycle. */
+  /** Number of days which represent a buffer period for orders to be included in a cycle. */
   cutoff?: InputMaybe<Scalars['Int']['input']>;
   /** The date and time when the fulfillment should trigger. */
   fulfillmentExactTime?: InputMaybe<Scalars['DateTime']['input']>;
@@ -58821,7 +68145,7 @@ export type SellingPlanRecurringDeliveryPolicy = {
 export type SellingPlanRecurringDeliveryPolicyInput = {
   /** The specific anchor dates upon which the delivery interval calculations should be made. */
   anchors?: InputMaybe<Array<SellingPlanAnchorInput>>;
-  /** A buffer period for orders to be included in a cycle. */
+  /** Number of days which represent a buffer period for orders to be included in a cycle. */
   cutoff?: InputMaybe<Scalars['Int']['input']>;
   /** Intention of this delivery policy, it can be either: delivery or fulfillment. */
   intent?: InputMaybe<SellingPlanRecurringDeliveryPolicyIntent>;
@@ -58882,6 +68206,8 @@ export enum SellingPlanRemainingBalanceChargeTrigger {
   ExactTime = 'EXACT_TIME',
   /** When there's no remaining balance to be charged after checkout. */
   NoRemainingBalance = 'NO_REMAINING_BALANCE',
+  /** When the order is fulfilled. */
+  OnFulfillment = 'ON_FULFILLMENT',
   /** After the duration defined by the remaining_balance_charge_time_after_checkout field. */
   TimeAfterCheckout = 'TIME_AFTER_CHECKOUT'
 }
@@ -58939,6 +68265,73 @@ export enum ShipmentLineItemSortKeys {
   Id = 'ID'
 }
 
+/** The input fields for a carrier-defined package to use for the shipping label purchase. */
+export type ShippingCarrierPackageInput = {
+  /** The code identifying the carrier that supplies the package. Examples include `usps`, `ups_shipping`, `dhl_express`, and `canada_post`. */
+  carrierCode: Scalars['String']['input'];
+  /** The code identifying the carrier package type. */
+  carrierPackageCode: Scalars['String']['input'];
+  /** The carrier-defined display name for the package. */
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+/**
+ * The shipping configuration attached to a market. Defines the shipping
+ * options available when a buyer is resolved to that market.
+ */
+export type ShippingConfiguration = {
+  __typename?: 'ShippingConfiguration';
+  /** Whether shipping is enabled for this market. When false, customers in this market won't see any shipping options. */
+  isEnabled: Scalars['Boolean']['output'];
+  /** The shipping options configured for this market. */
+  optionDefinitions: DeliveryOptionDefinitionConnection;
+  /** The number of shipping options in this configuration. */
+  optionDefinitionsCount: Count;
+};
+
+
+/**
+ * The shipping configuration attached to a market. Defines the shipping
+ * options available when a buyer is resolved to that market.
+ */
+export type ShippingConfigurationOptionDefinitionsArgs = {
+  active?: InputMaybe<Scalars['Boolean']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * The shipping configuration attached to a market. Defines the shipping
+ * options available when a buyer is resolved to that market.
+ */
+export type ShippingConfigurationOptionDefinitionsCountArgs = {
+  active?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** The input fields for creating a market's shipping configuration. */
+export type ShippingConfigurationCreateInput = {
+  /** Whether shipping is enabled for this market. When false, customers in this market won't see shipping options at checkout. */
+  isEnabled: Scalars['Boolean']['input'];
+  /** Shipping options to create for the market. */
+  optionDefinitions?: InputMaybe<Array<DeliveryOptionDefinitionCreateInput>>;
+};
+
+/** The input fields for updating a market's shipping configuration. */
+export type ShippingConfigurationUpdateInput = {
+  /** Whether shipping is enabled for this market. When false, customers in this market won't see shipping options at checkout. Defaults to true when the market has no shipping configuration; otherwise preserves the existing value. */
+  isEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Shipping options to create for this market. */
+  optionDefinitionsToCreate?: InputMaybe<Array<DeliveryOptionDefinitionCreateInput>>;
+  /** The IDs of shipping options to remove. */
+  optionDefinitionsToDelete?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** Shipping options to update, matched by ID. */
+  optionDefinitionsToUpdate?: InputMaybe<Array<DeliveryOptionDefinitionUpdateInput>>;
+};
+
 /**
  * The [discount class](https://help.shopify.com/manual/discounts/combining-discounts/discount-combinations)
  * that's used to control how discounts can be combined.
@@ -58946,6 +68339,195 @@ export enum ShipmentLineItemSortKeys {
 export enum ShippingDiscountClass {
   /** Combined as a shipping discount. */
   Shipping = 'SHIPPING'
+}
+
+/** Types of shipping documents. */
+export enum ShippingDocumentType {
+  /** The customs form document for the shipment. */
+  CustomsForm = 'CUSTOMS_FORM',
+  /** The shipping label document for the shipment. */
+  Label = 'LABEL'
+}
+
+/** File format for label. */
+export enum ShippingEnumsFileFormat {
+  /** PDF file format. */
+  Pdf = 'PDF',
+  /** ZPL file format. */
+  Zpl = 'ZPL'
+}
+
+/** The optional shipping label for this fulfillment. */
+export type ShippingLabel = Node & {
+  __typename?: 'ShippingLabel';
+  /** Indicates whether the label is cancellable or not. */
+  cancellable: Scalars['Boolean']['output'];
+  /** A globally-unique ID. */
+  id: Scalars['ID']['output'];
+  /** The location of the shipping origin. This will be null when the shipping origin is unknown. */
+  location?: Maybe<Location>;
+  /** Indicates whether the label was printed or not. */
+  printed: Scalars['Boolean']['output'];
+  /** The documents for a shipping label. */
+  shippingDocuments: Array<ShippingObjectsShippingDocument>;
+  /** Tracking information for the shipping label. */
+  trackingInfo?: Maybe<FulfillmentTrackingInfo>;
+};
+
+/** The input fields for a custom package to use for the shipping label purchase. */
+export type ShippingLabelPurchaseCustomPackageInput = {
+  /** The outside dimensions of the shipping package. */
+  dimensions: ObjectDimensionsInput;
+  /** The package type. Defaults to `BOX`. */
+  type?: InputMaybe<ShippingPackageType>;
+  /** The weight of the empty package. */
+  weight: WeightInput;
+};
+
+/** The shipping label purchase processing failure. */
+export type ShippingLabelPurchaseError = DisplayableError & {
+  __typename?: 'ShippingLabelPurchaseError';
+  /** The error code. */
+  code?: Maybe<ShippingLabelPurchaseErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `ShippingLabelPurchaseError`. */
+export enum ShippingLabelPurchaseErrorCode {
+  /** The carrier is not available for this label. Please try another carrier. */
+  CarrierNotAvailable = 'CARRIER_NOT_AVAILABLE',
+  /** We could not reach the shipping carrier. Please try again in a few minutes. */
+  ConnectionError = 'CONNECTION_ERROR',
+  /** The requested shop's shipping account is disabled. Please contact support. */
+  DisabledShippingAccount = 'DISABLED_SHIPPING_ACCOUNT',
+  /** There is another shipping label being purchased for this order. */
+  JobNotEnqueued = 'JOB_NOT_ENQUEUED',
+  /** Kill switch is enabled for this carrier. */
+  KillSwitch = 'KILL_SWITCH',
+  /** A non-recoverable error occurred while purchasing the label. Review the shipment details and try again. */
+  PermanentError = 'PERMANENT_ERROR',
+  /** We are still processing the purchase for this label. */
+  PurchaseInProgress = 'PURCHASE_IN_PROGRESS',
+  /** The shipping label could not be purchased due to invalid information. Please verify the shipping address, package weight and dimensions, and customs details (for international shipments). */
+  PurchaseLabelValidationError = 'PURCHASE_LABEL_VALIDATION_ERROR',
+  /** An error occurred while purchasing the label. Please try again. */
+  TransientError = 'TRANSIENT_ERROR',
+  /** An unknown error occurred while purchasing the label. */
+  UnknownError = 'UNKNOWN_ERROR'
+}
+
+/** The input fields for the fulfillment order, shipping date and time, package details, weight, notification setting, and optional rate preference used to purchase a shipping label. */
+export type ShippingLabelPurchaseInput = {
+  /** The ID of the fulfillment order to create the shipping label for. The fulfillment order must be fulfillable, require shipping, and have a destination shipping address. */
+  fulfillmentOrderId: Scalars['ID']['input'];
+  /** Whether to notify the customer after the shipping label is purchased. */
+  notifyCustomer?: InputMaybe<Scalars['Boolean']['input']>;
+  /** A custom ship-from origin address that overrides the fulfillment order's assigned location for this label. If not provided, the assigned location is used. */
+  originAddress?: InputMaybe<MailingAddressInput>;
+  /** The package to use for the shipment. Provide either a custom package or a carrier-provided package. */
+  packageInfo?: InputMaybe<PackageInfoInput>;
+  /** The preferred carrier and service to use for the shipping label. If omitted, the mutation uses Shopify Shipping's default rate selection. */
+  preferredRateSelection?: InputMaybe<PreferredRateSelectionInput>;
+  /** The date and time when the package is expected to be shipped. The value must not be in the past. */
+  shippingDatetime: Scalars['DateTime']['input'];
+  /** Total shipment weight, including the items being fulfilled and the package. If omitted, the total weight used is calculated using the weight of the empty package and the weight of the fulfillable line items. */
+  totalWeight?: InputMaybe<WeightInput>;
+};
+
+/** Return type for `shippingLabelPurchase` mutation. */
+export type ShippingLabelPurchasePayload = {
+  __typename?: 'ShippingLabelPurchasePayload';
+  /** The asynchronous purchase result. Query this object to track purchase status, retrieve purchased shipping labels, or inspect purchase-processing errors. */
+  shippingLabelPurchaseResult?: Maybe<ShippingLabelPurchaseResult>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<ShippingLabelPurchaseUserError>;
+};
+
+/** Tracks the progress of an asynchronous shipping label purchase request. */
+export type ShippingLabelPurchaseResult = JobResult & Node & {
+  __typename?: 'ShippingLabelPurchaseResult';
+  /** This indicates if the job is still queued or has been run. */
+  done: Scalars['Boolean']['output'];
+  /** Purchase-processing errors for the request. Synchronous validation errors are returned from the `shippingLabelPurchase` mutation's `userErrors` field instead. */
+  errors: Array<ShippingLabelPurchaseError>;
+  /** A globally-unique ID that's returned when running an asynchronous mutation. */
+  id: Scalars['ID']['output'];
+  /** The shipping labels created by the purchase request. Labels are returned only after successful purchase. */
+  shippingLabels: Array<ShippingLabel>;
+  /** The current purchase status. A purchase starts as `PENDING_PURCHASE` and ends as either `PURCHASED` or `PURCHASE_FAILED`. */
+  status: ShippingLabelPurchaseResultStatus;
+};
+
+/** The status of a shipping label purchase result. */
+export enum ShippingLabelPurchaseResultStatus {
+  /** Purchase is pending. */
+  PendingPurchase = 'PENDING_PURCHASE',
+  /** Purchase succeeded. */
+  Purchased = 'PURCHASED',
+  /** Purchase failed. */
+  PurchaseFailed = 'PURCHASE_FAILED'
+}
+
+/** An error that occurs during the execution of `ShippingLabelPurchase`. */
+export type ShippingLabelPurchaseUserError = DisplayableError & {
+  __typename?: 'ShippingLabelPurchaseUserError';
+  /** The error code. */
+  code?: Maybe<ShippingLabelPurchaseUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `ShippingLabelPurchaseUserError`. */
+export enum ShippingLabelPurchaseUserErrorCode {
+  /** The API client lacks write access to the provided fulfillment order. */
+  AccessDenied = 'ACCESS_DENIED',
+  /** The intent is trying to set an adaptive shipping state on a non-adaptive shipping order. */
+  AdaptiveShippingStateInvalid = 'ADAPTIVE_SHIPPING_STATE_INVALID',
+  /** At least 1 item should be fulfilled. */
+  AtLeast_1ItemRequired = 'AT_LEAST_1_ITEM_REQUIRED',
+  /** The selected shipping carrier cannot be purchased through this API. */
+  CarrierNotSupported = 'CARRIER_NOT_SUPPORTED',
+  /** The fulfillment order is not eligible for label purchase. Review the fulfillment order details and try again. */
+  FulfillmentOrderInvalid = 'FULFILLMENT_ORDER_INVALID',
+  /** Package dimensions must be greater than zero. */
+  InvalidPackageDimensions = 'INVALID_PACKAGE_DIMENSIONS',
+  /** Shipping labels may not be purchased at this time. Please try again later. */
+  KillSwitch = 'KILL_SWITCH',
+  /** Missing country of origin. */
+  MissingCountryOfOrigin = 'MISSING_COUNTRY_OF_ORIGIN',
+  /** Missing harmonized system code. */
+  MissingHsCode = 'MISSING_HS_CODE',
+  /** Missing insurance coverage amount. */
+  MissingInsuranceCoverageAmount = 'MISSING_INSURANCE_COVERAGE_AMOUNT',
+  /** Missing insurance coverage currency. */
+  MissingInsuranceCoverageCurrency = 'MISSING_INSURANCE_COVERAGE_CURRENCY',
+  /** Shipping date is required for purchase. */
+  MissingShippingDate = 'MISSING_SHIPPING_DATE',
+  /** Shipping rate selection is required for purchase. */
+  MissingShippingRate = 'MISSING_SHIPPING_RATE',
+  /** The record with the ID used as the input value couldn't be found. */
+  NotFound = 'NOT_FOUND',
+  /** The requested carrier package does not match the preferred rate selection carrier. */
+  PackageCarrierMismatch = 'PACKAGE_CARRIER_MISMATCH',
+  /** The shipping intent has a phone number that is not fully qualified for the destination address. */
+  PhoneNumberNotFullyQualifiedDestination = 'PHONE_NUMBER_NOT_FULLY_QUALIFIED_DESTINATION',
+  /** The shipping intent has a phone number that is not fully qualified for the origin address. */
+  PhoneNumberNotFullyQualifiedOrigin = 'PHONE_NUMBER_NOT_FULLY_QUALIFIED_ORIGIN',
+  /** The label purchase failed. Please review the shipment details and try again. */
+  PurchaseFailed = 'PURCHASE_FAILED',
+  /** Rates for the shipping label were not found. Please review the shipment details and try again. */
+  RatesNotFound = 'RATES_NOT_FOUND',
+  /** Shipping date has already passed. */
+  ShippingDateInThePast = 'SHIPPING_DATE_IN_THE_PAST',
+  /** Shopify Shipping terms of service have not been accepted. Purchase a shipping label through the Shopify admin first. */
+  TermsOfServiceNotAccepted = 'TERMS_OF_SERVICE_NOT_ACCEPTED',
+  /** Non-zero total weight is required for purchase. */
+  TotalWeightZero = 'TOTAL_WEIGHT_ZERO'
 }
 
 /** The shipping method that customers select for an order. Includes pricing details, carrier information, and any applied discounts or taxes. */
@@ -58982,11 +68564,11 @@ export type ShippingLine = {
   /** Whether the shipping line has been removed. */
   isRemoved: Scalars['Boolean']['output'];
   /**
-   * The pre-tax shipping price without any discounts applied.
+   * The shipping price without any discounts applied. If the parent order.taxesIncluded field is true, then this price includes taxes. Otherwise, this field is the pre-tax price.
    * @deprecated Use `originalPriceSet` instead.
    */
   originalPrice: MoneyV2;
-  /** The pre-tax shipping price without any discounts applied. */
+  /** The shipping price without any discounts applied. If the parent order.taxesIncluded field is true, then this price includes taxes. Otherwise, this field is the pre-tax price. */
   originalPriceSet: MoneyBag;
   /** The phone number at the shipping address. */
   phone?: Maybe<Scalars['String']['output']>;
@@ -59069,6 +68651,21 @@ export type ShippingLineSale = Sale & {
   totalDiscountAmountBeforeTaxes: MoneyBag;
   /** The total amount of taxes for the sale. */
   totalTaxAmount: MoneyBag;
+};
+
+/** Represents a shipping document. */
+export type ShippingObjectsShippingDocument = {
+  __typename?: 'ShippingObjectsShippingDocument';
+  /** The type of the shipping document. */
+  documentType: ShippingDocumentType;
+  /** File format of the shipping document. */
+  format?: Maybe<ShippingEnumsFileFormat>;
+  /** The last time the document was printed. */
+  printedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The shipping label associated with the shipping document. */
+  shippingLabelId: Scalars['ID']['output'];
+  /** URL of the shipping document. */
+  url?: Maybe<Scalars['URL']['output']>;
 };
 
 /** Return type for `shippingPackageDelete` mutation. */
@@ -59204,7 +68801,10 @@ export type Shop = HasMetafieldDefinitions & HasMetafields & HasPublishedTransla
    * @deprecated Use `shopAddress` instead.
    */
   billingAddress: ShopAddress;
-  /** List of all channel definitions associated with a shop. */
+  /**
+   * List of all channel definitions associated with a shop.
+   * @deprecated Use [`QueryRoot.orderAttributionDefinitions`](https://shopify.dev/docs/api/admin-graphql/latest/queries/orderAttributionDefinitions) and select `id`, `handle`, `displayName`, and `icon` instead.
+   */
   channelDefinitionsForInstalledChannels: Array<AvailableChannelDefinitionsByChannel>;
   /**
    * List of the shop's active sales channels.
@@ -59253,11 +68853,6 @@ export type Shop = HasMetafieldDefinitions & HasMetafields & HasPublishedTransla
   domains: Array<Domain>;
   /** A list of tags that have been added to draft orders. */
   draftOrderTags: StringConnection;
-  /**
-   * List of saved draft orders on the shop.
-   * @deprecated Removed as of 2026-01. Use `QueryRoot.draftOrders` instead.
-   */
-  draftOrders: DraftOrderConnection;
   /**
    * The shop owner's email address.
    * Shopify will use this email address to communicate with the shop owner.
@@ -59386,6 +68981,8 @@ export type Shop = HasMetafieldDefinitions & HasMetafields & HasPublishedTransla
   setupRequired: Scalars['Boolean']['output'];
   /** The list of countries that the shop ships to. */
   shipsToCountries: Array<CountryCode>;
+  /** The shop's address information as it will appear to buyers. */
+  shopAddress: ShopAddress;
   /** The name of the shop owner. */
   shopOwnerName: Scalars['String']['output'];
   /** The list of all legal policies associated with a shop. */
@@ -59536,22 +69133,6 @@ export type ShopCustomersArgs = {
  */
 export type ShopDraftOrderTagsArgs = {
   first: Scalars['Int']['input'];
-};
-
-
-/**
- * The central configuration and settings hub for a Shopify store. Access business information, operational preferences, feature availability, and store-wide settings that control how the shop operates.
- *
- * Includes core business details like the shop name, contact emails, billing address, and currency settings. The shop configuration determines customer account requirements, available sales channels, enabled features, payment settings, and policy documents. Also provides access to shop-level resources such as staff members, fulfillment services, navigation settings, and storefront access tokens.
- */
-export type ShopDraftOrdersArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  query?: InputMaybe<Scalars['String']['input']>;
-  reverse?: InputMaybe<Scalars['Boolean']['input']>;
-  sortKey?: InputMaybe<DraftOrderSortKeys>;
 };
 
 
@@ -59943,6 +69524,8 @@ export type ShopFeatures = {
   branding: ShopBranding;
   /** Represents the Bundles feature configuration for the shop. */
   bundles: BundlesFeature;
+  /** Whether the buyer experience deposit configuration is enabled. */
+  buyerExperienceDepositEnabled: Scalars['Boolean']['output'];
   /** Whether a shop's online store can have CAPTCHA protection. */
   captcha: Scalars['Boolean']['output'];
   /**
@@ -59957,6 +69540,8 @@ export type ShopFeatures = {
    * @deprecated Delivery profiles are now 100% enabled across Shopify.
    */
   deliveryProfiles: Scalars['Boolean']['output'];
+  /** Whether the direct connection catalog assignment is enabled. */
+  directConnectionCatalogAssignmentEnabled: Scalars['Boolean']['output'];
   /** Whether a shop has access to the Google Analytics dynamic remarketing feature. */
   dynamicRemarketing: Scalars['Boolean']['output'];
   /** Whether a shop can be migrated to use Shopify subscriptions. */
@@ -59998,6 +69583,8 @@ export type ShopFeatures = {
    * or don't have a storefront.
    */
   liveView: Scalars['Boolean']['output'];
+  /** Whether market-driven shipping is enabled for the shop. */
+  marketDrivenShipping: Scalars['Boolean']['output'];
   /**
    * Whether a shop has access to the onboarding visual.
    * @deprecated No longer supported.
@@ -60018,6 +69605,8 @@ export type ShopFeatures = {
   showMetrics: Scalars['Boolean']['output'];
   /** Whether a shop has an online store. */
   storefront: Scalars['Boolean']['output'];
+  /** Whether a shop is eligible for Sub Country Markets. */
+  subCountryMarketsEnabled: Scalars['Boolean']['output'];
   /** Whether a shop is eligible for Unified Markets. */
   unifiedMarkets: Scalars['Boolean']['output'];
   /** Whether a shop is using Shopify Balance. */
@@ -60248,6 +69837,8 @@ export enum ShopPayPaymentRequestReceiptProcessingStatusErrorCode {
   CardDeclined = 'CARD_DECLINED',
   /** There is an error in the gateway or merchant configuration. */
   ConfigError = 'CONFIG_ERROR',
+  /** Too many failed CVV verification attempts. */
+  CvvAttemptsExceeded = 'CVV_ATTEMPTS_EXCEEDED',
   /** The card is expired. */
   ExpiredCard = 'EXPIRED_CARD',
   /** The card issuer has flagged the transaction as potentially fraudulent. */
@@ -60342,7 +69933,7 @@ export type ShopPlan = {
   displayName: Scalars['String']['output'];
   /** Whether the shop is a partner development shop for testing purposes. */
   partnerDevelopment: Scalars['Boolean']['output'];
-  /** The public display name of the shop's billing plan. Possible values are: Advanced, Basic, Development, Grow, Inactive, Lite, Other, Paused, Plus, Plus Trial, Retail, Shop Component, Shopify Finance, Staff Business, Starter, and Trial. */
+  /** The public display name of the shop's billing plan. Possible values are: Advanced, Agentic, Agentic Enterprise, Basic, Development, Grow, Inactive, Lite, Other, Paused, Plus, Plus Trial, Retail, Shop Component, Staff Business, Starter, and Trial. */
   publicDisplayName: Scalars['String']['output'];
   /** Whether the shop has a Shopify Plus subscription. */
   shopifyPlus: Scalars['Boolean']['output'];
@@ -60354,7 +69945,7 @@ export type ShopPolicy = HasPublishedTranslations & Node & {
   /** The text of the policy. The maximum size is 512kb. */
   body: Scalars['HTML']['output'];
   /** The date and time ([ISO 8601 format](http://en.wikipedia.org/wiki/ISO_8601)) when the policy was created. */
-  createdAt: Scalars['Date']['output'];
+  createdAt: Scalars['DateTime']['output'];
   /** A globally-unique ID. */
   id: Scalars['ID']['output'];
   /** The translated title of the policy. For example, Refund Policy or Politique de remboursement. */
@@ -60364,7 +69955,7 @@ export type ShopPolicy = HasPublishedTranslations & Node & {
   /** The shop policy type. */
   type: ShopPolicyType;
   /** The date and time ([ISO 8601 format](http://en.wikipedia.org/wiki/ISO_8601)) when the policy was last modified. */
-  updatedAt: Scalars['Date']['output'];
+  updatedAt: Scalars['DateTime']['output'];
   /** The public URL of the policy. */
   url: Scalars['URL']['output'];
 };
@@ -60433,7 +70024,7 @@ export type ShopPolicyUserError = DisplayableError & {
 /** Return type for `shopResourceFeedbackCreate` mutation. */
 export type ShopResourceFeedbackCreatePayload = {
   __typename?: 'ShopResourceFeedbackCreatePayload';
-  /** The shop feedback that's created. */
+  /** The shop feedback that's created. Returns `null` when `state: ACCEPTED` is used, because setting state to `ACCEPTED` clears the active feedback signal. A `null` value here indicates success, not an error. */
   feedback?: Maybe<AppFeedback>;
   /** The list of errors that occurred from executing the mutation. */
   userErrors: Array<ShopResourceFeedbackCreateUserError>;
@@ -60502,6 +70093,8 @@ export type ShopifyFunction = {
   appKey: Scalars['String']['output'];
   /** The description of the Shopify Function. */
   description?: Maybe<Scalars['String']['output']>;
+  /** The handle of the Shopify Function. */
+  handle: Scalars['String']['output'];
   /** The ID of the Shopify Function. */
   id: Scalars['String']['output'];
   /** The input query of the Shopify Function. */
@@ -60932,11 +70525,11 @@ export type ShopifyPaymentsDispute = LegacyInteroperability & Node & {
   /** The evidence associated with the dispute. */
   disputeEvidence: ShopifyPaymentsDisputeEvidence;
   /** The deadline for evidence submission. */
-  evidenceDueBy?: Maybe<Scalars['Date']['output']>;
+  evidenceDueBy?: Maybe<Scalars['DateTime']['output']>;
   /** The date when evidence was sent. Returns null if evidence hasn't yet been sent. */
-  evidenceSentOn?: Maybe<Scalars['Date']['output']>;
+  evidenceSentOn?: Maybe<Scalars['DateTime']['output']>;
   /** The date when this dispute was resolved. Returns null if the dispute isn't yet resolved. */
-  finalizedOn?: Maybe<Scalars['Date']['output']>;
+  finalizedOn?: Maybe<Scalars['DateTime']['output']>;
   /** A globally-unique ID. */
   id: Scalars['ID']['output'];
   /** The date when this dispute was initiated. */
@@ -61175,9 +70768,15 @@ export type ShopifyPaymentsJpChargeStatementDescriptor = ShopifyPaymentsChargeSt
   __typename?: 'ShopifyPaymentsJpChargeStatementDescriptor';
   /** The default charge statement descriptor. */
   default?: Maybe<Scalars['String']['output']>;
-  /** The charge statement descriptor in kana. */
+  /**
+   * The charge statement descriptor in kana.
+   * @deprecated This field is deprecated and will be removed in a future release.
+   */
   kana?: Maybe<Scalars['String']['output']>;
-  /** The charge statement descriptor in kanji. */
+  /**
+   * The charge statement descriptor in kanji.
+   * @deprecated This field is deprecated and will be removed in a future release.
+   */
   kanji?: Maybe<Scalars['String']['output']>;
   /** The prefix of the statement descriptor. */
   prefix: Scalars['String']['output'];
@@ -61472,14 +71071,6 @@ export enum ShopifyPaymentsTransactionType {
   Advance = 'ADVANCE',
   /** The advance funding transaction type. */
   AdvanceFunding = 'ADVANCE_FUNDING',
-  /** The agentic_fee_tax_credit transaction type. */
-  AgenticFeeTaxCredit = 'AGENTIC_FEE_TAX_CREDIT',
-  /** The agentic_fee_tax_credit_reversal transaction type. */
-  AgenticFeeTaxCreditReversal = 'AGENTIC_FEE_TAX_CREDIT_REVERSAL',
-  /** The agentic_fee_tax_debit transaction type. */
-  AgenticFeeTaxDebit = 'AGENTIC_FEE_TAX_DEBIT',
-  /** The agentic_fee_tax_debit_reversal transaction type. */
-  AgenticFeeTaxDebitReversal = 'AGENTIC_FEE_TAX_DEBIT_REVERSAL',
   /** The anomaly_credit transaction type. */
   AnomalyCredit = 'ANOMALY_CREDIT',
   /** The anomaly_credit_reversal transaction type. */
@@ -61492,6 +71083,8 @@ export enum ShopifyPaymentsTransactionType {
   ApplicationFeeRefund = 'APPLICATION_FEE_REFUND',
   /** The balance_transfer_inbound transaction type. */
   BalanceTransferInbound = 'BALANCE_TRANSFER_INBOUND',
+  /** The balance_transfer_outbound transaction type. */
+  BalanceTransferOutbound = 'BALANCE_TRANSFER_OUTBOUND',
   /** The billing_debit transaction type. */
   BillingDebit = 'BILLING_DEBIT',
   /** The billing_debit_reversal transaction type. */
@@ -61738,6 +71331,76 @@ export enum ShopifyProtectStatus {
   Protected = 'PROTECTED'
 }
 
+/** Whether a column was explicitly requested in the query or dynamically generated. */
+export enum ShopifyqlColumnOrigin {
+  /** The column was dynamically generated (e.g. a comparison, total, benchmark, or attribution). */
+  Generated = 'GENERATED',
+  /** The column was explicitly requested in the query. */
+  Requested = 'REQUESTED',
+  /** The column origin is unspecified. */
+  Unspecified = 'UNSPECIFIED'
+}
+
+/** Describes how a dynamically generated column relates to the query. */
+export type ShopifyqlDynamicColumnMetadata = {
+  __typename?: 'ShopifyqlDynamicColumnMetadata';
+  /** The names of the dimension columns this column is aggregated (grouped) by. */
+  aggregatedBy: Array<Scalars['String']['output']>;
+  /** What the column is compared against. For benchmark columns, the percentile (e.g. `p50`); for comparison columns, the comparison period or date offset. Interpret based on `type`. */
+  comparisonReference?: Maybe<Scalars['String']['output']>;
+  /** The query column this dynamic column was derived from (e.g. `total_sales`). */
+  originalColumnName?: Maybe<Scalars['String']['output']>;
+  /** The kind of dynamic column. */
+  type: ShopifyqlDynamicColumnType;
+};
+
+/** The kind of dynamically generated column. */
+export enum ShopifyqlDynamicColumnType {
+  /** An attribution column. */
+  Attribution = 'ATTRIBUTION',
+  /** An attribution column with comparison data. */
+  AttributionComparison = 'ATTRIBUTION_COMPARISON',
+  /** An attribution column with comparison and cumulative data. */
+  AttributionComparisonCumulative = 'ATTRIBUTION_COMPARISON_CUMULATIVE',
+  /** An attribution column with comparison data and totals. */
+  AttributionComparisonTotals = 'ATTRIBUTION_COMPARISON_TOTALS',
+  /** An attribution column with cumulative data. */
+  AttributionCumulative = 'ATTRIBUTION_CUMULATIVE',
+  /** An attribution column with percent-change data. */
+  AttributionPercentChange = 'ATTRIBUTION_PERCENT_CHANGE',
+  /** An attribution column with totals. */
+  AttributionTotals = 'ATTRIBUTION_TOTALS',
+  /** A benchmark data column. */
+  Benchmarks = 'BENCHMARKS',
+  /** A benchmark column with totals. */
+  BenchmarkTotals = 'BENCHMARK_TOTALS',
+  /** A comparison data column (the comparison period). */
+  Comparison = 'COMPARISON',
+  /** A comparison column with cumulative data. */
+  ComparisonCumulative = 'COMPARISON_CUMULATIVE',
+  /** A comparison column with totals. */
+  ComparisonTotals = 'COMPARISON_TOTALS',
+  /** A cumulative column. */
+  Cumulative = 'CUMULATIVE',
+  /** A percent-change column. */
+  PercentChange = 'PERCENT_CHANGE',
+  /** A rollout results column. */
+  RolloutResults = 'ROLLOUT_RESULTS',
+  /** A column with totals. */
+  Totals = 'TOTALS',
+  /** Unspecified dynamic column type. */
+  Unspecified = 'UNSPECIFIED'
+}
+
+/** Localized display text shown in place of a null cell in a ShopifyQL result row. */
+export type ShopifyqlNullCellTranslation = {
+  __typename?: 'ShopifyqlNullCellTranslation';
+  /** The name of the column the translation applies to. */
+  columnName: Scalars['String']['output'];
+  /** The localized text to display in place of the null value. */
+  displayText: Scalars['String']['output'];
+};
+
 /** A response to a ShopifyQL query. */
 export type ShopifyqlQueryResponse = {
   __typename?: 'ShopifyqlQueryResponse';
@@ -61747,11 +71410,24 @@ export type ShopifyqlQueryResponse = {
   tableData?: Maybe<ShopifyqlTableData>;
 };
 
+/** Per-row metadata for a ShopifyQL result, aligned by index with the table's rows. */
+export type ShopifyqlRowMetadata = {
+  __typename?: 'ShopifyqlRowMetadata';
+  /** Localized display text for null cells in this row, by column. */
+  nullCellTranslations: Array<ShopifyqlNullCellTranslation>;
+  /** Raw resource IDs associated with the row, aligned by column index. Each entry is the list of IDs for that column (empty when the cell has none). These are raw ShopifyQL identifiers (numeric IDs, or image URLs for some schemas), not GIDs. */
+  rawResourceIds: Array<Array<Scalars['String']['output']>>;
+  /** Names of the columns whose values were rolled into the top-N "Other" remainder bucket. */
+  topNRemainderColumnNames: Array<Scalars['String']['output']>;
+};
+
 /** The result of a ShopifyQL query. */
 export type ShopifyqlTableData = {
   __typename?: 'ShopifyqlTableData';
   /** The columns of the table. */
   columns: Array<ShopifyqlTableDataColumn>;
+  /** Per-row metadata, aligned by index with `rows`. */
+  rowMetadata: Array<ShopifyqlRowMetadata>;
   /** The rows of the table. */
   rows: Scalars['JSON']['output'];
 };
@@ -61759,13 +71435,19 @@ export type ShopifyqlTableData = {
 /** Represents a column in a ShopifyQL query response. */
 export type ShopifyqlTableDataColumn = {
   __typename?: 'ShopifyqlTableDataColumn';
+  /** Whether the column was explicitly requested in the query or dynamically generated. */
+  columnOrigin: ShopifyqlColumnOrigin;
   /** The data type of the column. */
   dataType: ColumnDataType;
   /** The human-readable display name of the column. */
   displayName: Scalars['String']['output'];
+  /** Metadata describing how a dynamic column was generated (comparison, totals, benchmark, attribution, etc.). Null for non-dynamic columns. */
+  dynamicColumnMetadata?: Maybe<ShopifyqlDynamicColumnMetadata>;
   /** The name of the column. */
   name: Scalars['String']['output'];
-  /** The sub type of an array column. */
+  /** A shortened display name for the column, suitable for compact UI such as metric tiles. */
+  shortDisplayName?: Maybe<Scalars['String']['output']>;
+  /** The element type of an array column or DAY_DURATION for a range column. */
   subType?: Maybe<ColumnDataType>;
 };
 
@@ -62243,8 +71925,12 @@ export enum StandardMetafieldDefinitionEnableUserErrorCode {
   InvalidCapability = 'INVALID_CAPABILITY',
   /** The input combination is invalid. */
   InvalidInputCombination = 'INVALID_INPUT_COMBINATION',
+  /** The associated standard metaobject definition template is not valid for the metafield definition and prevented enabling it. */
+  InvalidStandardMetaobject = 'INVALID_STANDARD_METAOBJECT',
   /** The maximum number of definitions per owner type has been exceeded. */
   LimitExceeded = 'LIMIT_EXCEEDED',
+  /** You have reached the maximum allowed definitions to be used as admin filters. */
+  OwnerTypeLimitExceededForUseAsAdminFilters = 'OWNER_TYPE_LIMIT_EXCEEDED_FOR_USE_AS_ADMIN_FILTERS',
   /** The input value is already taken. */
   Taken = 'TAKEN',
   /** The standard metafield definition template was not found. */
@@ -62336,13 +72022,18 @@ export type StandardMetaobjectDefinitionFieldTemplate = {
   type: MetafieldDefinitionType;
   /** The configured validations for the standard metafield definition. */
   validations: Array<MetafieldDefinitionValidation>;
-  /** Whether metafields for the definition are by default visible using the Storefront API. */
+  /**
+   * Whether metafields for the definition are by default visible using the Storefront API.
+   * @deprecated Access control at the metaobject field definition level is deprecated and will be removed in 2027-01. Use the access field on the definition instead.
+   */
   visibleToStorefrontApi: Scalars['Boolean']['output'];
 };
 
 /** Standard metaobject definition templates provide preset configurations to create metaobject definitions. */
 export type StandardMetaobjectDefinitionTemplate = {
   __typename?: 'StandardMetaobjectDefinitionTemplate';
+  /** Access configuration for the standard metaobject definition template. */
+  access: MetaobjectAccess;
   /** The administrative description. */
   description?: Maybe<Scalars['String']['output']>;
   /** The key of a field to reference as the display name for each object. */
@@ -62416,6 +72107,11 @@ export type StoreCreditAccountCreditInput = {
   creditAmount: MoneyInput;
   /** The date and time when the credit expires. */
   expiresAt?: InputMaybe<Scalars['DateTime']['input']>;
+  /**
+   * Whether to send a notification to the account owner when the store credit is issued.
+   * Defaults to `false`.
+   */
+  notify?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** Return type for `storeCreditAccountCredit` mutation. */
@@ -62642,6 +72338,13 @@ export type StoreCreditAccountTransactionEdge = {
 /** The origin of a store credit account transaction. */
 export type StoreCreditAccountTransactionOrigin = OrderTransaction;
 
+/** The store credit configuration for a shop. */
+export type StoreCreditConfiguration = {
+  __typename?: 'StoreCreditConfiguration';
+  /** Whether store credit is enabled for customers on checkout. */
+  storeCreditEnabled: Scalars['Boolean']['output'];
+};
+
 /** The input fields to process a refund to store credit. */
 export type StoreCreditRefundInput = {
   /** The amount to be issued as store credit. */
@@ -62664,6 +72367,8 @@ export enum StoreCreditSystemEvent {
   PaymentFailure = 'PAYMENT_FAILURE',
   /** A smaller amount of store credit was captured than was originally authorized. */
   PaymentReturned = 'PAYMENT_RETURNED',
+  /** Store credit was used as payment for a recurring order. */
+  RecurringPayment = 'RECURRING_PAYMENT',
   /** Tax finalization affected the store credit payment. */
   TaxFinalization = 'TAX_FINALIZATION'
 }
@@ -62763,6 +72468,26 @@ export type StringEdge = {
   node: Scalars['String']['output'];
 };
 
+/** Stable identifier for why a collection cannot be referenced as a sub-collection target. */
+export enum SubCollectionIneligibleReason {
+  /** The referenced collection itself owns a sub-collection source (chains of depth > 1 are not supported). */
+  ChainReference = 'CHAIN_REFERENCE',
+  /** The referenced collection id does not parse as a positive integer or does not exist in the shop. */
+  InvalidCollectionReference = 'INVALID_COLLECTION_REFERENCE',
+  /** The referenced collection is one of the source's owning collections (a source cannot reference itself). */
+  SelfReference = 'SELF_REFERENCE'
+}
+
+/** The actor who initiated a subscription action. */
+export enum SubscriptionActor {
+  /** The subscription action was initiated by a customer. */
+  Customer = 'CUSTOMER',
+  /** The subscription action was initiated by a merchant. */
+  Merchant = 'MERCHANT',
+  /** The subscription action was initiated by a partner. */
+  Partner = 'PARTNER'
+}
+
 /** Represents an applied code discount. */
 export type SubscriptionAppliedCodeDiscount = {
   __typename?: 'SubscriptionAppliedCodeDiscount';
@@ -62805,21 +72530,27 @@ export type SubscriptionBillingAttempt = Node & {
   createdAt: Scalars['DateTime']['output'];
   /**
    * A code corresponding to a payment error during processing.
-   * @deprecated Use `processingError.code` instead to get the errorCode
+   * @deprecated Use `state` instead.
    */
   errorCode?: Maybe<SubscriptionBillingAttemptErrorCode>;
   /**
    * A message describing a payment error during processing.
-   * @deprecated Use `processingError.message` instead to get the errorMessage
+   * @deprecated Use `state` instead.
    */
   errorMessage?: Maybe<Scalars['String']['output']>;
   /** A globally-unique ID. */
   id: Scalars['ID']['output'];
   /** A unique key generated by the client to avoid duplicate payments. */
   idempotencyKey: Scalars['String']['output'];
-  /** The URL where the customer needs to be redirected so they can complete the 3D Secure payment flow. */
+  /**
+   * The URL where the customer needs to be redirected so they can complete the 3D Secure payment flow.
+   * @deprecated Use `state` instead.
+   */
   nextActionUrl?: Maybe<Scalars['URL']['output']>;
-  /** The result of this billing attempt if completed successfully. */
+  /**
+   * The result of this billing attempt if completed successfully.
+   * @deprecated Use `state` instead.
+   */
   order?: Maybe<Order>;
   /**
    * The date and time used to calculate fulfillment intervals for a billing attempt that
@@ -62831,12 +72562,20 @@ export type SubscriptionBillingAttempt = Node & {
   paymentGroupId?: Maybe<Scalars['String']['output']>;
   /** The reference shared between payment attempts with similar payment details. */
   paymentSessionId?: Maybe<Scalars['String']['output']>;
-  /** Error information from processing the billing attempt. */
+  /**
+   * Error information from processing the billing attempt.
+   * @deprecated Use `state` instead.
+   */
   processingError?: Maybe<SubscriptionBillingAttemptProcessingError>;
-  /** Whether the billing attempt is still processing. */
+  /**
+   * Whether the billing attempt is still processing.
+   * @deprecated Use `state` instead.
+   */
   ready: Scalars['Boolean']['output'];
   /** Whether the billing attempt respects the merchant's inventory policy. */
   respectInventoryPolicy: Scalars['Boolean']['output'];
+  /** The state of the billing attempt with state-specific data. */
+  state: SubscriptionBillingAttemptState;
   /** The subscription contract. */
   subscriptionContract: SubscriptionContract;
   /** The transactions created by the billing attempt. */
@@ -62855,6 +72594,19 @@ export type SubscriptionBillingAttemptTransactionsArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** The action required to continue processing the billing attempt. */
+export type SubscriptionBillingAttemptAction = SubscriptionBillingAttemptPaymentChallenge;
+
+/**
+ * The billing attempt state that requires an action to resolve.
+ * Must complete the action required for the billing attempt to continue being processed.
+ */
+export type SubscriptionBillingAttemptActionRequiredState = {
+  __typename?: 'SubscriptionBillingAttemptActionRequiredState';
+  /** The action required to resolve the billing attempt. */
+  action: SubscriptionBillingAttemptAction;
 };
 
 /** An auto-generated type for paginating through multiple SubscriptionBillingAttempts. */
@@ -62886,63 +72638,170 @@ export type SubscriptionBillingAttemptEdge = {
   node: SubscriptionBillingAttempt;
 };
 
+/** Possible error types for a subscription billing attempt. */
+export type SubscriptionBillingAttemptError = SubscriptionBillingAttemptGeneralError | SubscriptionBillingAttemptInventoryError | SubscriptionBillingAttemptPaymentError | SubscriptionBillingAttemptUnexpectedError;
+
 /**
  * The possible error codes associated with making billing attempts. The error codes supplement the
  * `error_message` to provide consistent results and help with dunning management.
  */
 export enum SubscriptionBillingAttemptErrorCode {
+  /** The amount exceeds the limit for this payment method. */
+  AmountTooLarge = 'AMOUNT_TOO_LARGE',
   /** The amount is too small. */
   AmountTooSmall = 'AMOUNT_TOO_SMALL',
-  /** There was an error during the authentication. */
+  /** There was an error during the payment authentication. */
   AuthenticationError = 'AUTHENTICATION_ERROR',
+  /** Authentication failed during payment processing. */
+  AuthenticationFailed = 'AUTHENTICATION_FAILED',
+  /** Additional authentication is required to complete the payment. */
+  AuthenticationRequired = 'AUTHENTICATION_REQUIRED',
   /** Payment method was canceled by buyer. */
   BuyerCanceledPaymentMethod = 'BUYER_CANCELED_PAYMENT_METHOD',
+  /** The card issuer requires the cardholder to call them. */
+  CallIssuer = 'CALL_ISSUER',
+  /** The payment was cancelled. */
+  CancelledPayment = 'CANCELLED_PAYMENT',
+  /** The card was declined by the payment processor. */
+  CardDeclined = 'CARD_DECLINED',
   /** Card number was incorrect. */
   CardNumberIncorrect = 'CARD_NUMBER_INCORRECT',
+  /** The payment confirmation was rejected. */
+  ConfirmationRejected = 'CONFIRMATION_REJECTED',
   /** Customer is invalid. */
   CustomerInvalid = 'CUSTOMER_INVALID',
   /** Customer was not found. */
   CustomerNotFound = 'CUSTOMER_NOT_FOUND',
+  /** The card issuer declined the transaction with a 'do not honor' response. */
+  DoNotHonor = 'DO_NOT_HONOR',
+  /** The required buyer action has expired. */
+  ExpiredBuyerAction = 'EXPIRED_BUYER_ACTION',
+  /** The card has expired. */
+  ExpiredCard = 'EXPIRED_CARD',
   /** Payment method is expired. */
   ExpiredPaymentMethod = 'EXPIRED_PAYMENT_METHOD',
   /** Fraud was suspected. */
   FraudSuspected = 'FRAUD_SUSPECTED',
   /** Gift cards must have a price greater than zero. */
   FreeGiftCardNotAllowed = 'FREE_GIFT_CARD_NOT_ALLOWED',
+  /** A generic payment error occurred. */
+  GenericError = 'GENERIC_ERROR',
+  /** The billing address provided is incorrect. */
+  IncorrectAddress = 'INCORRECT_ADDRESS',
+  /** The card security code entered is incorrect. */
+  IncorrectCvc = 'INCORRECT_CVC',
+  /** The card number entered is incorrect. */
+  IncorrectNumber = 'INCORRECT_NUMBER',
+  /** The PIN entered is incorrect. */
+  IncorrectPin = 'INCORRECT_PIN',
+  /** The postal/ZIP code provided is incorrect. */
+  IncorrectZip = 'INCORRECT_ZIP',
   /** Insufficient funds. */
   InsufficientFunds = 'INSUFFICIENT_FUNDS',
   /** Not enough inventory found. */
   InsufficientInventory = 'INSUFFICIENT_INVENTORY',
+  /** The transaction amount is invalid for this payment method. */
+  InvalidAmount = 'INVALID_AMOUNT',
+  /** The billing address is invalid. */
+  InvalidBillingAddress = 'INVALID_BILLING_ADDRESS',
+  /** The currency is not supported for this payment method. */
+  InvalidCurrency = 'INVALID_CURRENCY',
   /** The billing agreement ID or the transaction ID for the customer's payment method is invalid. */
   InvalidCustomerBillingAgreement = 'INVALID_CUSTOMER_BILLING_AGREEMENT',
+  /** The card security code is invalid. */
+  InvalidCvc = 'INVALID_CVC',
+  /** The expiry date of the card provided is invalid. */
+  InvalidExpiryDate = 'INVALID_EXPIRY_DATE',
+  /** The card number is invalid. */
+  InvalidNumber = 'INVALID_NUMBER',
   /** Payment method is invalid. Please update or create a new payment method. */
   InvalidPaymentMethod = 'INVALID_PAYMENT_METHOD',
+  /** The purchase type is invalid for this payment method. */
+  InvalidPurchaseType = 'INVALID_PURCHASE_TYPE',
+  /** The payment request is invalid. */
+  InvalidRequest = 'INVALID_REQUEST',
   /** The shipping address is either missing or invalid. */
   InvalidShippingAddress = 'INVALID_SHIPPING_ADDRESS',
   /** No inventory location found or enabled. */
   InventoryAllocationsNotFound = 'INVENTORY_ALLOCATIONS_NOT_FOUND',
   /** A payment has already been made for this invoice. */
   InvoiceAlreadyPaid = 'INVOICE_ALREADY_PAID',
+  /** Merchant account configuration error. */
+  MerchantAccountError = 'MERCHANT_ACCOUNT_ERROR',
+  /** The transaction was declined due to a merchant-defined rule. */
+  MerchantRule = 'MERCHANT_RULE',
   /** Non-test order limit reached. Use a test payment gateway to place another order. */
   NonTestOrderLimitReached = 'NON_TEST_ORDER_LIMIT_REACHED',
+  /** The off-session payment was rejected and requires customer action. */
+  OffSessionRejected = 'OFF_SESSION_REJECTED',
   /** Payment method was declined by processor. */
   PaymentMethodDeclined = 'PAYMENT_METHOD_DECLINED',
   /** Payment method cannot be used with the current payment gateway test mode configuration. */
   PaymentMethodIncompatibleWithGatewayConfig = 'PAYMENT_METHOD_INCOMPATIBLE_WITH_GATEWAY_CONFIG',
   /** Payment method was not found. */
   PaymentMethodNotFound = 'PAYMENT_METHOD_NOT_FOUND',
+  /** Payment method is not specified on subscription contract. */
+  PaymentMethodNotSpecified = 'PAYMENT_METHOD_NOT_SPECIFIED',
+  /** The payment method type is not supported. */
+  PaymentMethodUnsupported = 'PAYMENT_METHOD_UNSUPPORTED',
+  /** An exception occurred with the payment provider. */
+  PaymentProviderError = 'PAYMENT_PROVIDER_ERROR',
   /** Payment provider is not enabled. */
   PaymentProviderIsNotEnabled = 'PAYMENT_PROVIDER_IS_NOT_ENABLED',
   /** Paypal Error General. */
   PaypalErrorGeneral = 'PAYPAL_ERROR_GENERAL',
+  /** A processing error occurred with the payment provider. */
+  ProcessingError = 'PROCESSING_ERROR',
   /** Purchase Type is not supported. */
   PurchaseTypeNotSupported = 'PURCHASE_TYPE_NOT_SUPPORTED',
+  /** The payment retry was declined. */
+  RetryDeclined = 'RETRY_DECLINED',
   /** Gateway is in test mode and attempted to bill a live payment method. */
   TestMode = 'TEST_MODE',
+  /** The transaction exceeds the cardholder's limit. */
+  TransactionLimitExceeded = 'TRANSACTION_LIMIT_EXCEEDED',
   /** Transient error, try again later. */
   TransientError = 'TRANSIENT_ERROR',
   /** There was an unexpected error during the billing attempt. */
   UnexpectedError = 'UNEXPECTED_ERROR'
+}
+
+/** The billing attempt failed due to an error. */
+export type SubscriptionBillingAttemptFailedState = {
+  __typename?: 'SubscriptionBillingAttemptFailedState';
+  /** The error that caused the billing attempt to fail. */
+  error: SubscriptionBillingAttemptError;
+};
+
+/** An error that occurred during a subscription billing attempt that doesn't fit other categories. */
+export type SubscriptionBillingAttemptGeneralError = {
+  __typename?: 'SubscriptionBillingAttemptGeneralError';
+  /** The error code for the failure. */
+  code: SubscriptionBillingAttemptGeneralErrorCode;
+};
+
+/** Error codes for other billing attempt failures. */
+export enum SubscriptionBillingAttemptGeneralErrorCode {
+  /** Customer is invalid. */
+  CustomerInvalid = 'CUSTOMER_INVALID',
+  /** Customer was not found. */
+  CustomerNotFound = 'CUSTOMER_NOT_FOUND',
+  /** Free gift cards are not allowed. */
+  FreeGiftCardNotAllowed = 'FREE_GIFT_CARD_NOT_ALLOWED',
+  /** Billing address is invalid. */
+  InvalidBillingAddress = 'INVALID_BILLING_ADDRESS',
+  /** Merchant account error. */
+  MerchantAccountError = 'MERCHANT_ACCOUNT_ERROR',
+  /** Non-test order limit reached. */
+  NonTestOrderLimitReached = 'NON_TEST_ORDER_LIMIT_REACHED',
+  /** Payment method test mode incompatible with gateway. */
+  PaymentMethodIncompatibleWithGatewayConfig = 'PAYMENT_METHOD_INCOMPATIBLE_WITH_GATEWAY_CONFIG',
+  /** Payment method was not found. */
+  PaymentMethodNotFound = 'PAYMENT_METHOD_NOT_FOUND',
+  /** Payment method not specified. */
+  PaymentMethodNotSpecified = 'PAYMENT_METHOD_NOT_SPECIFIED',
+  /** Payment provider is not enabled. */
+  PaymentProviderIsNotEnabled = 'PAYMENT_PROVIDER_IS_NOT_ENABLED'
 }
 
 /** A base error type that applies to all uncategorized error classes. */
@@ -62956,6 +72815,8 @@ export type SubscriptionBillingAttemptGenericError = SubscriptionBillingAttemptP
 
 /** The input fields required to complete a subscription billing attempt. */
 export type SubscriptionBillingAttemptInput = {
+  /** The actor who initiated a subscription action. */
+  actor?: InputMaybe<SubscriptionActor>;
   /**
    * Select the specific billing cycle to be billed.
    * Default to bill the current billing cycle if not specified.
@@ -62974,6 +72835,8 @@ export type SubscriptionBillingAttemptInput = {
    * pushed to the next anchor date, this field can override the billing attempt date.
    */
   originTime?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Select payment processing policy for the billing attempt. Defaults to FAIL_UNLESS_VALID_PAYMENT_METHOD. */
+  paymentProcessingPolicy?: InputMaybe<SubscriptionBillingAttemptPaymentProcessingPolicy>;
 };
 
 /** An inventory error caused by an issue with one or more of the contract merchandise lines. */
@@ -62996,6 +72859,33 @@ export type SubscriptionBillingAttemptInsufficientStockProductVariantsErrorInsuf
   last?: InputMaybe<Scalars['Int']['input']>;
   reverse?: InputMaybe<Scalars['Boolean']['input']>;
 };
+
+/** An inventory-related error that occurred during a subscription billing attempt. */
+export type SubscriptionBillingAttemptInventoryError = {
+  __typename?: 'SubscriptionBillingAttemptInventoryError';
+  /** The error code for the inventory-related failure. */
+  code: SubscriptionBillingAttemptInventoryErrorCode;
+  /** A list of product variants that caused the insufficient inventory error. */
+  insufficientStockProductVariants?: Maybe<ProductVariantConnection>;
+};
+
+
+/** An inventory-related error that occurred during a subscription billing attempt. */
+export type SubscriptionBillingAttemptInventoryErrorInsufficientStockProductVariantsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Error codes for inventory-related billing attempt failures. */
+export enum SubscriptionBillingAttemptInventoryErrorCode {
+  /** Insufficient inventory. */
+  InsufficientInventory = 'INSUFFICIENT_INVENTORY',
+  /** No inventory location found or enabled. */
+  InventoryAllocationsNotFound = 'INVENTORY_ALLOCATIONS_NOT_FOUND'
+}
 
 /** The inventory policy for a billing attempt. */
 export enum SubscriptionBillingAttemptInventoryPolicy {
@@ -63035,11 +72925,166 @@ export type SubscriptionBillingAttemptOutOfStockProductVariantsErrorOutOfStockPr
   reverse?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+/** A payment challenge that the customer must complete. */
+export type SubscriptionBillingAttemptPaymentChallenge = {
+  __typename?: 'SubscriptionBillingAttemptPaymentChallenge';
+  /** URL to redirect the customer for authentication. */
+  nextActionUrl: Scalars['URL']['output'];
+  /** The status of the payment challenge. */
+  status: SubscriptionBillingAttemptPaymentChallengeStatus;
+};
+
+/** The status of the billing attempt authentication process. */
+export enum SubscriptionBillingAttemptPaymentChallengeStatus {
+  /** The billing attempt is rejected because the customer action was required. The customer has not yet attempted to complete the challenge. */
+  OffSessionRejected = 'OFF_SESSION_REJECTED',
+  /** The customer was brought on session and challenged. */
+  OnSessionChallenged = 'ON_SESSION_CHALLENGED'
+}
+
+/** A payment-related error that occurred during a subscription billing attempt. */
+export type SubscriptionBillingAttemptPaymentError = {
+  __typename?: 'SubscriptionBillingAttemptPaymentError';
+  /** The error code for the payment failure. */
+  code: SubscriptionBillingAttemptPaymentErrorCode;
+};
+
+/** Error codes for payment-related billing attempt failures. */
+export enum SubscriptionBillingAttemptPaymentErrorCode {
+  /** The transaction amount is too large. */
+  AmountTooLarge = 'AMOUNT_TOO_LARGE',
+  /** The transaction amount is too small. */
+  AmountTooSmall = 'AMOUNT_TOO_SMALL',
+  /** There was an error during the authentication. */
+  AuthenticationError = 'AUTHENTICATION_ERROR',
+  /** Authentication failed during the payment processing. */
+  AuthenticationFailed = 'AUTHENTICATION_FAILED',
+  /** Additional authentication is required for this payment. */
+  AuthenticationRequired = 'AUTHENTICATION_REQUIRED',
+  /** The buyer canceled the payment method. */
+  BuyerCanceledPaymentMethod = 'BUYER_CANCELED_PAYMENT_METHOD',
+  /** The card issuer requires the cardholder to call. */
+  CallIssuer = 'CALL_ISSUER',
+  /** The payment was cancelled. */
+  CancelledPayment = 'CANCELLED_PAYMENT',
+  /** The card was declined. */
+  CardDeclined = 'CARD_DECLINED',
+  /** The card number is incorrect. */
+  CardNumberIncorrect = 'CARD_NUMBER_INCORRECT',
+  /** The payment confirmation was rejected. */
+  ConfirmationRejected = 'CONFIRMATION_REJECTED',
+  /** The card issuer returned 'do not honor'. The customer should reach out to their card-issuing bank for more information. */
+  DoNotHonor = 'DO_NOT_HONOR',
+  /** The required buyer action has expired. */
+  ExpiredBuyerAction = 'EXPIRED_BUYER_ACTION',
+  /** The card has expired. */
+  ExpiredCard = 'EXPIRED_CARD',
+  /** Payment method has expired. */
+  ExpiredPaymentMethod = 'EXPIRED_PAYMENT_METHOD',
+  /** Fraud was suspected on this transaction. */
+  FraudSuspected = 'FRAUD_SUSPECTED',
+  /** A generic payment error occurred. */
+  GenericError = 'GENERIC_ERROR',
+  /** The billing address is incorrect. */
+  IncorrectAddress = 'INCORRECT_ADDRESS',
+  /** The card security code is incorrect. */
+  IncorrectCvc = 'INCORRECT_CVC',
+  /** The card number is incorrect. */
+  IncorrectNumber = 'INCORRECT_NUMBER',
+  /** The PIN is incorrect. */
+  IncorrectPin = 'INCORRECT_PIN',
+  /** The postal/ZIP code is incorrect. */
+  IncorrectZip = 'INCORRECT_ZIP',
+  /** The payment method has insufficient funds to complete the payment. */
+  InsufficientFunds = 'INSUFFICIENT_FUNDS',
+  /** The transaction amount is invalid. */
+  InvalidAmount = 'INVALID_AMOUNT',
+  /** The currency is not supported. */
+  InvalidCurrency = 'INVALID_CURRENCY',
+  /** The customer billing agreement is invalid. */
+  InvalidCustomerBillingAgreement = 'INVALID_CUSTOMER_BILLING_AGREEMENT',
+  /** The card security code is invalid. */
+  InvalidCvc = 'INVALID_CVC',
+  /** The expiry date is invalid. */
+  InvalidExpiryDate = 'INVALID_EXPIRY_DATE',
+  /** The card number is invalid. */
+  InvalidNumber = 'INVALID_NUMBER',
+  /** Payment method is invalid. */
+  InvalidPaymentMethod = 'INVALID_PAYMENT_METHOD',
+  /** The purchase type is invalid. */
+  InvalidPurchaseType = 'INVALID_PURCHASE_TYPE',
+  /** The payment request is invalid. */
+  InvalidRequest = 'INVALID_REQUEST',
+  /** The shipping address is invalid. */
+  InvalidShippingAddress = 'INVALID_SHIPPING_ADDRESS',
+  /** The invoice has already been paid. */
+  InvoiceAlreadyPaid = 'INVOICE_ALREADY_PAID',
+  /** The payment was declined due to a merchant rule. */
+  MerchantRule = 'MERCHANT_RULE',
+  /** The off-session payment was rejected. */
+  OffSessionRejected = 'OFF_SESSION_REJECTED',
+  /** Payment method was declined. */
+  PaymentMethodDeclined = 'PAYMENT_METHOD_DECLINED',
+  /** The payment method type is not supported. */
+  PaymentMethodUnsupported = 'PAYMENT_METHOD_UNSUPPORTED',
+  /** An exception occurred with the payment provider. */
+  PaymentProviderError = 'PAYMENT_PROVIDER_ERROR',
+  /** A general PayPal error occurred. */
+  PaypalErrorGeneral = 'PAYPAL_ERROR_GENERAL',
+  /** A processing error occurred. */
+  ProcessingError = 'PROCESSING_ERROR',
+  /** Purchase type is not supported. */
+  PurchaseTypeNotSupported = 'PURCHASE_TYPE_NOT_SUPPORTED',
+  /** The payment retry was declined. */
+  RetryDeclined = 'RETRY_DECLINED',
+  /** A test mode error occurred. */
+  TestMode = 'TEST_MODE',
+  /** The transaction exceeded the limit. */
+  TransactionLimitExceeded = 'TRANSACTION_LIMIT_EXCEEDED',
+  /** A transient error occurred, try again later. */
+  TransientError = 'TRANSIENT_ERROR'
+}
+
+/** The payment processing policy for a billing attempt. */
+export enum SubscriptionBillingAttemptPaymentProcessingPolicy {
+  /**
+   * Attempt to process payment on the billing attempt and fail the billing attempt if
+   *         the payment method is not valid or if a payment method does not exist.
+   */
+  FailUnlessValidPaymentMethod = 'FAIL_UNLESS_VALID_PAYMENT_METHOD',
+  /** Skip payment processing on the billing attempt and create an unpaid order. */
+  SkipPaymentAndCreateUnpaidOrder = 'SKIP_PAYMENT_AND_CREATE_UNPAID_ORDER'
+}
+
+/** The billing attempt is currently being processed. */
+export type SubscriptionBillingAttemptPendingState = {
+  __typename?: 'SubscriptionBillingAttemptPendingState';
+  /** Always true when the billing attempt is pending. */
+  processing: Scalars['Boolean']['output'];
+};
+
 /** An error that prevented a billing attempt. */
 export type SubscriptionBillingAttemptProcessingError = {
   /** The code for the error. */
   code: SubscriptionBillingAttemptErrorCode;
   /** An explanation of the error. */
+  message: Scalars['String']['output'];
+};
+
+/** The state of a subscription billing attempt with state-specific data. */
+export type SubscriptionBillingAttemptState = SubscriptionBillingAttemptActionRequiredState | SubscriptionBillingAttemptFailedState | SubscriptionBillingAttemptPendingState | SubscriptionBillingAttemptSuccessState;
+
+/** The billing attempt completed successfully and created an order. */
+export type SubscriptionBillingAttemptSuccessState = {
+  __typename?: 'SubscriptionBillingAttemptSuccessState';
+  /** The order created by the successful billing attempt. May be null if the order was deleted. */
+  order?: Maybe<Order>;
+};
+
+/** An unexpected error that occurred during a subscription billing attempt. */
+export type SubscriptionBillingAttemptUnexpectedError = {
+  __typename?: 'SubscriptionBillingAttemptUnexpectedError';
+  /** A message describing the unexpected error. */
   message: Scalars['String']['output'];
 };
 
@@ -63673,6 +73718,8 @@ export type SubscriptionContractActivatePayload = {
 
 /** The input fields required to create a Subscription Contract. */
 export type SubscriptionContractAtomicCreateInput = {
+  /** The actor who initiated a subscription action. */
+  actor?: InputMaybe<SubscriptionActor>;
   /** The attributes used as input for the Subscription Draft. */
   contract: SubscriptionDraftInput;
   /** The currency used for the subscription contract. */
@@ -63791,6 +73838,8 @@ export type SubscriptionContractConnection = {
 
 /** The input fields required to create a Subscription Contract. */
 export type SubscriptionContractCreateInput = {
+  /** The actor who initiated a subscription action. */
+  actor?: InputMaybe<SubscriptionActor>;
   /** The attributes used as input for the Subscription Draft. */
   contract: SubscriptionDraftInput;
   /** The currency used for the subscription contract. */
@@ -64303,6 +74352,8 @@ export type SubscriptionDiscountValue = SubscriptionDiscountFixedAmountValue | S
  * [subscription contract](https://shopify.dev/docs/api/admin-graphql/latest/objects/SubscriptionContract)
  * before it's committed. It serves as a staging area for making changes to an existing subscription or creating
  * a new one. The draft allows you to preview and modify various aspects of a subscription before applying the changes.
+ * This object is deprecated in favor of the
+ * [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api).
  *
  * Use the `SubscriptionDraft` object to:
  *
@@ -64389,6 +74440,8 @@ export type SubscriptionDraft = Node & {
  * [subscription contract](https://shopify.dev/docs/api/admin-graphql/latest/objects/SubscriptionContract)
  * before it's committed. It serves as a staging area for making changes to an existing subscription or creating
  * a new one. The draft allows you to preview and modify various aspects of a subscription before applying the changes.
+ * This object is deprecated in favor of the
+ * [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api).
  *
  * Use the `SubscriptionDraft` object to:
  *
@@ -64429,6 +74482,8 @@ export type SubscriptionDraftConcatenatedBillingCyclesArgs = {
  * [subscription contract](https://shopify.dev/docs/api/admin-graphql/latest/objects/SubscriptionContract)
  * before it's committed. It serves as a staging area for making changes to an existing subscription or creating
  * a new one. The draft allows you to preview and modify various aspects of a subscription before applying the changes.
+ * This object is deprecated in favor of the
+ * [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api).
  *
  * Use the `SubscriptionDraft` object to:
  *
@@ -64464,6 +74519,8 @@ export type SubscriptionDraftCustomerPaymentMethodArgs = {
  * [subscription contract](https://shopify.dev/docs/api/admin-graphql/latest/objects/SubscriptionContract)
  * before it's committed. It serves as a staging area for making changes to an existing subscription or creating
  * a new one. The draft allows you to preview and modify various aspects of a subscription before applying the changes.
+ * This object is deprecated in favor of the
+ * [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api).
  *
  * Use the `SubscriptionDraft` object to:
  *
@@ -64499,6 +74556,8 @@ export type SubscriptionDraftDeliveryOptionsArgs = {
  * [subscription contract](https://shopify.dev/docs/api/admin-graphql/latest/objects/SubscriptionContract)
  * before it's committed. It serves as a staging area for making changes to an existing subscription or creating
  * a new one. The draft allows you to preview and modify various aspects of a subscription before applying the changes.
+ * This object is deprecated in favor of the
+ * [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api).
  *
  * Use the `SubscriptionDraft` object to:
  *
@@ -64538,6 +74597,8 @@ export type SubscriptionDraftDiscountsArgs = {
  * [subscription contract](https://shopify.dev/docs/api/admin-graphql/latest/objects/SubscriptionContract)
  * before it's committed. It serves as a staging area for making changes to an existing subscription or creating
  * a new one. The draft allows you to preview and modify various aspects of a subscription before applying the changes.
+ * This object is deprecated in favor of the
+ * [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api).
  *
  * Use the `SubscriptionDraft` object to:
  *
@@ -64577,6 +74638,8 @@ export type SubscriptionDraftDiscountsAddedArgs = {
  * [subscription contract](https://shopify.dev/docs/api/admin-graphql/latest/objects/SubscriptionContract)
  * before it's committed. It serves as a staging area for making changes to an existing subscription or creating
  * a new one. The draft allows you to preview and modify various aspects of a subscription before applying the changes.
+ * This object is deprecated in favor of the
+ * [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api).
  *
  * Use the `SubscriptionDraft` object to:
  *
@@ -64616,6 +74679,8 @@ export type SubscriptionDraftDiscountsRemovedArgs = {
  * [subscription contract](https://shopify.dev/docs/api/admin-graphql/latest/objects/SubscriptionContract)
  * before it's committed. It serves as a staging area for making changes to an existing subscription or creating
  * a new one. The draft allows you to preview and modify various aspects of a subscription before applying the changes.
+ * This object is deprecated in favor of the
+ * [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api).
  *
  * Use the `SubscriptionDraft` object to:
  *
@@ -64655,6 +74720,8 @@ export type SubscriptionDraftDiscountsUpdatedArgs = {
  * [subscription contract](https://shopify.dev/docs/api/admin-graphql/latest/objects/SubscriptionContract)
  * before it's committed. It serves as a staging area for making changes to an existing subscription or creating
  * a new one. The draft allows you to preview and modify various aspects of a subscription before applying the changes.
+ * This object is deprecated in favor of the
+ * [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api).
  *
  * Use the `SubscriptionDraft` object to:
  *
@@ -64694,6 +74761,8 @@ export type SubscriptionDraftLinesArgs = {
  * [subscription contract](https://shopify.dev/docs/api/admin-graphql/latest/objects/SubscriptionContract)
  * before it's committed. It serves as a staging area for making changes to an existing subscription or creating
  * a new one. The draft allows you to preview and modify various aspects of a subscription before applying the changes.
+ * This object is deprecated in favor of the
+ * [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api).
  *
  * Use the `SubscriptionDraft` object to:
  *
@@ -64733,6 +74802,8 @@ export type SubscriptionDraftLinesAddedArgs = {
  * [subscription contract](https://shopify.dev/docs/api/admin-graphql/latest/objects/SubscriptionContract)
  * before it's committed. It serves as a staging area for making changes to an existing subscription or creating
  * a new one. The draft allows you to preview and modify various aspects of a subscription before applying the changes.
+ * This object is deprecated in favor of the
+ * [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api).
  *
  * Use the `SubscriptionDraft` object to:
  *
@@ -64772,6 +74843,8 @@ export type SubscriptionDraftLinesRemovedArgs = {
  * [subscription contract](https://shopify.dev/docs/api/admin-graphql/latest/objects/SubscriptionContract)
  * before it's committed. It serves as a staging area for making changes to an existing subscription or creating
  * a new one. The draft allows you to preview and modify various aspects of a subscription before applying the changes.
+ * This object is deprecated in favor of the
+ * [SubscriptionContractCalculation API](https://shopify.dev/docs/apps/build/purchase-options/subscriptions/contracts/migrate-to-subscription-calculation-api).
  *
  * Use the `SubscriptionDraft` object to:
  *
@@ -64938,6 +75011,10 @@ export enum SubscriptionDraftErrorCode {
   StaleContract = 'STALE_CONTRACT',
   /** The input value is too long. */
   TooLong = 'TOO_LONG',
+  /** The contract draft has too many discounts. */
+  TooManyDiscounts = 'TOO_MANY_DISCOUNTS',
+  /** The contract draft has too many lines. */
+  TooManyLines = 'TOO_MANY_LINES',
   /** The input value is too short. */
   TooShort = 'TOO_SHORT',
   /** Billing cycle selector cannot select upcoming billing cycle past limit. */
@@ -65623,6 +75700,8 @@ export enum TaxExemption {
   CaMbFarmerExemption = 'CA_MB_FARMER_EXEMPTION',
   /** This customer is exempt from specific taxes for holding a valid RESELLER_EXEMPTION in Manitoba. */
   CaMbResellerExemption = 'CA_MB_RESELLER_EXEMPTION',
+  /** This customer is exempt from VPT (Vapour Products Tax) for holding a valid VPT_RESELLER_EXEMPTION in Newfoundland and Labrador. */
+  CaNlVptResellerExemption = 'CA_NL_VPT_RESELLER_EXEMPTION',
   /** This customer is exempt from specific taxes for holding a valid COMMERCIAL_FISHERY_EXEMPTION in Nova Scotia. */
   CaNsCommercialFisheryExemption = 'CA_NS_COMMERCIAL_FISHERY_EXEMPTION',
   /** This customer is exempt from specific taxes for holding a valid FARMER_EXEMPTION in Nova Scotia. */
@@ -65643,6 +75722,8 @@ export enum TaxExemption {
   CaSkResellerExemption = 'CA_SK_RESELLER_EXEMPTION',
   /** This customer is exempt from specific taxes for holding a valid SUB_CONTRACTOR_EXEMPTION in Saskatchewan. */
   CaSkSubContractorExemption = 'CA_SK_SUB_CONTRACTOR_EXEMPTION',
+  /** This customer is exempt from VPT (Vapour Products Tax) for holding a valid VPT_RESELLER_EXEMPTION in Saskatchewan. */
+  CaSkVptResellerExemption = 'CA_SK_VPT_RESELLER_EXEMPTION',
   /** This customer is exempt from specific taxes for holding a valid STATUS_CARD_EXEMPTION in Canada. */
   CaStatusCardExemption = 'CA_STATUS_CARD_EXEMPTION',
   /** This customer is exempt from VAT for purchases within the EU that is shipping from outside of customer's country, as well as purchases from the EU to the UK. */
@@ -65785,6 +75866,41 @@ export enum TaxPartnerState {
   Pending = 'PENDING',
   /** App is configured, but not used for tax calculations. */
   Ready = 'READY'
+}
+
+/** Tax settings for a customer. */
+export type TaxSettings = {
+  __typename?: 'TaxSettings';
+  /** The customer's tax ID. */
+  taxId?: Maybe<Scalars['String']['output']>;
+};
+
+/** Return type for `taxSummaryCreate` mutation. */
+export type TaxSummaryCreatePayload = {
+  __typename?: 'TaxSummaryCreatePayload';
+  /** A list of orders that were successfully enqueued to create a tax summary. */
+  enqueuedOrders?: Maybe<Array<Order>>;
+  /** The list of errors that occurred from executing the mutation. */
+  userErrors: Array<TaxSummaryCreateUserError>;
+};
+
+/** An error that occurs during the execution of `TaxSummaryCreate`. */
+export type TaxSummaryCreateUserError = DisplayableError & {
+  __typename?: 'TaxSummaryCreateUserError';
+  /** The error code. */
+  code?: Maybe<TaxSummaryCreateUserErrorCode>;
+  /** The path to the input field that caused the error. */
+  field?: Maybe<Array<Scalars['String']['output']>>;
+  /** The error message. */
+  message: Scalars['String']['output'];
+};
+
+/** Possible error codes that can be returned by `TaxSummaryCreateUserError`. */
+export enum TaxSummaryCreateUserErrorCode {
+  /** There was an error during enqueueing of the tax summary creation job(s). */
+  GeneralError = 'GENERAL_ERROR',
+  /** No order was not found. */
+  OrderNotFound = 'ORDER_NOT_FOUND'
 }
 
 /**
@@ -66465,7 +76581,7 @@ export enum TranslatableResourceType {
   Collection = 'COLLECTION',
   /** A collection image. Translatable fields: `alt`. */
   CollectionImage = 'COLLECTION_IMAGE',
-  /** The delivery method definition. For example, "Standard", or "Expedited". Translatable fields: `name`. */
+  /** The delivery method definition. For example, "Standard", or "Expedited". Translatable fields: `name`, `description`. */
   DeliveryMethodDefinition = 'DELIVERY_METHOD_DEFINITION',
   /** An email template. Translatable fields: `title`, `body_html`. */
   EmailTemplate = 'EMAIL_TEMPLATE',
@@ -66477,7 +76593,10 @@ export enum TranslatableResourceType {
   MediaImage = 'MEDIA_IMAGE',
   /** A category of links. Translatable fields: `title`. */
   Menu = 'MENU',
-  /** A Metafield. Translatable fields: `value`. */
+  /**
+   * A Metafield. Translatable fields: `value`.
+   * @deprecated Query metafields via their respective resource owners and use `Metafield.translatable` to determine which is translatable.
+   */
   Metafield = 'METAFIELD',
   /** A Metaobject. Translatable fields are determined by the Metaobject type. */
   Metaobject = 'METAOBJECT',
@@ -66819,8 +76938,13 @@ export type UnverifiedReturnLineItem = Node & ReturnLineItemType & {
   refundableQuantity: Scalars['Int']['output'];
   /** The quantity that was refunded. */
   refundedQuantity: Scalars['Int']['output'];
-  /** The reason for returning the item. */
+  /**
+   * The reason for returning the item.
+   * @deprecated Use `returnReasonDefinition` instead. This field will be removed in the future.
+   */
   returnReason: ReturnReason;
+  /** The standardized reason for why the item is being returned. */
+  returnReasonDefinition?: Maybe<ReturnReasonDefinition>;
   /** Additional information about the reason for the return. Maximum length: 255 characters. */
   returnReasonNote: Scalars['String']['output'];
   /** The unit price of the unverified return line item. */
@@ -67666,7 +77790,7 @@ export type WebhookSubscription = LegacyInteroperability & Node & {
   format: WebhookSubscriptionFormat;
   /** A globally-unique ID. */
   id: Scalars['ID']['output'];
-  /** The list of fields to be included in the webhook subscription. Only the fields specified will be included in the webhook payload. If null, then all fields will be included. Learn more about [modifying webhook payloads](https://shopify.dev/docs/apps/build/webhooks/customize/modify_payloads). */
+  /** The list of fields to be included in the webhook subscription. Only the fields specified will be included in the webhook payload. If null, then all fields will be included. Learn more about [modifying webhook payloads](https://shopify.dev/docs/apps/build/webhooks/customize/modify-payloads). */
   includeFields: Array<Scalars['String']['output']>;
   /** The ID of the corresponding resource in the REST Admin API. */
   legacyResourceId: Scalars['UnsignedInt64']['output'];
@@ -67674,6 +77798,8 @@ export type WebhookSubscription = LegacyInteroperability & Node & {
   metafieldNamespaces: Array<Scalars['String']['output']>;
   /** The list of identifiers specifying metafields to include in the webhook subscription. */
   metafields: Array<WebhookSubscriptionMetafieldIdentifier>;
+  /** A human-readable name for the webhook subscription. */
+  name?: Maybe<Scalars['String']['output']>;
   /** The type of event that triggers the webhook. The topic determines when the webhook subscription sends a webhook, as well as what class of data object that webhook contains. */
   topic: WebhookSubscriptionTopic;
   /** The date and time when the webhook subscription was updated. */
@@ -67741,6 +77867,8 @@ export type WebhookSubscriptionInput = {
   metafieldNamespaces?: InputMaybe<Array<Scalars['String']['input']>>;
   /** A list of identifiers specifying metafields to include in the webhook payload. */
   metafields?: InputMaybe<Array<HasMetafieldsMetafieldIdentifierInput>>;
+  /** A human-readable name for the webhook subscription. */
+  name?: InputMaybe<Scalars['String']['input']>;
   /** The URI where the webhook subscription should send events. Supports an HTTPS URL, a Google Pub/Sub URI (pubsub://{project-id}:{topic-id}) or an Amazon EventBridge event source ARN. */
   uri?: InputMaybe<Scalars['String']['input']>;
 };
@@ -67832,7 +77960,7 @@ export enum WebhookSubscriptionTopic {
   CollectionsCreate = 'COLLECTIONS_CREATE',
   /** The webhook topic for `collections/delete` events. Occurs whenever a collection is deleted. Requires the `read_products` scope. */
   CollectionsDelete = 'COLLECTIONS_DELETE',
-  /** The webhook topic for `collections/update` events. Occurs whenever a collection is updated, including whenever products are added or removed from the collection. Occurs once if multiple products are added or removed from a collection at the same time. Requires the `read_products` scope. */
+  /** The webhook topic for `collections/update` events. Occurs whenever a collection is updated, including when a product is manually added or removed from the collection or when the collection rules change. Occurs once if multiple products are manually added or removed from a collection at the same time. Not fired when attribute changes affect whether a product matches a collection's rules. Requires the `read_products` scope. */
   CollectionsUpdate = 'COLLECTIONS_UPDATE',
   /** The webhook topic for `collection_listings/add` events. Occurs whenever a collection listing is added. Requires the `read_product_listings` scope. */
   CollectionListingsAdd = 'COLLECTION_LISTINGS_ADD',
@@ -67886,6 +78014,8 @@ export enum WebhookSubscriptionTopic {
   CustomersPurchasingSummary = 'CUSTOMERS_PURCHASING_SUMMARY',
   /** The webhook topic for `customers/update` events. Occurs whenever a customer is updated. Requires the `read_customers` scope. */
   CustomersUpdate = 'CUSTOMERS_UPDATE',
+  /** The webhook topic for `customers_whats_app_marketing_consent/update` events. Occurs whenever a customer's WhatsApp marketing consent is updated. Requires the `read_customers` scope. */
+  CustomersWhatsAppMarketingConsentUpdate = 'CUSTOMERS_WHATS_APP_MARKETING_CONSENT_UPDATE',
   /** The webhook topic for `customer_account_settings/update` events. Triggers when merchants change customer account setting. */
   CustomerAccountSettingsUpdate = 'CUSTOMER_ACCOUNT_SETTINGS_UPDATE',
   /** The webhook topic for `customer_groups/create` events. Occurs whenever a customer saved search is created. Requires the `read_customers` scope. */
@@ -67994,6 +78124,8 @@ export enum WebhookSubscriptionTopic {
   FulfillmentOrdersLineItemsPreparedForLocalDelivery = 'FULFILLMENT_ORDERS_LINE_ITEMS_PREPARED_FOR_LOCAL_DELIVERY',
   /** The webhook topic for `fulfillment_orders/line_items_prepared_for_pickup` events. Triggers when one or more of the line items for a fulfillment order are prepared for pickup Requires at least one of the following scopes: read_merchant_managed_fulfillment_orders, read_assigned_fulfillment_orders, read_third_party_fulfillment_orders, read_marketplace_fulfillment_orders. */
   FulfillmentOrdersLineItemsPreparedForPickup = 'FULFILLMENT_ORDERS_LINE_ITEMS_PREPARED_FOR_PICKUP',
+  /** The webhook topic for `fulfillment_orders/manually_reported_progress_stopped` events. Occurs when a fulfillment order that has previously been manually marked as in progress is marked back as open. Requires at least one of the following scopes: read_merchant_managed_fulfillment_orders, read_assigned_fulfillment_orders, read_third_party_fulfillment_orders. */
+  FulfillmentOrdersManuallyReportedProgressStopped = 'FULFILLMENT_ORDERS_MANUALLY_REPORTED_PROGRESS_STOPPED',
   /** The webhook topic for `fulfillment_orders/merged` events. Occurs when multiple fulfillment orders are merged into a single fulfillment order. Requires at least one of the following scopes: read_merchant_managed_fulfillment_orders, read_assigned_fulfillment_orders, read_third_party_fulfillment_orders. */
   FulfillmentOrdersMerged = 'FULFILLMENT_ORDERS_MERGED',
   /**
@@ -68021,6 +78153,8 @@ export enum WebhookSubscriptionTopic {
    *  Requires at least one of the following scopes: read_merchant_managed_fulfillment_orders, read_assigned_fulfillment_orders, read_third_party_fulfillment_orders, read_marketplace_fulfillment_orders.
    */
   FulfillmentOrdersPlacedOnHold = 'FULFILLMENT_ORDERS_PLACED_ON_HOLD',
+  /** The webhook topic for `fulfillment_orders/progress_reported` events. Occurs when progress is reported for a fulfillment order. Requires at least one of the following scopes: read_merchant_managed_fulfillment_orders, read_assigned_fulfillment_orders, read_third_party_fulfillment_orders. */
+  FulfillmentOrdersProgressReported = 'FULFILLMENT_ORDERS_PROGRESS_REPORTED',
   /**
    * The webhook topic for `fulfillment_orders/rescheduled` events. Triggers when a fulfillment order is rescheduled.
    *
@@ -68072,6 +78206,8 @@ export enum WebhookSubscriptionTopic {
   InventoryTransfersReadyToShip = 'INVENTORY_TRANSFERS_READY_TO_SHIP',
   /** The webhook topic for `inventory_transfers/remove_items` events. Occurs any time items are removed from a transfer. Requires the `read_inventory_transfers` scope. */
   InventoryTransfersRemoveItems = 'INVENTORY_TRANSFERS_REMOVE_ITEMS',
+  /** The webhook topic for `inventory_transfers/updated` events. Triggers when a shipment belonging to the transfer is created, edited, or removed. Re-fetch the transfer to get the latest state. Requires the `read_inventory_transfers` scope. */
+  InventoryTransfersUpdated = 'INVENTORY_TRANSFERS_UPDATED',
   /** The webhook topic for `inventory_transfers/update_item_quantities` events. Occurs whenever the quantity of transfer line items changes. Requires the `read_inventory_transfers` scope. */
   InventoryTransfersUpdateItemQuantities = 'INVENTORY_TRANSFERS_UPDATE_ITEM_QUANTITIES',
   /** The webhook topic for `locales/create` events. Occurs whenever a shop locale is created Requires the `read_locales` scope. */
@@ -68090,6 +78226,8 @@ export enum WebhookSubscriptionTopic {
   LocationsDelete = 'LOCATIONS_DELETE',
   /** The webhook topic for `locations/update` events. Occurs whenever a location is updated. Requires the `read_locations` scope. */
   LocationsUpdate = 'LOCATIONS_UPDATE',
+  /** The webhook topic for `machine_translation_batch/completed` events. Occurs when a whole-shop machine translation batch completes. */
+  MachineTranslationBatchCompleted = 'MACHINE_TRANSLATION_BATCH_COMPLETED',
   /** The webhook topic for `markets_backup_region/update` events. Occurs when a backup region is updated. Requires the `read_markets` scope. */
   MarketsBackupRegionUpdate = 'MARKETS_BACKUP_REGION_UPDATE',
   /** The webhook topic for `markets/create` events. Occurs when a new market is created. Requires the `read_markets` scope. */
@@ -68120,6 +78258,8 @@ export enum WebhookSubscriptionTopic {
   OrdersEdited = 'ORDERS_EDITED',
   /** The webhook topic for `orders/fulfilled` events. Occurs whenever an order is fulfilled. Requires at least one of the following scopes: read_orders, read_marketplace_orders. */
   OrdersFulfilled = 'ORDERS_FULFILLED',
+  /** The webhook topic for `orders/link_requested` events. Occurs whenever a customer requests a new order link from the expired order status page. Requires at least one of the following scopes: read_orders, read_marketplace_orders, read_buyer_membership_orders. */
+  OrdersLinkRequested = 'ORDERS_LINK_REQUESTED',
   /** The webhook topic for `orders/paid` events. Occurs whenever an order is paid. Requires at least one of the following scopes: read_orders, read_marketplace_orders. */
   OrdersPaid = 'ORDERS_PAID',
   /** The webhook topic for `orders/partially_fulfilled` events. Occurs whenever an order is partially fulfilled. Requires at least one of the following scopes: read_orders, read_marketplace_orders. */
@@ -68276,6 +78416,8 @@ export enum WebhookSubscriptionTopic {
   TaxServicesCreate = 'TAX_SERVICES_CREATE',
   /** The webhook topic for `tax_services/update` events. Occurs whenver a tax service is updated. Requires the `read_taxes` scope. */
   TaxServicesUpdate = 'TAX_SERVICES_UPDATE',
+  /** The webhook topic for `tax_summaries/create` events. Occurs when a tax summary is created. Consumed by tax partners. Requires at least one of the following scopes: read_fulfillments, read_marketplace_orders, read_orders. */
+  TaxSummariesCreate = 'TAX_SUMMARIES_CREATE',
   /** The webhook topic for `tender_transactions/create` events. Occurs when a tender transaction is created. Requires the `read_orders` scope. */
   TenderTransactionsCreate = 'TENDER_TRANSACTIONS_CREATE',
   /** The webhook topic for `themes/create` events. Occurs whenever a theme is created. Does not occur when theme files are created. Requires the `read_themes` scope. */

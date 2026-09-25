@@ -39,7 +39,7 @@ export class ShopifyGraphQLClient {
   constructor(
     shopDomain: string,
     accessToken: string,
-    apiVersion = '2025-01',
+    apiVersion = '2026-07',
     maxRetries = 3
   ) {
     this.maxRetries = maxRetries;
