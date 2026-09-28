@@ -22,6 +22,7 @@ import { FinaleHttpClient } from './client/http-client';
 import { FinaleFacilities } from './resources/facilities';
 import { FinaleOrders } from './resources/orders';
 import { FinaleProducts } from './resources/products';
+import { FinaleShipments } from './resources/shipments';
 import { FinaleVariances } from './resources/variances';
 import type { FinaleConnectorConfig, FinaleQuota } from './types/config';
 
@@ -36,6 +37,8 @@ export const FINALE_BASE_URL = 'https://app.finaleinventory.com';
  */
 export class Finale {
   readonly orders: FinaleOrders;
+  /** Physical movement records — the only evidence a purchase order was received. */
+  readonly shipments: FinaleShipments;
   readonly variances: FinaleVariances;
   readonly facilities: FinaleFacilities;
   readonly products: FinaleProducts;
@@ -45,6 +48,7 @@ export class Finale {
   constructor(config: FinaleConnectorConfig) {
     this.http = new FinaleHttpClient(config);
     this.orders = new FinaleOrders(this.http);
+    this.shipments = new FinaleShipments(this.http);
     this.variances = new FinaleVariances(this.http);
     this.facilities = new FinaleFacilities(this.http);
     this.products = new FinaleProducts(this.http);
@@ -83,6 +87,7 @@ export { FinaleHttpClient } from './client/http-client';
 
 // ─── Resources ────────────────────────────────────────────────────────────────
 export { FinaleOrders, DEFAULT_COMPLETED_STATUSES } from './resources/orders';
+export { FinaleShipments } from './resources/shipments';
 export { FinaleVariances } from './resources/variances';
 export { FinaleFacilities } from './resources/facilities';
 export { FinaleProducts } from './resources/products';
@@ -110,6 +115,13 @@ export type {
   FinaleVarianceLine,
   FinaleVarianceQuery,
 } from './types/variances';
+export type {
+  FinaleShipment,
+  FinaleShipmentLine,
+  FinaleShipmentQuery,
+  FinaleShipmentStatus,
+  FinaleShipmentType,
+} from './types/shipments';
 
 // ─── Errors ───────────────────────────────────────────────────────────────────
 export {
