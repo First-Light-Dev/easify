@@ -1024,8 +1024,16 @@ export const ProductSchema = z.looseObject({
    */
   CustomPrices: z.array(z.unknown()).nullable().optional()
 ,
-  /** Verified against the live v2 API 2026-08-10. */
-  AlwaysShowQuantity: z.boolean().nullable().optional(),
+  /**
+   * Boolean in Cin7's blueprint, but the live v2 API returns a NUMBER (0/1) — confirmed on
+   * 2026-09-28, where a strict boolean made every `/product` read throw a validation error and
+   * silently broke the caller. Accepts either and normalises to boolean.
+   */
+  AlwaysShowQuantity: z
+    .union([z.boolean(), z.number()])
+    .nullable()
+    .optional()
+    .transform((value) => (typeof value === 'number' ? value !== 0 : value)),
   /** Verified against the live v2 API 2026-08-10. */
   WarrantyName: z.string().nullable().optional(),
   /** Verified against the live v2 API 2026-08-10. */

@@ -314,12 +314,41 @@ export function translateFinaleError(
         resetAt: readQuota(error.response?.headers).resetAt,
       });
     }
-    if (status === 401 || status === 403) {
+    if (status === 401) {
       return new FinaleAuthError({
         ...base,
         message:
           `${prefix}Finale rejected the credentials (${status}) — ${detail}. ` +
           `Check the API key, secret and account path.`,
+        statusCode: status,
+      });
+    }
+
+    // 403 is NOT reliably an auth failure. Finale returns it for ordinary validation too —
+    // "invalid facilityUrl", "can not pack shipment because one or more items do not have
+    // product or facility specified" — and, on evidence from 2026-09-28, for throttling after a
+    // burst of calls. Reporting all of those as bad credentials sent an operator to check an API
+    // key that was working perfectly, while the real reason sat unread in the response body.
+    //
+    // So the body decides. Finale puts its explanation in `msg`; when that is present this is a
+    // rejected request, not a rejected key.
+    if (status === 403) {
+      const explained = typeof (error.response?.data as { msg?: unknown } | undefined)?.msg === 'string';
+
+      if (explained) {
+        return new FinaleClientError({
+          ...base,
+          message: `${prefix}Finale rejected the request (403) — ${detail}`,
+          statusCode: status,
+        });
+      }
+
+      return new FinaleAuthError({
+        ...base,
+        message:
+          `${prefix}Finale returned 403 with no explanation — ${detail}. This is usually a ` +
+          `credentials or permissions problem, but Finale also uses 403 for throttling, so a ` +
+          `403 that appears only under load is worth retrying before changing any keys.`,
         statusCode: status,
       });
     }

@@ -1,5 +1,11 @@
 import { AxiosInstance } from 'axios';
-import { QueryOptions, ReadableResource, ResourceOptions, WritableResource } from './base/Resource';
+import {
+  NestedDocumentResource,
+  QueryOptions,
+  ReadableResource,
+  ResourceOptions,
+  WritableResource
+} from './base/Resource';
 import {
   InventoryWriteOff,
   InventoryWriteOffListSchema,
@@ -14,6 +20,7 @@ import {
   StockTransfer,
   StockTransferLine,
   StockTransferListSchema,
+  StockTransferOrderSchema,
   StockTransferSchema
 } from './types/Stock';
 
@@ -24,6 +31,16 @@ export default class Stock {
   readonly takes: WritableResource<typeof StockTakeSchema>;
   readonly takeList: ReadableResource<typeof StockTakeListSchema>;
   readonly transfers: WritableResource<typeof StockTransferSchema>;
+  /**
+   * `/stockTransfer/order` — the transfer's order document, addressed by its parent `TaskID`.
+   *
+   * Separate from the transfer itself, and unavoidably so: a new transfer's lines can ONLY be
+   * attached here. Posting `Lines` to `/stockTransfer` is rejected with "Cannot add lines to
+   * Stock Transfer with Order while Order is not yet authorised", and passing them nested as
+   * `Order.Lines` is accepted and silently dropped — the transfer comes back with
+   * `Order.Status: NOT AVAILABLE` and no lines. Verified against the live API on 2026-09-09.
+   */
+  readonly transferOrder: NestedDocumentResource<typeof StockTransferOrderSchema>;
   readonly transferList: ReadableResource<typeof StockTransferListSchema>;
   readonly writeOffs: WritableResource<typeof InventoryWriteOffSchema>;
   readonly writeOffList: ReadableResource<typeof InventoryWriteOffListSchema>;
@@ -65,6 +82,13 @@ export default class Stock {
       StockTransferSchema,
       'StockTransferList',
       { ...options, idParam: 'TaskID' }
+    );
+    this.transferOrder = new NestedDocumentResource(
+      axios,
+      '/stockTransfer/order',
+      StockTransferOrderSchema,
+      'TaskID',
+      options
     );
     this.transferList = new ReadableResource(
       axios,
