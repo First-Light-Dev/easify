@@ -68,7 +68,11 @@ export class FinaleShipments {
     return {
       items,
       limit,
-      hasMore: clamped || scanned.length >= limit,
+      // "The range may not be exhausted", not "the page was full" — Finale under-delivers
+      // against `limit` while more of the range remains, so only an empty page proves the end.
+      // See the long note in the orders resource; this collection is read by the same kind of
+      // paging loop and would stall the same way.
+      hasMore: clamped || scanned.length > 0,
       nextChangedSince: newest ?? (clamped ? to : undefined),
     };
   }

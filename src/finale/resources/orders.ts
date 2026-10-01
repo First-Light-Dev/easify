@@ -168,11 +168,19 @@ export class FinaleOrders {
     return {
       items,
       limit,
-      // Both derived from what was SCANNED, never from what matched. A full scan window means
-      // there is more of the range to walk even if this page matched nothing, and a clamped
-      // window means there is more beyond it — otherwise a caller stops early and silently
-      // skips records.
-      hasMore: clamped || scanned.length >= limit,
+      // "The range may not be exhausted", NOT "the page was full".
+      //
+      // Finale returns FEWER rows than `limit` while more of the range remains — 495 against a
+      // limit of 500, reproducibly, with thousands of rows beyond. So page fullness cannot be
+      // used as an end-of-data test. An earlier revision did exactly that and froze
+      // `finale_sales_orders` for twelve days: the short page ended the walk, the newest row in
+      // it was the watermark the tick had started from, and every subsequent tick repeated the
+      // same no-op while reporting success.
+      //
+      // A page with ANY rows therefore means "advance the cursor and ask again". Only an empty
+      // page proves the range is finished. The cost is one extra request on an idle tick; the
+      // alternative is a poller that stops silently and permanently.
+      hasMore: clamped || scanned.length > 0,
       nextChangedSince: newestTimestamp(scanned) ?? (clamped ? to : undefined),
     };
   }
