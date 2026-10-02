@@ -52,6 +52,19 @@ export interface Cin7Config {
          * Must not throw and must not await anything slow — it runs on the request path.
          */
         onRequest?: (request: { method: string; url: string }) => void;
+        /**
+         * Awaited before each request goes out, so a consumer can pace itself.
+         *
+         * Separate from `onRequest` deliberately: that hook is metering and is documented as
+         * never blocking, so overloading it with a delay would make every existing consumer's
+         * measurement call a potential stall.
+         *
+         * Cin7's limits — 3/sec, 60/min — are low enough that any bulk operation needs a
+         * gate rather than a retry. The 429 handling below recovers an individual call; it
+         * does nothing about a job that issues them faster than the account allows, which
+         * simply fails in a different place.
+         */
+        beforeRequest?: (request: { method: string; url: string }) => Promise<void>;
         multiAPIKeyHandling?: {
             enabled: boolean;
             additionalAPIKeys: string[];
@@ -109,6 +122,14 @@ export class Cin7 {
             } catch {
                 // Metering must never break the request it is measuring.
             }
+
+            // Awaited, unlike `onRequest`: this is the one hook allowed to hold a request back.
+            // Errors are not swallowed — a pacer that cannot pace should fail loudly rather
+            // than let the caller flood the account.
+            await this.config.options?.beforeRequest?.({
+                method: config.method?.toUpperCase() ?? "GET",
+                url: config.url ?? "",
+            });
 
             if (!this.config.options?.multiAPIKeyHandling?.enabled) {
                 return config;
