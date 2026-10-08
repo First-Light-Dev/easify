@@ -27,6 +27,41 @@ export class FinaleProducts {
   constructor(private readonly http: FinaleHttpClient) {}
 
   /**
+   * One product by its Finale id or `productUrl`, or null if Finale has no such record.
+   *
+   * The counterpart to `findBySku`, and far cheaper: a per-record GET costs against the
+   * **120/minute** budget, while `findBySku` filters a collection and costs against the
+   * **300/hour** one. Reach for this whenever the URL is already in hand.
+   *
+   * It is the only correct way to get a SKU from a `productUrl`. The trailing path segment is
+   * NOT reliably the `productId` — measured against a live account on 2026-10-09, 2,468 of
+   * 20,000 products carried a numeric URL unrelated to their SKU (`COTG-1DayCleanse-10001` at
+   * `/product/100289`). Code that slices the URL instead of asking will be wrong for those, and
+   * wrong silently.
+   */
+  async get(idOrUrl: string): Promise<FinaleProduct | null> {
+    const raw = idOrUrl.trim();
+    if (!raw) return null;
+
+    // Accepts either form so callers holding a `productUrl` need not dissect it first.
+    const id = raw.includes('/') ? raw.replace(/\/+$/, '').split('/').pop() ?? '' : raw;
+    if (!id) return null;
+
+    try {
+      return await this.http.get<FinaleProduct>(
+        `product/${encodeURIComponent(id)}`,
+        undefined,
+        { operation: 'getFinaleProduct', recordId: id }
+      );
+    } catch (error) {
+      // A deleted or unknown product is an answer, not a failure — the caller decides what an
+      // unresolvable line means. Anything else (auth, throttling, a 5xx) still propagates.
+      if (error instanceof FinaleClientError && error.statusCode === 404) return null;
+      throw error;
+    }
+  }
+
+  /**
    * The product whose `productId` matches a SKU exactly, or null.
    *
    * Filters server-side, then re-checks for an exact match locally. Finale's filter values
