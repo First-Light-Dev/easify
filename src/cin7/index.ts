@@ -183,6 +183,27 @@ export class Cin7 {
         }
     }
 
+    // Keep third-party overlays (Pendo guides) from covering the page and intercepting clicks.
+    // Network block stops the guide loading; the stylesheet hides it if it ever gets through.
+    private async suppressOverlays(page: Page): Promise<void> {
+        const client = await page.createCDPSession();
+        await client.send("Network.enable");
+        await client.send("Network.setBlockedURLs", { urls: GLOBAL.blockedUrlPatterns });
+
+        await page.evaluateOnNewDocument((css: string) => {
+            const inject = () => {
+                const style = document.createElement("style");
+                style.textContent = css;
+                (document.head || document.documentElement).appendChild(style);
+            };
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", inject);
+            } else {
+                inject();
+            }
+        }, GLOBAL.overlayHideCss);
+    }
+
     async getPuppeteerPage(): Promise<Page> {
         if (this.isLoggedIn && this.page) {
             return this.page;
@@ -206,6 +227,8 @@ export class Cin7 {
         this.browser = browser;
 
         let page = await browser.newPage();
+
+        await this.suppressOverlays(page);
 
         await page.goto(LOGIN.url);
 

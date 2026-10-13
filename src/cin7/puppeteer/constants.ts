@@ -1,5 +1,16 @@
 export const GLOBAL = {
-    url: "https://go.cin7.com/Cloud/Dashboard/HomePageDashboard.aspx"
+    url: "https://go.cin7.com/Cloud/Dashboard/HomePageDashboard.aspx",
+
+    // Cin7 serves in-app announcements through Pendo. Its guides render as a full-screen
+    // modal (z-index 300000, pointer-events: all) a second or two after page load and
+    // swallow every click underneath, e.g. the Qty Moved cell on credit notes.
+    blockedUrlPatterns: ["*pendo.io*"],
+    overlayHideCss: `
+        [id^="pendo-"], [class*="_pendo-"] {
+            display: none !important;
+            pointer-events: none !important;
+        }
+    `,
 }
 
 export const LOGIN = {
