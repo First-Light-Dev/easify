@@ -95,12 +95,20 @@ export class FinaleOrders {
   /**
    * Finds an order by the reference stamped on it.
    *
-   * The recovery path when a correlation record is missing, and the only route for orders
-   * created by something else — an order this client never created has an id it never saw,
-   * leaving `referenceNumber` as the sole thread back.
+   * ⚠ **This cannot work against Finale and always returns null.** Kept only so existing callers
+   * compile; use `findRecentByNoteFragment` instead.
    *
-   * Returns null rather than throwing: "no such order" is a normal answer when checking
-   * whether something landed.
+   * Two independent reasons, both measured against a live account on 2026-10-09:
+   *
+   * 1. The filter is ignored. `{ referenceNumber: 'TR-00607' }` returns ten arbitrary 2019 sales
+   *    orders; the range form `['TR-00607','TR-00607']` returns nothing at all — for an order
+   *    that provably carries that reference.
+   * 2. `referenceNumber` is **not a column on the order collection**. Of the 24 columns returned,
+   *    it is absent — so it cannot be matched client-side either. It appears only on a
+   *    per-record GET, which needs the id this method exists to discover.
+   *
+   * The exact-match guard below is the only reason this was merely useless rather than
+   * dangerous: without it, the junk the filter returns would have been adopted as a real match.
    */
   async findByReference(reference: string): Promise<FinaleOrder | null> {
     const wanted = reference.trim();
@@ -115,6 +123,43 @@ export class FinaleOrders {
     // Exact match rather than trusting the filter: Finale's range filter is inclusive, and
     // returning a different transfer's order would corrupt the correlation.
     return items.find((order) => order.referenceNumber?.trim() === wanted) ?? null;
+  }
+
+  /**
+   * Finds a recently-changed order whose `privateNotes` contain a fragment.
+   *
+   * The workable substitute for `findByReference`, and the one dedupe available before creating
+   * an order: `privateNotes` IS a collection column, and a caller that writes its own identifier
+   * into it can find its own records again.
+   *
+   * Scoped by a `changedSince` window rather than scanning history, because `limit` is a SCAN
+   * window applied before filtering — a wide range returns rows from the wrong end of it. For
+   * the duplicate check the window only has to cover the gap between a lost response and its
+   * retry, which is minutes.
+   *
+   * Matching is a substring test on the caller's fragment, so the fragment must be distinctive.
+   * A transfer number inside a sentence qualifies; a bare number would not.
+   */
+  async findRecentByNoteFragment(
+    fragment: string,
+    changedSince: Date | string,
+    options: { changedUntil?: Date | string; limit?: number } = {}
+  ): Promise<FinaleOrder | null> {
+    const wanted = fragment.trim();
+    if (!wanted) return null;
+
+    const { from, to } = clampRange(changedSince, options.changedUntil);
+
+    const items = await this.http.getCollection<FinaleOrder>(
+      'order',
+      {
+        filter: encodeFilter({ lastUpdatedDate: [from, to] }),
+        limit: options.limit ?? 500,
+      },
+      { operation: 'findFinaleOrderByNoteFragment', recordId: wanted }
+    );
+
+    return items.find((order) => (order.privateNotes ?? '').includes(wanted)) ?? null;
   }
 
   /**

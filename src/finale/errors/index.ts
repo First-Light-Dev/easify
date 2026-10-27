@@ -86,10 +86,19 @@ export class FinaleCredentialsError extends FinaleApiError {
   }
 }
 
-/** 4xx other than auth — the request is wrong. Never retried. */
+/**
+ * 4xx other than auth — the request is wrong.
+ *
+ * Non-retryable by default, but the caller may override: Finale answers 403 for transient
+ * conditions as well as permanent ones and the body does not distinguish them, so that call
+ * belongs with whoever inspected the status and message.
+ */
 export class FinaleClientError extends FinaleApiError {
   constructor(input: FinaleApiErrorInput) {
-    super({ ...input, retryable: false });
+    // Defaults to non-retryable — a rejected request is normally rejected for good — but the
+    // caller may override. Finale uses 403 for transient conditions too, and the response body
+    // does not say which it is, so that judgement belongs with whoever read the status code.
+    super({ ...input, retryable: input.retryable ?? false });
     this.name = 'FinaleClientError';
   }
 }
@@ -336,10 +345,27 @@ export function translateFinaleError(
       const explained = typeof (error.response?.data as { msg?: unknown } | undefined)?.msg === 'string';
 
       if (explained) {
+        // Retryable, despite being a 4xx and despite carrying an explanation.
+        //
+        // Finale answers 403 for transient conditions as well as permanent ones, and the body
+        // does not distinguish them. `"order type is not editable, current orderTypeId=
+        // SALES_ORDER"` was treated as permanent for a week; it is not. Three purchase orders
+        // (TR-00104, TR-00110, TR-00116) failed with that exact message and then succeeded on an
+        // unchanged retry minutes later — same payload, same credentials, same facility. Every
+        // failure fell in business hours and every success overnight, which points at a
+        // collision inside Finale when several clients create orders at once.
+        //
+        // Retrying a genuinely permanent 403 costs five attempts over ~10 minutes and then fails
+        // exactly as before. Not retrying a transient one stranded TR-00104 for two days and
+        // needed a hand-built Cloud Task to clear. The asymmetry decides it.
+        //
+        // ⚠ This makes every Finale 4xx-with-explanation retryable, so a non-idempotent call
+        // behind it MUST dedupe. `createPurchaseOrder` does, via `findRecentByNoteFragment`.
         return new FinaleClientError({
           ...base,
           message: `${prefix}Finale rejected the request (403) — ${detail}`,
           statusCode: status,
+          retryable: true,
         });
       }
 
