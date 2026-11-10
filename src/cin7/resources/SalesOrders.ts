@@ -30,7 +30,6 @@ export default class SalesOrders {
     }
 
     async create(salesOrder: Partial<SalesOrder>): Promise<string> {
-        console.log("Creating Sales Order", JSON.stringify(salesOrder));
         const response = await this.axios.post(`/SalesOrders`, [salesOrder]);
 
         const data = response.data as Array<APIUpsertResponse>;
@@ -43,12 +42,12 @@ export default class SalesOrders {
 
     async createBatch(salesOrders: Partial<SalesOrder>[]): Promise<Array<APIUpsertResponse>> {
         const response = await this.axios.post(`/SalesOrders`, salesOrders);
-        console.log("Sales Orders Create Batch Response", JSON.stringify(response.data));
+        const failed = (response.data as Array<APIUpsertResponse>).filter(r => !r.success);
+        if (failed.length) console.error("Sales Orders Create Batch Failures", JSON.stringify(failed));
         return response.data as Array<APIUpsertResponse>;
     }
 
     async update(salesOrder: Partial<SalesOrder>): Promise<string> {
-        console.log("Updating Sales Order", JSON.stringify(salesOrder));
         const response = await this.axios.put(`/SalesOrders`, [salesOrder]);
         const data = response.data as Array<APIUpsertResponse>;
         const success = data.every(r => r.success);

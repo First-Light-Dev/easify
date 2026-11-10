@@ -57,7 +57,8 @@ export default class Payments {
 
     async createBatch(payments: Partial<Payment>[]) {
         const response = await this.axios.post(`/Payments`, payments);
-        console.log("Payments Create Batch Response", JSON.stringify(response.data));
+        const failed = (response.data as Array<APIUpsertResponse>).filter(r => !r.success);
+        if (failed.length) console.error("Payments Create Batch Failures", JSON.stringify(failed));
         return response.data as Array<APIUpsertResponse>;
     }
 
