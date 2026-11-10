@@ -74,6 +74,9 @@ export class Cin7 {
         });
 
         this.axios.interceptors.request.use(async (config: EasifyCin7AxiosRequestConfig) => {
+            // One short line per call so a runaway loop is traceable; no query string or payload (customer data).
+            console.log("Cin7 Request", config.method?.toUpperCase(), config.url?.split("?")[0]);
+
             if (!this.config.options?.multiAPIKeyHandling?.enabled) {
                 return config;
             }
