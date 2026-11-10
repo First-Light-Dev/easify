@@ -24,11 +24,11 @@ export default class SalesOrders {
         return SalesOrderSchema.parse(response.data);
     }
 
-    async update(payload: SalesOrderUpdate, previousHash?: string): Promise<{updated: boolean, salesOrder: SalesOrder | null, hash: string}> {
+    async update(orderGuid: string, payload: SalesOrderUpdate, previousHash?: string): Promise<{updated: boolean, salesOrder: SalesOrder | null, hash: string}> {
         if (previousHash && this.compareUpdateHash(payload, previousHash)) {
             return {updated: false, salesOrder: null, hash: previousHash};
         }
-        const response = await this.axios.put(`/SalesOrders`, payload);
+        const response = await this.axios.put(`/SalesOrders/${orderGuid}`, payload);
         return { updated: true, salesOrder: SalesOrderSchema.parse(response.data), hash: this.getUpdateHash(payload) };
     }
 
